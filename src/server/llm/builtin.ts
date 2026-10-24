@@ -142,7 +142,7 @@ const BUILTIN: Record<Scene, Entry> = {
         variables: [{ name: "s", label: "1まわりの {時間|じかん|2}", value: 90, unit: "びょう", min: 30, max: 240, step: 10 }],
         answerUnit: "かい",
         llmAnswer: 960,
-        guessRange: { min: 100, max: 10000 },
+        guessRange: { min: 30, max: 3000 },
         explanation: {
           short: "{信号|しんごう|4}は {休|やす|1}まずに はたらいているんだね！",
           steps: ["1{日|にち|1}は 24{時間|じかん|2}。1{時間|じかん|2}は 60ぷん、1ぷんは 60びょう。", "だから 1{日|にち|1}は 24×60×60＝86400びょう。", "90びょうで 1まわり だから、86400÷90＝960かい！"],
@@ -165,7 +165,7 @@ const BUILTIN: Record<Scene, Entry> = {
         variables: [{ name: "n", label: "ランプの {数|かず|2}", value: 3, unit: "こ", min: 1, max: 12, step: 1 }],
         answerUnit: "とおり",
         llmAnswer: 8,
-        guessRange: { min: 2, max: 200 },
+        guessRange: { min: 3, max: 300 },
         explanation: {
           short: "ランプが 1こ ふえると、とおりの {数|かず|2}は 2ばいに なるよ。",
           steps: ["1こ{目|め|1}：つく・きえる の 2とおり。", "2こ{目|め|1}も 2とおり。2×2＝4とおり。", "3こ{目|め|1}も 2とおり。4×2＝8とおり。", "コンピューターも「つく・きえる」の くみあわせで、いろいろな ことを あらわして いるんだ。"],
@@ -239,7 +239,7 @@ const BUILTIN: Record<Scene, Entry> = {
         ],
         answerUnit: "ばい",
         llmAnswer: 1800000,
-        guessRange: { min: 100000, max: 10000000 },
+        guessRange: { min: 300000, max: 30000000 },
         explanation: {
           short: "1{日|にち|1}に 1000ばい くんでも、5{年|ねん|1}くらい かかるよ！",
           steps: ["プールの {水|みず|1}は 25×12×1.2＝360（{立方|りっぽう|4}メートル）。これは 360000L。", "1Lは 1000mL。だから 360000Lは 3{億|おく|4}6000{万|まん|2}mL。", "200mL ずつ くむと、360000000÷200＝1800000。180{万|まん|2}ばい！"],

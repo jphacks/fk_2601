@@ -19,7 +19,7 @@ function ChooseContent() {
   const router = useRouter();
   const { backend, profile } = useApp();
   const { archives } = useArchive();
-  const { crop, generation, regenerate, selectQuestion } = useQuiz();
+  const { crop, scene, generation, regenerate, selectQuestion } = useQuiz();
   const [mode, setMode] = useState<FirstMode>(profile?.firstMode ?? "choices");
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -40,7 +40,12 @@ function ChooseContent() {
     setSorry(null);
     setError(null);
     try {
-      const result = await requestCustom(backend, { image: crop.base64, ...buildGenerationContext(profile, archives.map((a) => a.question)), text: text.trim() });
+      const result = await requestCustom(backend, {
+        image: crop.base64,
+        ...buildGenerationContext(profile, archives.map((a) => a.question)),
+        text: text.trim(),
+        ...(scene ? { scene } : {}),
+      });
       if (result.answerable && result.question) {
         selectQuestion(result.question);
         router.push("/predict");
@@ -86,6 +91,11 @@ function ChooseContent() {
           {generation.status === "ready" && generation.data.questions.length > 0 && (
             <>
               <Say mood="happy">気になる もんだいを 1つ えらんでね！</Say>
+              {generation.data.demo && (
+                <p className="rounded-xl bg-sun/25 px-3 py-2 text-center text-sm font-bold">
+                  みほんの もんだい（AIは つかっていないよ）
+                </p>
+              )}
               <ul className="space-y-3">
                 {generation.data.questions.map((q, i) => (
                   <li key={i}>
