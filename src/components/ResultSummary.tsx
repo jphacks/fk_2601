@@ -1,7 +1,10 @@
+"use client";
+
 import { formatNumber, formatRatio, isApprox } from "@/lib/format";
 import { refParts } from "@/lib/ref";
 import { describeGuess, RATING_LABEL, type Evaluation, type Guess, type Rating } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
+import { CountUp } from "./CountUp";
 import { Navigator } from "./Navigator";
 import { NumberLine } from "./NumberLine";
 import { RubyText } from "./RubyText";
@@ -17,15 +20,17 @@ export function ratingText(rating: Rating, type: Question["type"]): string {
   return RATING_LABEL[rating];
 }
 
-/** 予想と正解のズレを、ことばと数直線で見せる */
+/** 予想と正解のズレを、ことばと数直線で見せる。animate が false のとき（ずかんで見返すとき）は動かさない */
 export function ResultSummary({
   question,
   guess,
   evaluation,
+  animate = true,
 }: {
   question: Question;
   guess: Guess;
   evaluation: Evaluation;
+  animate?: boolean;
 }) {
   const { rating, type, guessValue, actual } = evaluation;
   const unit = type === "compare" ? "倍" : question.answerUnit;
@@ -34,7 +39,7 @@ export function ResultSummary({
     <div className="space-y-4">
       <div className={`flex items-center gap-3 rounded-3xl p-4 ${BANNER[rating]}`}>
         <Navigator mood={rating === "ohazure" ? "surprise" : "happy"} size={72} />
-        <p className="text-3xl font-bold">{ratingText(rating, type)}</p>
+        <p className={`text-3xl font-bold ${animate ? "animate-stamp" : ""}`}>{ratingText(rating, type)}</p>
       </div>
 
       {type === "why" && question.choices && guess.kind === "reason" && (
@@ -59,24 +64,28 @@ export function ResultSummary({
             <div className="rounded-2xl bg-berry/10 p-3">
               <p className="text-sm font-bold text-berry">きみの よそう</p>
               <p className="text-xl font-bold">{describeGuess(guess, unit)}</p>
-              {type === "compare" && guess.kind === "compare" && (
-                <p className="text-sm">{question.compare?.[guess.side]} が 大きい</p>
+              {type === "compare" && guess.kind === "compare" && question.compare && (
+                <p className="text-sm">
+                  <RubyText text={question.compare[guess.side]} /> が 大きい
+                </p>
               )}
             </div>
             <div className="rounded-2xl bg-[#e1ecff] p-3">
               <p className="text-sm font-bold text-brand-dark">せいかい</p>
-              <p className="text-xl font-bold">
-                {formatNumber(actual)}
+              <p className="text-2xl font-bold">
+                {animate ? <CountUp value={actual} from={0} format={formatNumber} /> : formatNumber(actual)}
                 <span className="text-base">{unit}</span>
               </p>
-              {type === "compare" && evaluation.bigger && (
-                <p className="text-sm">{question.compare?.[evaluation.bigger]} が 大きい</p>
+              {type === "compare" && evaluation.bigger && question.compare && (
+                <p className="text-sm">
+                  <RubyText text={question.compare[evaluation.bigger]} /> が 大きい
+                </p>
               )}
             </div>
           </div>
 
-          <NumberLine guess={guessValue} actual={actual} unit={unit} />
-          <p className="text-center text-lg font-bold">{gapText(guessValue, actual)}</p>
+          <NumberLine guess={guessValue} actual={actual} unit={unit} intro={animate} />
+          <p className="text-center text-xl font-bold">{gapText(guessValue, actual)}</p>
           {type === "compare" && evaluation.correct === false && (
             <p className="text-center text-base">大きいのは、きみが えらんだ ほうでは なかったよ。</p>
           )}
