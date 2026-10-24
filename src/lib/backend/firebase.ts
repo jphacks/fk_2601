@@ -8,9 +8,20 @@ import {
   updateProfile,
   type User,
 } from "firebase/auth";
-import { collection, doc, getDocs, getFirestore, setDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  getFirestore,
+  limit,
+  orderBy,
+  query,
+  setDoc,
+  writeBatch,
+} from "firebase/firestore";
 import { UserFacingError } from "@/lib/errors";
-import type { AuthUser, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, Profile, PublicPost } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -90,5 +101,42 @@ export const firebaseBackend: Backend = {
 
   async saveProfile(uid, profile) {
     await setDoc(doc(db(), "users", uid, "profiles", profile.id), profile);
+  },
+
+  async listArchives(uid, profileId) {
+    const snapshot = await getDocs(query(collection(db(), "users", uid, "profiles", profileId, "archives"), orderBy("createdAt", "desc")));
+    return snapshot.docs.map((d) => d.data() as ArchiveRecord);
+  },
+
+  async saveArchive(uid, profileId, record) {
+    // Firestore は undefined を保存できないので、JSON を通して取り除く
+    await setDoc(doc(db(), "users", uid, "profiles", profileId, "archives", record.id), JSON.parse(JSON.stringify(record)));
+  },
+
+  async deleteArchive(uid, profileId, id) {
+    await deleteDoc(doc(db(), "users", uid, "profiles", profileId, "archives", id));
+  },
+
+  async deleteAllArchives(uid, profileId) {
+    const snapshot = await getDocs(collection(db(), "users", uid, "profiles", profileId, "archives"));
+    // 1回の書き込みは 500 件まで
+    for (let i = 0; i < snapshot.docs.length; i += 400) {
+      const batch = writeBatch(db());
+      snapshot.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+    }
+  },
+
+  async listPublic() {
+    const snapshot = await getDocs(query(collection(db(), "public"), orderBy("createdAt", "desc"), limit(30)));
+    return snapshot.docs.map((d) => d.data() as PublicPost);
+  },
+
+  async savePublic(post) {
+    await setDoc(doc(db(), "public", post.id), JSON.parse(JSON.stringify(post)));
+  },
+
+  async deletePublic(id) {
+    await deleteDoc(doc(db(), "public", id));
   },
 };
