@@ -111,7 +111,7 @@ export function LassoPicker({
   return (
     <div className="relative overflow-hidden rounded-[32px] border-3 border-ink bg-photo select-none">
       {/* eslint-disable-next-line @next/next/no-img-element -- 撮ったばかりの写真（data URL）を表示する */}
-      <img ref={imgRef} src={photo.dataUrl} alt="撮った しゃしん" className="block w-full" draggable={false} />
+      <img ref={imgRef} src={photo.dataUrl} alt="とった しゃしん" className="block w-full" draggable={false} />
       <canvas
         ref={canvasRef}
         style={{ width: size.w, height: size.h, touchAction: "none" }}

@@ -92,7 +92,7 @@ export function ConditionSliders({
             </div>
             <div className="flex justify-between px-3.5 font-pop text-sm text-ink-sub" aria-hidden>
               <span>{formatNumber(v.min)}</span>
-              {moved && <span className="text-ink-muted">もと {formatNumber(v.value)}</span>}
+              {moved && <span className="text-ink-muted">もとは {formatNumber(v.value)}</span>}
               <span>{formatNumber(v.max)}</span>
             </div>
             {moved && (
@@ -164,7 +164,7 @@ export function ConditionSliders({
       {changed && (
         <p className="flex items-center gap-1.5 text-sm font-black text-ink-sub">
           <Icon name="info" size={18} strokeWidth={2.4} />
-          スライダーを もとの いちに もどすと、さいしょの こたえに なるよ
+          スライダーを もとの ばしょに もどすと、さいしょの こたえに なるよ
         </p>
       )}
     </div>

@@ -197,7 +197,7 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
             ))}
           </div>
         ) : (
-          <LogSlider min={1} max={1000} value={slider} unit="倍" label="なんばいと よそうする？" onChange={setSlider} />
+          <LogSlider min={1} max={1000} value={slider} unit="倍" label="なんばいだと おもう？" onChange={setSlider} />
         )}
       </div>
 
