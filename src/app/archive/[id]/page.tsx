@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useArchive } from "@/components/ArchiveProvider";
 import { ConditionSliders } from "@/components/ConditionSliders";
-import { Explanation, Sources } from "@/components/Explanation";
+import { Explanation, Related, Sources } from "@/components/Explanation";
 import { Gate } from "@/components/Gate";
 import { Page } from "@/components/Page";
 import { Chips, QuestionText } from "@/components/QuestionCard";
@@ -66,7 +66,7 @@ function DetailContent() {
         <QuestionText question={question} />
       </Card>
 
-      {evaluation && <ResultSummary question={question} guess={record.guess} evaluation={evaluation} />}
+      {evaluation && <ResultSummary question={question} guess={record.guess} evaluation={evaluation} animate={false} />}
 
       <Card>
         <Explanation question={question} />
@@ -75,10 +75,11 @@ function DetailContent() {
       {question.variables.length > 0 && question.type !== "why" && (
         <Card className="space-y-3">
           <h2 className="text-lg font-bold">じょうけんを かえてみよう</h2>
-          <ConditionSliders question={question} values={values ?? defaultScope(question)} onChange={setValues} />
+          <ConditionSliders question={question} values={values ?? defaultScope(question)} onChange={setValues} guess={record.guess} />
         </Card>
       )}
 
+      <Related question={question} />
       <Sources question={question} />
 
       {related.length > 0 && (

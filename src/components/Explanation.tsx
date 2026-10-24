@@ -35,9 +35,27 @@ export function Explanation({ question }: { question: Question }) {
   );
 }
 
+/** 同じ考えかたが使える、ほかの身近なものの問い。しらべるときのことばも出す（前に保存した問いには無いので、なければ何も出さない） */
+export function Related({ question }: { question: Question }) {
+  const related = question.related ?? [];
+  if (related.length === 0) return null;
+  return (
+    <div className="space-y-2 rounded-2xl bg-mint/15 p-4">
+      <h2 className="text-lg font-bold">ほかにも こんな ふしぎが あるよ</h2>
+      <ul className="list-disc space-y-1 pl-6 text-base leading-loose">
+        {related.map((r, i) => (
+          <li key={i}>
+            <RubyText text={r} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** 出典と前提条件。リンクは、おとなの人といっしょに見るよう伝える */
 export function Sources({ question }: { question: Question }) {
-  if (question.sources.length === 0) return null;
+  if (question.sources.length === 0 && !question.keyword) return null;
   return (
     <details className="rounded-2xl bg-white p-4 shadow-sm">
       <summary className="cursor-pointer text-base font-bold">つかった データと まえ提</summary>
@@ -58,6 +76,11 @@ export function Sources({ question }: { question: Question }) {
           </li>
         ))}
       </ul>
+      {question.keyword && (
+        <p className="mt-3 text-base">
+          もっと しらべるときの ことば：<b>{question.keyword}</b>
+        </p>
+      )}
       <p className="mt-3 text-sm text-ink/60">リンクを 開くときは、おとなの人と いっしょに 見てね。</p>
     </details>
   );

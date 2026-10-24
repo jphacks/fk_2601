@@ -3,12 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ConditionSliders } from "@/components/ConditionSliders";
-import { Explanation, Sources } from "@/components/Explanation";
+import { Explanation, Related, Sources } from "@/components/Explanation";
 import { Gate } from "@/components/Gate";
 import { Page } from "@/components/Page";
 import { Chips, QuestionText } from "@/components/QuestionCard";
 import { useQuiz } from "@/components/QuizProvider";
 import { ResultSummary } from "@/components/ResultSummary";
+import { RubyText } from "@/components/RubyText";
 import { SavePanel } from "@/components/SavePanel";
 import { Button, Card, ErrorNotice, Say } from "@/components/ui";
 import { defaultScope } from "@/lib/calc";
@@ -80,11 +81,15 @@ function ResultContent() {
           {selected.variables.length > 0 && selected.type !== "why" && (
             <Card className="space-y-3">
               <h2 className="text-lg font-bold">もし ちがう じょうけんだったら？</h2>
+              {selected.whatIf ? (
+                <RubyText text={selected.whatIf} className="block text-base font-bold text-brand-dark" />
+              ) : null}
               <p className="text-base">スライダーを うごかして、こたえが どう かわるか 見てみよう！</p>
-              <ConditionSliders question={selected} values={scope} onChange={setValues} />
+              <ConditionSliders question={selected} values={scope} onChange={setValues} guess={guess} />
             </Card>
           )}
 
+          <Related question={selected} />
           <Sources question={selected} />
 
           {crop && <SavePanel question={selected} guess={guess} rating={evaluation.rating} image={crop.dataUrl} />}

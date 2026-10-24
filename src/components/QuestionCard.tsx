@@ -25,6 +25,12 @@ export function Chips({ question }: { question: Question }) {
   );
 }
 
+/** 問いの見かた・前提（答えのヒントではない）。前に保存した問いには無いので、なければ何も出さない */
+export function QuestionHint({ question }: { question: Question }) {
+  if (!question.hint) return null;
+  return <RubyText text={question.hint} className="block text-base text-ink/80" />;
+}
+
 export function QuestionText({ question }: { question: Question }) {
   return <RubyText text={question.text} className="text-lg font-bold leading-loose" />;
 }
