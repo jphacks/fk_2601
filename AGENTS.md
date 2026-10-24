@@ -37,7 +37,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 └── src/
     ├── app/              # 画面（Next.js の App Router）と API（app/api/questions）
     ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ
-    ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）など
+    ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、scenes.ts（見本の絵。AI なしでも試せる見本の問いは server/llm/builtin.ts）など
     └── server/           # サーバーだけで動く処理。llm/（prompts・client・validate・mock）と auth.ts
 ```
 - 画面の流れ：`/capture`（撮影）→ `/lasso`（囲む）→ `/recognize` → `/choose` → `/predict` → `/result`（保存）→ `/archive`
@@ -103,7 +103,8 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 - 計算で求められる値は LLM に計算させず、コードで計算する（LLM は計算を間違えることがあり、子どもが誤った答えを覚えてしまうため）
 - プロンプトはコード中に散らばらせず、`src/server/llm/prompts.ts` だけに書く（`docs/03-technical.md` 5.3）
 - 断られたとき（`stop_reason: "refusal"`）は別のモデルに切り替えない。`content` を読む前に `stop_reason` を確認する
-- ふりがなの `<ruby>` タグは、表示前に `ruby`・`rt`・`rp` 以外のタグを取り除く（LLM の出力をそのまま HTML として表示しない）
+- ふりがなは `{漢字|よみ}` の記法で書かせ、表示前に `src/lib/ruby.ts` で `<ruby>` に変換する。それ以外の HTML タグは文字として表示する（LLM の出力をそのまま HTML として表示しない）。topic・target・単位にはこの記法を使わない
+- 問いは「予想がはずれて、おどろく」ものにする。数えるだけ・1回のかけ算で出る問いを出させない（`prompts.ts`）
 - テストでは LLM を実際に呼ばず、モックを使う。ループや自動リトライで API を大量に呼ぶ実装にしない（課金とレート制限のため）
 
 ### 個人情報・データ
