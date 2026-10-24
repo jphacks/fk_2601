@@ -1,0 +1,78 @@
+/*
+ * Tailwind CSS v4 用のテーマ（tokens.css と同じ名前・同じ値）
+ *
+ * 使い方：アプリの src/app/globals.css で
+ *   @import "tailwindcss";
+ *   @import "../../design/tailwind-theme.css";   ← パスはアプリの置き場所に合わせる
+ * とすると、次のようなクラスが使えるようになります。
+ *   bg-navi / text-ink / border-ink / bg-pink-light / text-red-dark
+ *   font-pop / font-body
+ *   shadow-pop / shadow-pop-md / shadow-pop-sm / shadow-pop-xs
+ *   rounded-btn / rounded-card
+ *
+ * フォントは next/font/google（Next.js に入っている）で読み込み、
+ * 変数を --font-pop / --font-body に渡してください（README の「アプリへの取り込み方」）。
+ */
+@theme {
+  --color-ink: #22223A;
+  --color-ink-sub: #4A4E6A;
+  --color-ink-muted: #6B7090;
+  --color-placeholder: #8A8FA6;
+
+  --color-white: #FFFFFF;
+  --color-cloud: #F1F2F7;
+  --color-photo: #EAF0F8;
+
+  --color-navi: #4A5AE8;
+  --color-navi-dark: #2F3CB8;
+  --color-navi-light: #E8EBFF;
+
+  --color-yellow: #FFC83D;
+  --color-yellow-dark: #6E4D00;
+  --color-yellow-deep: #9A6B00;
+  --color-yellow-soft: #FFF1C2;
+  --color-yellow-light: #FFF6D6;
+
+  --color-pink: #FF6F9C;
+  --color-pink-dark: #A12A55;
+  --color-pink-deep: #C23668;
+  --color-pink-light: #FFE8F0;
+
+  --color-mint: #24C3A0;
+  --color-mint-dark: #0F7A63;
+  --color-mint-light: #DDF7F0;
+
+  --color-purple: #8B5CF6;
+  --color-purple-dark: #6A3FD6;
+  --color-purple-light: #F0E9FF;
+
+  --color-orange: #FF8A3D;
+  --color-orange-dark: #9A4410;
+  --color-orange-light: #FFEEDF;
+  --color-zure: #FFB547;
+
+  --color-red: #F0444F;
+  --color-red-dark: #C42F39;
+  --color-red-light: #FFE8EA;
+
+  --font-pop: "Mochiy Pop One", "Zen Maru Gothic", sans-serif;
+  --font-body: "Zen Maru Gothic", sans-serif;
+
+  --shadow-pop: 0 6px 0 #22223A;
+  --shadow-pop-md: 0 5px 0 #22223A;
+  --shadow-pop-sm: 0 4px 0 #22223A;
+  --shadow-pop-xs: 0 3px 0 #22223A;
+
+  --radius-btn: 26px;
+  --radius-card: 24px;
+}
+
+/* ふりがな：rt はいつも本文の丸ゴシックで、親の半分の大きさ */
+@layer base {
+  rt {
+    font-family: var(--font-body);
+    font-size: 0.5em;
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+}

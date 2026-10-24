@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>もしも（条件変更）｜デザイン見本</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../screen.css">
+<style>
+input.mins{-webkit-appearance:none;appearance:none;width:100%;height:48px;background:transparent;margin:0;cursor:pointer}
+input.mins::-webkit-slider-runnable-track{height:18px;border-radius:12px;background:var(--color-white);border:3px solid var(--color-ink)}
+input.mins::-webkit-slider-thumb{-webkit-appearance:none;width:44px;height:44px;border-radius:50%;background:var(--color-pink);border:3px solid var(--color-ink);margin-top:-16px}
+input.mins::-moz-range-track{height:18px;border-radius:12px;background:var(--color-white);border:3px solid var(--color-ink)}
+input.mins::-moz-range-thumb{width:38px;height:38px;border-radius:50%;background:var(--color-pink);border:3px solid var(--color-ink)}
+</style>
+</head>
+<body>
+<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 12px">
+  <div style="display: flex; align-items: center; gap: 10px; height: 52px">
+    <a href="17-nazo.html" aria-label="もどる" style="width: 50px; height: 50px; flex-shrink: 0; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-white); box-shadow: var(--shadow-pop-xs); display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22223A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-family: var(--font-pop); font-weight: 400; font-size: 26px">もしも…？</h1>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px">
+    <img src="../assets/navi/navi-think.png" alt="ナビ（はてな）" style="width: 90px; height: 90px; flex-shrink: 0">
+    <div style="position: relative; flex-grow: 1; padding: 10px 16px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); font-size: 21px; font-weight: 900; line-height: 1.75">
+      <div style="position: absolute; left: -11px; top: calc(50% - 9px); width: 16px; height: 16px; background: var(--color-white); border-left: 3px solid var(--color-ink); border-bottom: 3px solid var(--color-ink); transform: rotate(45deg)"></div>
+      もしも ひとまわりが<br>3<ruby>分<rt>ぷん</rt></ruby>だったら？
+    </div>
+  </div>
+
+  <div style="padding: 14px 18px; border: 3px solid var(--color-ink); border-radius: 26px; background: var(--color-yellow-light); box-shadow: var(--shadow-pop-md); display: flex; flex-direction: column; gap: 6px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <label for="m" style="font-family: var(--font-pop); font-size: 17px">ひとまわりの じかん</label>
+      <span style="font-family: var(--font-pop); font-size: 30px; line-height: 1.6"><span id="m-val">2</span><ruby>分<rt id="m-fun">ふん</rt></ruby></span>
+    </div>
+    <input id="m" class="mins" type="range" min="1" max="5" step="1" value="2">
+    <div style="display: flex; justify-content: space-between; margin: 0 14px; font-family: var(--font-pop); font-size: 14px; color: var(--color-ink-sub)">
+      <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+    </div>
+  </div>
+
+  <div style="padding: 12px 18px 16px; border: 3px solid var(--color-ink); border-radius: 26px; background: var(--color-white); box-shadow: var(--shadow-pop-md); display: flex; flex-direction: column; align-items: center">
+    <span style="font-size: 20px; font-weight: 900; line-height: 1.75">1<ruby>日<rt>にち</rt></ruby>に <ruby>赤<rt>あか</rt></ruby>に なるのは</span>
+    <div style="display: flex; align-items: baseline; gap: 4px">
+      <span style="font-family: var(--font-pop); font-size: 80px; line-height: 1.15; color: var(--color-navi)"><span class="count-val">720</span></span>
+      <span style="font-family: var(--font-pop); font-size: 30px; line-height: 1.6; color: var(--color-navi)"><ruby>回<rt>かい</rt></ruby></span>
+    </div>
+  </div>
+
+  <div role="img" id="bars" aria-label="さっきは 720かい、いまは 720かい" style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px">
+    <div style="display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; align-items: center; gap: 8px">
+      <span style="font-size: 15px; font-weight: 900; color: var(--color-ink-sub)">さっき</span>
+      <span style="height: 22px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 11px; background: var(--color-cloud); overflow: hidden; display: block"><span style="display: block; height: 100%; width: 50%; background: #C9CFFF"></span></span>
+      <span style="font-family: var(--font-pop); font-size: 15px; color: var(--color-ink-sub); text-align: right">720</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; align-items: center; gap: 8px">
+      <span style="font-size: 15px; font-weight: 900">いま</span>
+      <span style="height: 22px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 11px; background: var(--color-cloud); overflow: hidden; display: block"><span id="bar-now" style="display: block; height: 100%; width: 50%; background: var(--color-navi)"></span></span>
+      <span style="font-family: var(--font-pop); font-size: 15px; color: var(--color-navi-dark); text-align: right"><span class="count-val">720</span></span>
+    </div>
+  </div>
+
+  <a href="19-get.html" style="margin-top: auto; margin-bottom: 6px; height: 72px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 26px; background: var(--color-navi); box-shadow: var(--shadow-pop); color: var(--color-white); font-family: var(--font-pop); font-size: 23px; display: flex; align-items: center; justify-content: center; text-decoration: none">ずかんに のこす！</a>
+</div>
+<script src="../screen.js"></script>
+<script>
+// 見本の計算：1日（1440分）÷ ひとまわりの分。アプリでは LLM の式と変数を math.js で計算する
+var minutes = document.getElementById('m');
+var readings = { 1: 'ぷん', 2: 'ふん', 3: 'ぷん', 4: 'ふん', 5: 'ふん' };
+minutes.addEventListener('input', function () {
+  var m = Number(minutes.value);
+  var count = Math.round(1440 / m);
+  document.getElementById('m-val').textContent = m;
+  document.getElementById('m-fun').textContent = readings[m];
+  document.querySelectorAll('.count-val').forEach(function (el) { el.textContent = count; });
+  document.getElementById('bar-now').style.width = Math.round((count / 1440) * 100) + '%';
+  document.getElementById('bars').setAttribute('aria-label', 'さっきは 720かい、いまは ' + count + 'かい');
+});
+</script>
+</body>
+</html>

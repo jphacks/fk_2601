@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>プロフィール作成｜デザイン見本</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../screen.css">
+</head>
+<body>
+<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 16px">
+  <svg aria-hidden="true" width="390" height="844" viewBox="0 0 390 844" style="position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none"><circle cx="372" cy="30" r="6" fill="#FFC83D"></circle><path d="M14 40l12 4-9 9z" fill="#FF6F9C"></path><path d="M350 330q7-9 14 0t14 0" fill="none" stroke="#8B5CF6" stroke-width="4" stroke-linecap="round"></path></svg>
+
+  <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px">
+    <img src="../assets/navi/navi-smile.png" alt="ナビ（にこにこ）" style="width: 108px; height: 108px; flex-shrink: 0">
+    <div style="position: relative; flex-grow: 1; padding: 14px 18px; border: 3px solid var(--color-ink); border-radius: 24px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); font-family: var(--font-pop); font-size: 22px; line-height: 1.5">
+      <div style="position: absolute; left: -11px; top: calc(50% - 9px); width: 16px; height: 16px; background: var(--color-white); border-left: 3px solid var(--color-ink); border-bottom: 3px solid var(--color-ink); transform: rotate(45deg)"></div>
+      きみの こと<br>おしえて！
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <label for="nick" style="font-family: var(--font-pop); font-size: 19px">ニックネーム</label>
+    <input id="nick" type="text" placeholder="れい：そら" style="height: 60px; box-sizing: border-box; padding: 0 18px; border: 3px solid var(--color-ink); border-radius: 20px; font-family: inherit; font-size: 20px; font-weight: 700; color: var(--color-ink)">
+    <span style="font-size: 15px; font-weight: 900; color: var(--color-pink-deep)">ほんとうの なまえは いれないでね</span>
+  </div>
+
+  <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+    <legend style="padding: 0; margin-bottom: 10px; font-family: var(--font-pop); font-size: 22px; line-height: 1.6"><ruby>学年<rt>がくねん</rt></ruby></legend>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+      <button type="button" class="grade lg" data-c="1" aria-pressed="false" aria-label="1ねんせい"><span class="grade-n">1</span><span class="grade-l">ねんせい</span></button>
+        <button type="button" class="grade lg" data-c="2" aria-pressed="false" aria-label="2ねんせい"><span class="grade-n">2</span><span class="grade-l">ねんせい</span></button>
+        <button type="button" class="grade lg" data-c="3" aria-pressed="false" aria-label="3ねんせい"><span class="grade-n">3</span><span class="grade-l">ねんせい</span></button>
+        <button type="button" class="grade lg" data-c="4" aria-pressed="false" aria-label="4ねんせい"><span class="grade-n">4</span><span class="grade-l">ねんせい</span></button>
+        <button type="button" class="grade lg" data-c="5" aria-pressed="true" aria-label="5ねんせい"><span class="grade-n">5</span><span class="grade-l">ねんせい</span></button>
+        <button type="button" class="grade lg" data-c="6" aria-pressed="false" aria-label="6ねんせい"><span class="grade-n">6</span><span class="grade-l">ねんせい</span></button>
+    </div>
+    <span style="font-size: 15px; font-weight: 700; color: var(--color-ink-sub)">あとから かえられるよ</span>
+  </fieldset>
+
+  <a href="04-home.html" style="margin-top: auto; margin-bottom: 6px; height: 72px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 26px; background: var(--color-navi); box-shadow: var(--shadow-pop); color: var(--color-white); font-family: var(--font-pop); font-size: 24px; display: flex; align-items: center; justify-content: center; text-decoration: none">けってい！</a>
+</div>
+<script src="../screen.js"></script>
+<script>
+group('.grade', 'aria-pressed');
+</script>
+</body>
+</html>
