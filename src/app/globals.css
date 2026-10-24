@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #1f2a44;
+  --color-paper: #fff8e7;
+  --color-brand: #2f6fed;
+  --color-brand-dark: #1e4fb8;
+  --color-sun: #ffb703;
+  --color-mint: #2fbf9b;
+  --color-berry: #f0558a;
+  --font-sans:
+    "Hiragino Maru Gothic ProN", "BIZ UDPGothic", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  overscroll-behavior-y: none;
+}
+
+ruby rt {
+  font-size: 0.55em;
+  line-height: 1;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input[type="range"] {
+  accent-color: var(--color-brand);
+}
