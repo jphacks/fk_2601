@@ -25,10 +25,11 @@ export const SUBJECTS: Subject[] = ["math", "science", "info"];
 // 称号を得るのに必要な個数。未決（docs/02-spec.md 16章）なので仮の値
 export const STAMP_GOAL = 5;
 
+// 称号の名前（仮。docs/design/README.md「見本の決まりごと」）。小さい文字で出すので、ひらがなで書く
 export const TITLE_LABEL: Record<Subject, string> = {
-  math: "数学博士",
-  science: "理科マスター",
-  info: "エンジニアレベル",
+  math: "すうがく はかせ",
+  science: "りか マスター",
+  info: "エンジニア レベル",
 };
 
 // 切り抜き画像：長辺のピクセル数と JPEG の品質（Firestore の1件 1MiB に収めるため）

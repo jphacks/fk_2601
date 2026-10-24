@@ -1,5 +1,6 @@
 import { computeAnswer } from "./calc";
 import { formatNumber } from "./format";
+import { unitKana } from "./ruby";
 import type { Question } from "@/server/llm/schema";
 
 export type Rating = "pita" | "oshii" | "ohazure";
@@ -106,10 +107,11 @@ export const RATING_LABEL: Record<Rating, string> = {
 /** 子どもの予想が低学年向けの選択肢か（4年生まで）、スライダー・自由入力か（5年生から） */
 export const usesChoices = (grade: number) => grade <= 4;
 
-/** 子どもの予想を、画面に出す文字にする（選択肢で答えたときは、選んだ範囲のまま出す） */
+/** 子どもの予想を、画面に出す文字にする（選択肢で答えたときは、選んだ範囲のまま出す）。小さい文字で出すので、単位はひらがなにする */
 export function describeGuess(guess: Guess, unit: string): string {
-  if (guess.kind === "bin") return `${formatNumber(guess.edges[guess.index])}〜${formatNumber(guess.edges[guess.index + 1])}${unit}`;
-  if (guess.kind === "number") return `${formatNumber(guess.value)}${unit}`;
-  if (guess.kind === "compare") return `約${formatNumber(guess.ratio)}倍`;
+  const u = unitKana(unit);
+  if (guess.kind === "bin") return `${formatNumber(guess.edges[guess.index])}〜${formatNumber(guess.edges[guess.index + 1])}${u}`;
+  if (guess.kind === "number") return `${formatNumber(guess.value)}${u}`;
+  if (guess.kind === "compare") return `やく ${formatNumber(guess.ratio)}ばい`;
   return "";
 }

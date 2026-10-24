@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { kanaOf } from "@/lib/ruby";
 import type { Question } from "@/server/llm/schema";
 import { Icon } from "./Icons";
 import { RubyText } from "./RubyText";
@@ -39,7 +40,7 @@ export function ExplanationSteps({ question, defaultOpen = false }: { question: 
               <li key={i} className={`flex items-start gap-3 rounded-[22px] border-3 border-ink px-3.5 py-3 ${style.card}`}>
                 <span className={`flex size-[42px] shrink-0 items-center justify-center rounded-full border-3 border-ink font-pop text-xl ${style.dot}`}>{i + 1}</span>
                 <span className="pt-0.5 text-[19px] font-black leading-[1.75]">
-                  <RubyText text={s} />
+                  <RubyText kana text={s} />
                 </span>
               </li>
             );
@@ -60,7 +61,7 @@ export function Related({ question }: { question: Question }) {
       <ul className="flex list-disc flex-col gap-1 pl-5 text-[18px] font-black leading-[1.75]">
         {related.map((r, i) => (
           <li key={i}>
-            <RubyText text={r} />
+            <RubyText kana text={r} />
           </li>
         ))}
       </ul>
@@ -73,27 +74,31 @@ export function Sources({ question }: { question: Question }) {
   if (question.sources.length === 0 && !question.keyword) return null;
   return (
     <details className="rounded-card border-3 border-ink bg-white px-4 py-3">
-      <summary className="cursor-pointer text-base font-black">つかった データと まえていの はなし</summary>
+      <summary className="cursor-pointer text-base font-black">こたえの もとに なった データ</summary>
+      {/* AI が書いた文には、ふりがなの記法が入っていることがある。小さい文字なので、読みに置きかえて出す */}
       <ul className="mt-3 flex flex-col gap-3 text-base">
-        {question.sources.map((s, i) => (
-          <li key={i} className="flex flex-col gap-1">
-            <p className="font-black">
-              <span className="mr-2 rounded-lg border-2 border-ink bg-navi-light px-2 py-0.5 text-sm text-navi-dark">{KIND_LABEL[s.kind]}</span>
-              {s.url ? (
-                <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-navi-dark underline">
-                  {s.title}
-                </a>
-              ) : (
-                s.title
-              )}
-            </p>
-            <p className="font-bold text-ink-sub">{s.assumption}</p>
-          </li>
-        ))}
+        {question.sources.map((s, i) => {
+          const assumption = kanaOf(s.assumption).trim();
+          return (
+            <li key={i} className="flex flex-col gap-1">
+              <p className="font-black">
+                <span className="mr-2 rounded-lg border-2 border-ink bg-navi-light px-2 py-0.5 text-sm text-navi-dark">{KIND_LABEL[s.kind]}</span>
+                {s.url ? (
+                  <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-navi-dark underline">
+                    {kanaOf(s.title)}
+                  </a>
+                ) : (
+                  kanaOf(s.title)
+                )}
+              </p>
+              {assumption && assumption !== "—" && <p className="font-bold text-ink-sub">{assumption}</p>}
+            </li>
+          );
+        })}
       </ul>
       {question.keyword && (
         <p className="mt-3 text-base font-bold">
-          もっと しらべるときの ことば：<b className="font-black">{question.keyword}</b>
+          もっと しらべるときの ことば：<b className="font-black">{kanaOf(question.keyword)}</b>
         </p>
       )}
       <p className="mt-3 text-sm font-bold text-ink-muted">リンクを ひらくときは、おとなの ひとと いっしょに みてね。</p>

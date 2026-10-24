@@ -92,7 +92,7 @@ function RecognizeContent() {
             <p className="rounded-card border-3 border-ink bg-white px-4 py-3 text-center text-[19px] font-black leading-[1.75] shadow-pop-sm">
               この しゃしんからは、
               <br />
-              はてなが 作れなかったよ。
+              はてなが つくれなかったよ。
               <br />
               べつの ものを かこんでみてね。
             </p>

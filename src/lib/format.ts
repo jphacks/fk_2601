@@ -19,9 +19,10 @@ export function formatRatio(ratio: number): string {
   return `約${formatNumber(inverse >= 10 ? Math.round(inverse) : Math.round(inverse * 10) / 10)}分の1`;
 }
 
+/** 日付を「10/24」の形にする（小さい文字なので、漢字を使わない） */
 export function formatDate(timestamp: number): string {
   const d = new Date(timestamp);
-  return `${d.getMonth() + 1}月${d.getDate()}日`;
+  return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
 /** formatNumber が丸めたあとの数（「約」をつけるかの判断に使う） */

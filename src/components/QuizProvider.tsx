@@ -27,6 +27,9 @@ type QuizContext = {
   /** えらんだ問いと、その予想 */
   selected: Question | null;
   guess: Guess | null;
+  /** いまの問いを、ずかんに保存したか（保存したら、もどっても もう一度は保存しない） */
+  saved: boolean;
+  markSaved: () => void;
   setPhoto: (photo: Photo, scene?: SceneKey) => void;
   /** 囲んだ直後に呼ぶ。裏で LLM を呼び始める（先読み生成） */
   startGeneration: (crop: Crop) => void;
@@ -60,6 +63,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
   const [generation, setGeneration] = useState<Generation>({ status: "idle" });
   const [selected, setSelected] = useState<Question | null>(null);
   const [guess, setGuessState] = useState<Guess | null>(null);
+  const [saved, setSaved] = useState(false);
   const latest = useRef(0);
   // 問いを作るときに、いまの図鑑（出題済みの組み合わせ・学習の進み具合）を使う
   const archivesRef = useRef(archives);
@@ -108,6 +112,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
     setCrop(null);
     setSelected(null);
     setGuessState(null);
+    setSaved(false);
     setGeneration({ status: "idle" });
   }, []);
 
@@ -117,6 +122,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
       setCrop(next);
       setSelected(null);
       setGuessState(null);
+      setSaved(false);
       run(next);
     },
     [run],
@@ -134,19 +140,22 @@ function QuizState({ children }: { children: React.ReactNode }) {
     setCrop(null);
     setSelected(null);
     setGuessState(null);
+    setSaved(false);
     setGeneration({ status: "idle" });
   }, []);
 
   const selectQuestion = useCallback((question: Question) => {
     setSelected(question);
     setGuessState(null);
+    setSaved(false);
   }, []);
 
   const setGuess = useCallback((next: Guess) => setGuessState(next), []);
+  const markSaved = useCallback(() => setSaved(true), []);
 
   const value = useMemo<QuizContext>(
-    () => ({ photo, scene, crop, generation, selected, guess, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset }),
-    [photo, scene, crop, generation, selected, guess, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset],
+    () => ({ photo, scene, crop, generation, selected, guess, saved, markSaved, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset }),
+    [photo, scene, crop, generation, selected, guess, saved, markSaved, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset],
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }

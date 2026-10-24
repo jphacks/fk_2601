@@ -39,7 +39,8 @@ function LassoContent() {
   }
 
   return (
-    <Page title="ぐるっと つかまえよう！" back="/capture">
+    // もどるは、来た画面へ（ホームの見本の絵・アルバムから来たときは ホーム、カメラから来たときは カメラ）
+    <Page title="ぐるっと つかまえよう！" onBack={() => router.back()}>
       <LassoPicker photo={photo} points={points} onChange={setPoints} />
       <Say mood={points ? "happy" : "think"} size={84}>
         {points ? (

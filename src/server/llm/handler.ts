@@ -19,10 +19,10 @@ const STATUS: Record<ApiErrorCode, number> = {
 const MESSAGE: Record<ApiErrorCode, string> = {
   unauthorized: "ログインしなおしてね",
   bad_request: "しゃしんを うまく おくれなかったよ。もういちど ためしてね",
-  refusal: "この しゃしんからは もんだいが 作れなかったよ。べつの ものを 囲んでみてね",
+  refusal: "この しゃしんからは はてなが つくれなかったよ。べつの ものを かこんでみてね",
   timeout: "じかんが かかりすぎたよ。もういちど ためしてね",
   busy: "いま みんなが たくさん つかっているよ。すこし まってから もういちど ためしてね",
-  invalid_output: "もんだいを うまく 作れなかったよ。もういちど ためしてね",
+  invalid_output: "はてなを うまく つくれなかったよ。もういちど ためしてね",
   llm_error: "うまくいかなかったよ。もういちど ためしてね",
 };
 

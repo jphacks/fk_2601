@@ -59,14 +59,14 @@ export function Chips({ question }: { question: Question }) {
 /** 問いの見かた・前提（答えのヒントではない）。前に保存した問いには無いので、なければ何も出さない */
 export function QuestionHint({ question }: { question: Question }) {
   if (!question.hint) return null;
-  return <RubyText text={question.hint} className="block text-base font-bold leading-[1.8] text-ink-sub" />;
+  return <RubyText text={question.hint} kana className="block text-base font-bold leading-[1.8] text-ink-sub" />;
 }
 
-/** 問題文（21px 以上の漢字には、ふりがなが付いて届く） */
+/** 問題文。22px 以上なら漢字にふりがなを付け、それより小さいときは ひらがなで出す（docs/design/README.md「文字」） */
 export function QuestionText({ question, size = 21 }: { question: Question; size?: number }) {
   return (
     <div style={{ fontSize: size }}>
-      <RubyText text={question.text} className="block font-black leading-[1.75]" />
+      <RubyText text={question.text} kana={size < 22} className="block font-black leading-[1.75]" />
     </div>
   );
 }

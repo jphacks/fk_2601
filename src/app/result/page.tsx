@@ -16,14 +16,16 @@ import { Button, ErrorNotice, Say } from "@/components/ui";
 import { defaultScope } from "@/lib/calc";
 import { formatNumber } from "@/lib/format";
 import { describeGuess, evaluate } from "@/lib/rating";
+import { unitKana } from "@/lib/ruby";
 
 // しょうたい → なぞとき → もしも → ずかんにのこす（見本 14〜19）
 type Step = "shoutai" | "nazo" | "moshimo" | "get";
 
 function ResultContent() {
   const router = useRouter();
-  const { selected, guess, crop } = useQuiz();
-  const [step, setStep] = useState<Step>("shoutai");
+  const { selected, guess, crop, saved } = useQuiz();
+  // 保存したあとに もどってきたときは、保存した画面（はてなゲット！）から見せる
+  const [step, setStep] = useState<Step>(() => (saved ? "get" : "shoutai"));
   const [values, setValues] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
@@ -48,8 +50,8 @@ function ResultContent() {
   if (!selected || !guess) return null;
   if (!evaluation) {
     return (
-      <Page title="しょうたい" back="/predict">
-        <ErrorNotice>この はてなは こたえを 出せなかったよ。ほかの はてなを えらんでね。</ErrorNotice>
+      <Page title="しょうたい" back="/choose">
+        <ErrorNotice>この はてなは こたえを だせなかったよ。ほかの はてなを えらんでね。</ErrorNotice>
         <Button onClick={() => router.push("/choose")}>はてなを えらびなおす</Button>
       </Page>
     );
@@ -63,7 +65,7 @@ function ResultContent() {
       ? evaluation.rating === "pita"
         ? "せいかい！"
         : "ざんねん…"
-      : `きみ ${describeGuess(guess, unit)} → こたえ ${formatNumber(evaluation.actual ?? 0)}${unit}`;
+      : `きみ ${describeGuess(guess, unit)} → こたえ ${formatNumber(evaluation.actual ?? 0)}${unitKana(unit)}`;
 
   if (step === "shoutai") {
     return (
@@ -83,7 +85,7 @@ function ResultContent() {
     return (
       <Page title="なぞとき" icon={<Icon name="search" size={28} fill="#FFC83D" strokeWidth={2.4} />} onBack={() => setStep("shoutai")}>
         <Say mood="happy" size={88}>
-          <RubyText text={selected.explanation.short} />
+          <RubyText kana text={selected.explanation.short} />
         </Say>
         <ExplanationSteps question={selected} defaultOpen />
         <Related question={selected} />
@@ -118,7 +120,7 @@ function ResultContent() {
           <div className="relative grow rounded-[22px] border-3 border-ink bg-white px-4 py-2.5 text-[19px] font-black leading-[1.75] shadow-pop-sm">
             <span aria-hidden className="absolute -left-[11px] top-[calc(50%-9px)] size-4 rotate-45 border-b-3 border-l-3 border-ink bg-white" />
             <span className="relative">
-              {selected.whatIf ? <RubyText text={selected.whatIf} /> : "じょうけんを かえると、こたえは どうなるかな？"}
+              {selected.whatIf ? <RubyText kana text={selected.whatIf} /> : "じょうけんを かえると、こたえは どうなるかな？"}
             </span>
           </div>
         </div>
@@ -131,11 +133,11 @@ function ResultContent() {
   }
 
   return (
-    <Page>
+    <Page onBack={saved ? undefined : () => setStep(canChange ? "moshimo" : "nazo")}>
       {crop ? (
         <SavePanel question={selected} guess={guess} rating={evaluation.rating} image={crop.dataUrl} summary={summary} />
       ) : (
-        <ErrorNotice>しゃしんが 見つからなかったよ。もういちど とってみてね。</ErrorNotice>
+        <ErrorNotice>しゃしんが みつからなかったよ。もういちど とってみてね。</ErrorNotice>
       )}
     </Page>
   );

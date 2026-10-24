@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { computeAnswer, defaultScope } from "@/lib/calc";
 import { formatNumber } from "@/lib/format";
 import { refParts } from "@/lib/ref";
+import { kanaOf, unitKana, unitRuby } from "@/lib/ruby";
 import type { Question } from "@/server/llm/schema";
 import { CountUp } from "./CountUp";
 import { Icon } from "./Icons";
@@ -65,11 +66,11 @@ export function ConditionSliders({
           <div key={v.name} className="flex flex-col gap-1.5 rounded-[26px] border-3 border-ink bg-yellow-light px-[18px] py-3.5 shadow-pop-md">
             <div className="flex items-center justify-between gap-2">
               <label htmlFor={`v-${v.name}`} className="font-pop text-[17px] leading-snug">
-                <RubyText text={v.label} />
+                {kanaOf(v.label)}
               </label>
               <span className="shrink-0 font-pop text-[26px] leading-[1.4]">
                 {formatNumber(now)}
-                <span className="text-lg">{v.unit}</span>
+                <span className="text-lg">{unitKana(v.unit)}</span>
               </span>
             </div>
             <div className="relative">
@@ -105,12 +106,12 @@ export function ConditionSliders({
 
       <div aria-live="polite" className="flex flex-col items-center rounded-[26px] border-3 border-ink bg-white px-[18px] pb-4 pt-3 shadow-pop-md">
         {current === null ? (
-          <p className="text-lg font-black">この じょうけんでは 計算できないよ</p>
+          <p className="text-lg font-black">この じょうけんでは けいさん できないよ</p>
         ) : question.type === "compare" ? (
           <p key={bumped} className="animate-bump text-center text-[20px] font-black leading-[1.75]">
-            <RubyText text={`${current >= 1 ? question.compare?.a ?? "A" : question.compare?.b ?? "B"} は ${current >= 1 ? question.compare?.b ?? "B" : question.compare?.a ?? "A"} の `} />
+            <RubyText kana text={`${current >= 1 ? question.compare?.a ?? "A" : question.compare?.b ?? "B"} は ${current >= 1 ? question.compare?.b ?? "B" : question.compare?.a ?? "A"} の `} />
             <b className="font-pop text-navi">
-              <RubyText text={ratioRuby(onLine(current))} />
+              <RubyText kana text={ratioRuby(onLine(current))} />
             </b>
           </p>
         ) : (
@@ -120,20 +121,23 @@ export function ConditionSliders({
               <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(shown) }}>
                 <CountUp value={current} duration={400} format={formatNumber} />
               </span>
-              <span className="font-pop text-[30px] leading-[1.6]">{unit}</span>
+              <span className="font-pop text-[30px] leading-[1.6]">
+                <RubyText text={unitRuby(unit)} />
+              </span>
             </div>
           </>
         )}
         {changed && original !== null && current !== null && original > 0 && Math.abs(ratio - 1) > 1e-4 && (
           <span className={`mt-1 rounded-[18px] border-[2.5px] border-ink px-4 py-0.5 font-pop text-lg ${ratio > 1 ? "bg-yellow" : "bg-navi-light text-navi-dark"}`}>
             {ratio > 1 ? "▲ " : "▼ "}
-            もとの <RubyText text={ratioRuby(ratio)} />
+            もとの <RubyText kana text={ratioRuby(ratio)} />
           </span>
         )}
         {parts && (
           <p className="mt-2 text-center text-[17px] font-black leading-[1.7]">
-            <RubyText text={parts.label} /> {formatNumber(parts.value)}
-            <RubyText text={`${parts.unit}${parts.suffix}`} />
+            {kanaOf(parts.label)} {formatNumber(parts.value)}
+            {unitKana(parts.unit)}
+            {parts.suffix}
           </p>
         )}
       </div>

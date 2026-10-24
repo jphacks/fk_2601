@@ -34,6 +34,7 @@ function build(d: Draft): Question {
     hint: g(d.hint),
     whatIf: g(d.whatIf),
     related: d.related.map(g),
+    keyword: g(d.keyword),
     explanation: { short: g(d.explanation.short), steps: d.explanation.steps.map(g) },
     answerUnit: d.answerUnit ?? "",
     formula: d.formula ?? null,
@@ -42,7 +43,7 @@ function build(d: Draft): Question {
     guessRange: d.guessRange ?? null,
     compare: null,
     choices: d.choices?.map((c) => ({ ...c, text: g(c.text) })) ?? null,
-    ref: d.ref ? { ...d.ref, label: g(d.ref.label) } : null,
+    ref: d.ref ? { ...d.ref, label: g(d.ref.label), unit: g(d.ref.unit) } : null,
     sources: [{ kind: "data", title: g(source), url: null, assumption: g(assume) }],
   };
 }
@@ -62,7 +63,8 @@ const BUILTIN: Record<Scene, Entry> = {
         variables: [{ name: "n", label: "おもちゃの しゅるい", value: 10, unit: "しゅるい", min: 2, max: 40, step: 1 }],
         answerUnit: "かい",
         llmAnswer: 29.3,
-        guessRange: { min: 3, max: 300 },
+        // 予想の範囲の まんなか（スライダーのはじめの位置・5つの範囲の まんなか）が、答えにならないようにする
+        guessRange: { min: 10, max: 1000 },
         explanation: {
           short: "さいごの 1しゅるいが、なかなか {出|で|1}て こないんだ！",
           steps: [
@@ -93,7 +95,7 @@ const BUILTIN: Record<Scene, Entry> = {
         ],
         answerUnit: "とおり",
         llmAnswer: 27,
-        guessRange: { min: 3, max: 300 },
+        guessRange: { min: 10, max: 1000 },
         explanation: {
           short: "1かい ふえる ごとに、3ばいずつ ふえていくよ。",
           steps: ["1かい{目|め|1}の {色|いろ|2}は 3とおり。", "2かい{目|め|1}も、それぞれに 3とおり ずつ。3×3＝9とおり。", "3かい{目|め|1}も おなじ。9×3＝27とおり！"],

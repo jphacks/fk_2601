@@ -7,11 +7,8 @@ import { Icon } from "./Icons";
 import { Navigator } from "./Navigator";
 import { TRIVIA } from "@/lib/trivia";
 
-/**
- * 待ち時間（見本 07「つかまえた！」）：切り抜きを見せて、ナビがしらべ中。まめちしきをときどき入れかえる。
- * image を渡すと、つかまえたところを丸く見せる
- */
-export function Loading({ message = "いま しらべてるよ", image }: { message?: string; image?: string }) {
+/** まめちしき（ときどき入れかえる） */
+function Trivia() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -25,10 +22,41 @@ export function Loading({ message = "いま しらべてるよ", image }: { mess
   }, []);
 
   return (
+    <div className="rounded-[26px] border-3 border-ink bg-yellow-light px-[18px] py-3.5 shadow-pop-md">
+      <p className="flex items-center gap-1.5 text-[15px] font-black text-yellow-dark">
+        <Icon name="bulb" size={20} />
+        まめちしき
+      </p>
+      <p className="mt-1 text-[19px] font-black leading-[1.75]">{TRIVIA[index]}</p>
+    </div>
+  );
+}
+
+/**
+ * 待ち時間。
+ * image を渡したとき（はてなを さがしている あいだ）は、見本 07「つかまえた！」：切り抜きを丸く見せて、まめちしきを出す。
+ * 渡さないとき（ログインの確認・ずかんを ひらく など）は、ナビと はずむ点だけの、かんたんな表示にする
+ */
+export function Loading({ message = "ちょっと まってね", image }: { message?: string; image?: string }) {
+  if (!image) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 py-10 text-center" role="status" aria-live="polite">
+        <Navigator mood="effort" size={110} />
+        <p className="text-lg font-black">{message}</p>
+        <div className="flex gap-2" aria-hidden>
+          {["bg-navi", "bg-yellow", "bg-pink"].map((color, i) => (
+            <span key={color} className={`loading-dot ${color}`} style={{ animationDelay: `${i * 0.18}s` }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="relative flex flex-col gap-3.5" role="status" aria-live="polite">
       <Confetti />
       <div className="mt-1.5 flex items-center gap-3.5">
-        {image && <CropCircle src={image} alt="つかまえた ところ" size={128} />}
+        <CropCircle src={image} alt="つかまえた ところ" size={128} />
         <div className="flex flex-col gap-2">
           <span className="font-pop text-[32px] leading-tight text-pink [-webkit-text-stroke:1.5px_var(--color-ink)]">つかまえた！</span>
           <span className="self-start rounded-[14px] border-[2.5px] border-ink bg-yellow-light px-3 py-1 text-[15px] font-black">{message}</span>
@@ -45,13 +73,7 @@ export function Loading({ message = "いま しらべてるよ", image }: { mess
         </div>
       </div>
 
-      <div className="rounded-[26px] border-3 border-ink bg-yellow-light px-[18px] py-3.5 shadow-pop-md">
-        <p className="flex items-center gap-1.5 text-[15px] font-black text-yellow-dark">
-          <Icon name="bulb" size={20} />
-          まめちしき
-        </p>
-        <p className="mt-1 text-[19px] font-black leading-[1.75]">{TRIVIA[index]}</p>
-      </div>
+      <Trivia />
     </div>
   );
 }

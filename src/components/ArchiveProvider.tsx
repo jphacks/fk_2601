@@ -84,7 +84,7 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
         try {
           await backend.savePublic(publicPost(user.uid, profile, record));
         } catch {
-          throw new UserFacingError("ずかんには ほぞんしたけど、みんなには 見せられなかったよ");
+          throw new UserFacingError("ずかんには のこせたけど、みんなには みせられなかったよ");
         }
       }
       return record;
