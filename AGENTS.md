@@ -158,3 +158,13 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 - 進捗・担当者・期限は書かない（GitHub Issues で管理する）
 - エージェントが同じミスを2回したら、「落とし穴」か「禁止事項」に1行足す。不要になった記述は消す
 - 未決事項が決まったら、「後で記載」の箇所と「未決事項」の一覧を更新する
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
