@@ -1,4 +1,5 @@
-import { formatNumber, formatRatio } from "@/lib/format";
+import { formatNumber, formatRatio, isApprox } from "@/lib/format";
+import { refParts } from "@/lib/ref";
 import { describeGuess, RATING_LABEL, type Evaluation, type Guess, type Rating } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
 import { Navigator } from "./Navigator";
@@ -92,15 +93,14 @@ function gapText(guess: number, actual: number): string {
   return `せいかいは、きみの よそうの ${formatRatio(k)}だったよ！`;
 }
 
-/** 答えを、身近なものにおきかえる（「プール○杯分」など） */
+/** 答えを、身近なものにおきかえる（「1日に 1000ばいずつ くむと 1800日ぶん」など） */
 function Familiar({ question, actual }: { question: Question; actual: number }) {
-  const f = question.familiar;
-  if (!f) return null;
-  const n = actual / f.amount;
-  if (n < 0.1 || n > 100000) return null;
+  const parts = refParts(question, actual);
+  if (!parts) return null;
   return (
     <p className="rounded-2xl bg-sun/20 p-3 text-center text-base">
-      <RubyText text={`「${f.name}」の 約${formatNumber(n)}こぶん`} />
+      <RubyText text={parts.label} /> <b className="text-lg">{isApprox(parts.value) ? "約" : ""}{formatNumber(parts.value)}</b>
+      <RubyText text={`${parts.unit}${parts.suffix}`} />
     </p>
   );
 }

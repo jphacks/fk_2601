@@ -23,3 +23,18 @@ export function formatDate(timestamp: number): string {
   const d = new Date(timestamp);
   return `${d.getMonth() + 1}月${d.getDate()}日`;
 }
+
+/** formatNumber が丸めたあとの数（「約」をつけるかの判断に使う） */
+function roundForDisplay(value: number): number {
+  const abs = Math.abs(value);
+  if (abs >= 1000) return Math.round(value);
+  if (abs >= 100) return Math.round(value * 10) / 10;
+  if (abs >= 1) return Math.round(value * 100) / 100;
+  if (abs >= 0.001) return Math.round(value * 10000) / 10000;
+  return value;
+}
+
+/** 画面に出す数が、丸めた数（ほんとうの数とすこしちがう）か */
+export function isApprox(value: number): boolean {
+  return Math.abs(roundForDisplay(value) - value) > Math.abs(value) * 0.001;
+}
