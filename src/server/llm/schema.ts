@@ -4,7 +4,7 @@ export const SubjectSchema = z.enum(["math", "science", "info"]);
 
 export const VariableSchema = z.object({
   name: z.string().describe("式で使う名前。英小文字で始まる英数字（例: length）"),
-  label: z.string().describe("画面に出す名前（漢字にはふりがなの ruby タグを付ける）"),
+  label: z.string().describe("画面に出す名前（漢字には {漢字|よみ} の形でふりがなをつける）"),
   value: z.number(),
   unit: z.string(),
   min: z.number().describe("スライダーの最小値"),
@@ -20,11 +20,12 @@ export const SourceSchema = z.object({
 });
 
 export const QuestionSchema = z.object({
-  text: z.string().describe("問題文（漢字にはふりがなの ruby タグを付ける）"),
+  text: z.string().describe("問題文。答えの数やヒントを書かない。漢字には {漢字|よみ} の形でふりがなをつける"),
   type: z.enum(["estimate", "compare", "why"]),
   subject: SubjectSchema,
-  topic: z.string().describe("単元（例: 面積・速さ・割合）"),
-  target: z.string().describe("写真の対象（例: 校庭のタイル）"),
+  topic: z.string().describe("単元（例: 場合の数・時間・光）。ふりがな記法は使わない"),
+  target: z.string().describe("写真の対象（例: ガチャガチャ）。ふりがな記法は使わない"),
+  hint: z.string().describe("問いの見かた・前提を1文で（答えのヒントは書かない）。なければ空文字"),
   formula: z
     .string()
     .nullable()
@@ -48,18 +49,25 @@ export const QuestionSchema = z.object({
     short: z.string().describe("まず見せる一言"),
     steps: z.array(z.string()).describe("タップで見る計算過程のステップ"),
   }),
-  familiar: z
+  ref: z
     .object({
-      name: z.string().describe("身近なものの単位（例: 25mプール1ぱい）"),
-      amount: z.number().describe("answerUnit での大きさ"),
+      type: z.enum(["per", "times"]),
+      label: z.string().describe("身近なものの言いかえ。数の手前までの文（例: 1日に 1000ばいずつ くむと）"),
+      value: z.number().describe("per：1つぶんの大きさ（answerUnit）。times：答えにかける数"),
+      unit: z.string().describe("数のあとに付ける単位（例: 日、円）"),
     })
     .nullable()
-    .describe("estimate のとき、答えを身近なものに置き換える基準。なければ null"),
+    .describe(
+      "estimate のとき、答えを身近なものにおきかえる。per は「label 答え÷value unit ぶん」、times は「label 答え×value unit」と表示する。うまく作れなければ null",
+    ),
+  whatIf: z.string().describe("条件を変えたくなる問いかけ（例: じゃあ、40しゅるいだったら？）。なければ空文字"),
+  related: z.array(z.string()).describe("同じ考えかたが使える、べつの身近なものの問い（0〜2つ）"),
+  keyword: z.string().describe("もっとしらべるときのことば。なければ空文字"),
   sources: z.array(SourceSchema),
 });
 
 export const RecognitionSchema = z.object({
-  label: z.string().describe("「これは○○だね？」に使う名前（ひらがな多め）"),
+  label: z.string().describe("「これは○○だね？」に使う名前（ひらがなかカタカナ。ふりがな記法は使わない）"),
   canAsk: z.boolean().describe("この写真から問いが作れるか"),
 });
 
