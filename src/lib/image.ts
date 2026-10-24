@@ -26,15 +26,44 @@ function photoFromSource(source: CanvasImageSource, srcWidth: number, srcHeight:
   return { dataUrl: canvas.toDataURL("image/jpeg", 0.9), width, height };
 }
 
-/** アルバムの写真を読み込む（向きの情報を反映し、縮める。位置情報などは引き継がない） */
-export async function photoFromFile(file: Blob): Promise<Photo> {
+/** createImageBitmap で読み込む。向きの指定に対応していない古いブラウザでは、指定なしで読み込む（その場合も、新しいブラウザは向きを自動で直す） */
+async function bitmapOf(file: Blob): Promise<ImageBitmap> {
   try {
-    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-    const photo = photoFromSource(bitmap, bitmap.width, bitmap.height);
-    bitmap.close();
-    return photo;
-  } catch (error) {
-    if (error instanceof UserFacingError) throw error;
+    return await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    return await createImageBitmap(file);
+  }
+}
+
+/** img 要素で読み込む（createImageBitmap が使えない・失敗するブラウザ向け。向きの情報はブラウザが反映する） */
+async function photoViaImageElement(file: Blob): Promise<Photo> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImage(url);
+    return photoFromSource(img, img.naturalWidth, img.naturalHeight);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+const HEIC_PATTERN = /heic|heif/i;
+
+/** アルバムの写真を読み込む（向きの情報を反映し、縮める。位置情報などは引き継がない） */
+export async function photoFromFile(file: Blob & { name?: string }): Promise<Photo> {
+  try {
+    try {
+      const bitmap = await bitmapOf(file);
+      const photo = photoFromSource(bitmap, bitmap.width, bitmap.height);
+      bitmap.close();
+      return photo;
+    } catch {
+      return await photoViaImageElement(file);
+    }
+  } catch {
+    // iPhone の HEIC 形式は、Windows や一部のブラウザでは開けない
+    if (HEIC_PATTERN.test(file.type) || HEIC_PATTERN.test(file.name ?? "")) {
+      throw new UserFacingError("この しゃしんの かたち（HEIC）は ひらけないよ。「しゃしんを とる」で とるか、ほかの しゃしんを えらんでね");
+    }
     throw new UserFacingError("この しゃしんは ひらけなかったよ。ほかの しゃしんを えらんでね");
   }
 }
