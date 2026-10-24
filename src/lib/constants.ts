@@ -13,6 +13,13 @@ export const SUBJECT_LABEL: Record<Subject, string> = {
   info: "情報",
 };
 
+// 小さい文字には、漢字を使わずひらがなで書く（docs/design/README.md「文字」）
+export const SUBJECT_KANA: Record<Subject, string> = {
+  math: "さんすう",
+  science: "りか",
+  info: "じょうほう",
+};
+
 export const SUBJECTS: Subject[] = ["math", "science", "info"];
 
 // 称号を得るのに必要な個数。未決（docs/02-spec.md 16章）なので仮の値

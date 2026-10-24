@@ -1,15 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { AlbumPicker } from "@/components/AlbumPicker";
 import { Gate } from "@/components/Gate";
-import { Loading } from "@/components/Loading";
-import { Page } from "@/components/Page";
+import { Icon } from "@/components/Icons";
+import { Navigator } from "@/components/Navigator";
 import { useQuiz } from "@/components/QuizProvider";
-import { SafetyNotice } from "@/components/SafetyNotice";
-import { Button, Say } from "@/components/ui";
 import { messageOf } from "@/lib/errors";
-import { photoFromFile, photoFromVideo } from "@/lib/image";
+import { photoFromVideo } from "@/lib/image";
 
 type CameraState = "starting" | "live" | "unavailable";
 
@@ -18,7 +18,6 @@ function CaptureContent() {
   const { setPhoto } = useQuiz();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [camera, setCamera] = useState<CameraState>("starting");
-  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,61 +56,81 @@ function CaptureContent() {
     }
   }
 
-  async function pick(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-    setBusy(true);
-    setError(null);
-    try {
-      setPhoto(await photoFromFile(file));
-      router.push("/lasso");
-    } catch (e) {
-      setError(messageOf(e));
-      setBusy(false);
-    }
-  }
-
   return (
-    <Page title="しゃしんを とろう" back="/">
-      <SafetyNotice />
-      {busy ? (
-        <Loading message="しゃしんを よみこんでいるよ…" />
-      ) : (
-        <>
-          <div className="relative overflow-hidden rounded-3xl bg-ink">
-            <video
-              ref={videoRef}
-              playsInline
-              muted
-              className={`aspect-[3/4] w-full object-cover ${camera === "live" ? "" : "invisible h-0"}`}
-            />
-            {camera === "starting" && <p className="p-10 text-center text-white">カメラを じゅんびしているよ…</p>}
-            {camera === "unavailable" && (
-              <div className="p-4">
-                <Say mood="sorry">
-                  カメラが つかえなかったよ。おとなの人に 「カメラの きょか」を たのむか、アルバムから えらんでね。
-                </Say>
-              </div>
-            )}
-          </div>
+    <main className="animate-rise flex min-h-dvh flex-col gap-3.5 px-6 pb-8 pt-6">
+      <div className="flex h-[52px] items-center justify-between">
+        <h1 className="font-pop text-2xl font-normal">はてなを さがせ！</h1>
+        <Link
+          href="/"
+          aria-label="とじる"
+          className="flex size-[50px] items-center justify-center rounded-full border-3 border-ink bg-white shadow-pop-xs active:translate-y-[3px] active:shadow-none"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22223A" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </Link>
+      </div>
 
-          {error && (
-            <p role="alert" className="rounded-xl bg-berry/10 px-3 py-2 text-base font-bold text-berry">
-              {error}
-            </p>
-          )}
+      <div className="relative flex h-[min(540px,62dvh)] shrink-0 items-center justify-center overflow-hidden rounded-[32px] border-3 border-ink bg-photo">
+        <video ref={videoRef} playsInline muted className={`absolute inset-0 size-full object-cover ${camera === "live" ? "" : "invisible"}`} />
 
-          <div className="mt-auto space-y-3">
-            {camera === "live" && <Button onClick={shoot}>とる</Button>}
-            <label className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-2xl border-2 border-brand bg-white px-5 py-3 text-lg font-bold text-brand active:bg-brand/10">
-              アルバムから えらぶ
-              <input type="file" accept="image/*" className="sr-only" onChange={pick} />
-            </label>
-          </div>
-        </>
+        {camera === "starting" && <p className="relative px-6 text-center text-lg font-black text-ink-sub">カメラを じゅんびしているよ…</p>}
+        {camera === "unavailable" && (
+          <p className="relative px-6 text-center text-lg font-black leading-relaxed text-ink-sub">
+            カメラが つかえなかったよ。
+            <br />
+            おうちの ひとに 「カメラの きょか」を たのむか、アルバムから えらんでね。
+          </p>
+        )}
+
+        {/* ねらいの かど */}
+        <svg aria-hidden="true" viewBox="0 0 336 534" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 size-full">
+          <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M56 150v-34h34M246 116h34v34M280 300v34h-34M90 334H56v-34" stroke="#22223A" strokeWidth="12" />
+            <path d="M56 150v-34h34M246 116h34v34M280 300v34h-34M90 334H56v-34" stroke="#FFC83D" strokeWidth="6" />
+          </g>
+        </svg>
+
+        {/* 撮影時の注意（docs/02-spec.md 3章） */}
+        <span className="absolute inset-x-3.5 top-3.5 flex items-center gap-2 rounded-2xl border-[2.5px] border-ink bg-pink-light px-3 py-2 text-[15px] font-black text-pink-dark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A12A55" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true" className="shrink-0">
+            <circle cx="12" cy="12" r="8" />
+            <line x1="4" y1="4" x2="20" y2="20" />
+          </svg>
+          ひとの かおは とらないでね。まわりにも きをつけてね
+        </span>
+
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+          <Navigator mood="happy" size={68} />
+          <span className="rounded-[18px] border-[2.5px] border-ink bg-white px-3.5 py-2 text-base font-black shadow-pop-xs">どこに あるかな？</span>
+        </div>
+      </div>
+
+      {error && (
+        <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
+          {error}
+        </p>
       )}
-    </Page>
+
+      <div className="grid h-[108px] grid-cols-3 items-center">
+        <AlbumPicker className="flex flex-col items-center gap-1.5 justify-self-start text-sm font-black">
+          <span className="flex size-16 items-center justify-center rounded-[22px] border-3 border-ink bg-yellow shadow-pop-sm">
+            <Icon name="album" size={30} strokeWidth={2.2} />
+          </span>
+          アルバム
+        </AlbumPicker>
+        <button
+          type="button"
+          aria-label="とる"
+          onClick={shoot}
+          disabled={camera !== "live"}
+          className="flex size-24 items-center justify-center justify-self-center rounded-full border-3 border-ink bg-white shadow-pop-md active:translate-y-[5px] active:shadow-none disabled:opacity-40"
+        >
+          <span className="size-[70px] rounded-full border-3 border-ink bg-pink" />
+        </button>
+        <span />
+      </div>
+    </main>
   );
 }
 
