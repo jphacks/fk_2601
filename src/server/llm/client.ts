@@ -30,6 +30,11 @@ function effort(): Effort {
   return value === "low" || value === "high" ? value : "medium";
 }
 
+// 考える処理をオフにすると速くなる（LLM_THINKING=off）。Haiku 5.5 だけが対応している（Opus 5.5・Sonnet 5.5 では 400 になる）
+function thinkingOption() {
+  return process.env.LLM_THINKING === "off" && model() === "claude-haiku-5-5" ? { thinking: { type: "disabled" as const } } : {};
+}
+
 // 自動リトライはしない（課金とレート制限のため）。タイムアウトは60秒
 let cached: Anthropic | null = null;
 function anthropic(): Anthropic {
@@ -59,6 +64,7 @@ export async function callStructured<S extends ZodType>(
           ],
         },
       ],
+      ...thinkingOption(),
       output_config: { effort: effort(), format: zodOutputFormat(schema) },
     });
 
@@ -69,6 +75,7 @@ export async function callStructured<S extends ZodType>(
       outputTokens: response.usage.output_tokens,
       model: model(),
       effort: effort(),
+      thinking: process.env.LLM_THINKING === "off" ? "off" : "auto",
       stop: response.stop_reason,
     });
 
