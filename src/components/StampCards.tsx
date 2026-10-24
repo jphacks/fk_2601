@@ -23,7 +23,7 @@ export function StampCards({
         const count = counts[subject];
         const earned = count >= STAMP_GOAL;
         return (
-          <div key={subject} className={`space-y-2 rounded-3xl p-4 ${COLOR[subject].card}`}>
+          <div key={subject} className={`paper-card space-y-2 p-4 ${COLOR[subject].card}`}>
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-lg font-bold">{SUBJECT_LABEL[subject]}のスタンプ</h3>
               <span className="text-base font-bold">{count}こ</span>
@@ -33,7 +33,7 @@ export function StampCards({
                 <span
                   key={i}
                   className={`flex size-9 items-center justify-center rounded-full text-lg ${
-                    i < count ? `${COLOR[subject].dot} text-white` : "border-2 border-dashed border-ink/25 bg-white/60"
+                    i < count ? `${COLOR[subject].dot} animate-twinkle border-2 border-ink text-white` : "border-2 border-dashed border-ink/30 bg-white/60"
                   }`}
                 >
                   {i < count ? "★" : ""}

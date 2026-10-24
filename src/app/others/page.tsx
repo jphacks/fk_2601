@@ -48,7 +48,7 @@ function OthersContent() {
 
       <ul className="space-y-4">
         {posts?.map((p) => (
-          <li key={p.id} className="space-y-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
+          <li key={p.id} className="paper-card space-y-3 p-4">
             {/* eslint-disable-next-line @next/next/no-img-element -- 公開された切り抜き（data URL） */}
             <img src={p.image} alt="" className="mx-auto max-h-56 rounded-2xl bg-paper object-contain" />
             <div className="flex flex-wrap items-center gap-2">

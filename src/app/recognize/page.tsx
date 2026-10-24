@@ -50,7 +50,7 @@ function RecognizeContent() {
       {generation.status === "ready" && generation.data.recognition.canAsk && (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element -- 囲んだ部分の切り抜き（data URL） */}
-          <img src={crop.dataUrl} alt="囲んだ ところ" className="mx-auto max-h-64 rounded-3xl bg-white object-contain shadow-sm" />
+          <img src={crop.dataUrl} alt="囲んだ ところ" className="mx-auto max-h-64 paper-card bg-white object-contain p-1" />
           <Say mood={denied ? "sorry" : "think"}>
             {denied ? (
               "ごめんね！ もういちど やってみよう。"

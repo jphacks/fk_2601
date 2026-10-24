@@ -65,7 +65,7 @@ function ChooseContent() {
 
   return (
     <Page title="もんだいを えらぼう" back="/recognize">
-      <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white p-1 shadow-sm" role="tablist">
+      <div className="paper-card grid grid-cols-2 gap-2 rounded-full p-1" role="tablist">
         {tabs.map(([value, label]) => (
           <button
             key={value}
@@ -77,7 +77,7 @@ function ChooseContent() {
               setSorry(null);
               setError(null);
             }}
-            className={`min-h-11 rounded-xl text-base font-bold ${mode === value ? "bg-brand text-white" : "text-ink/60"}`}
+            className={`min-h-11 rounded-full text-base font-black ${mode === value ? "bg-brand text-white shadow-[0_2px_0_var(--color-ink)]" : "text-ink/60"}`}
           >
             {label}
           </button>
@@ -105,7 +105,7 @@ function ChooseContent() {
                         selectQuestion(q);
                         router.push("/predict");
                       }}
-                      className="w-full space-y-2 rounded-3xl bg-white p-4 text-left shadow-sm ring-2 ring-transparent transition active:ring-brand"
+                      className="paper-card paper-card-press w-full space-y-2 p-4 text-left"
                     >
                       <Chips question={q} />
                       <QuestionText question={q} />

@@ -37,9 +37,13 @@ export function ResultSummary({
 
   return (
     <div className="space-y-4">
-      <div className={`flex items-center gap-3 rounded-3xl p-4 ${BANNER[rating]}`}>
-        <Navigator mood={rating === "ohazure" ? "surprise" : "happy"} size={72} />
-        <p className={`text-3xl font-bold ${animate ? "animate-stamp" : ""}`}>{ratingText(rating, type)}</p>
+      <div className={`paper-card flex items-center gap-3 p-4 ${BANNER[rating]}`}>
+        <Navigator mood={rating === "ohazure" ? "surprise" : "happy"} size={80} />
+        <p
+          className={`rounded-xl border-4 border-current bg-white/70 px-3 py-1 font-display text-3xl leading-tight ${animate ? "animate-stamp" : "-rotate-3"}`}
+        >
+          {ratingText(rating, type)}
+        </p>
       </div>
 
       {type === "why" && question.choices && guess.kind === "reason" && (
@@ -47,7 +51,7 @@ export function ResultSummary({
           {question.choices.map((c, i) => (
             <li
               key={i}
-              className={`rounded-2xl border-2 px-4 py-3 text-lg ${
+              className={`rounded-2xl border-2 px-4 py-3 text-lg shadow-[3px_3px_0_rgba(31,42,68,.14)] ${
                 c.correct ? "border-mint bg-mint/15 font-bold" : i === guess.index ? "border-berry/60 bg-berry/10" : "border-ink/10 bg-white"
               }`}
             >
@@ -61,7 +65,7 @@ export function ResultSummary({
       {type !== "why" && guessValue !== null && actual !== null && (
         <>
           <div className="grid grid-cols-2 gap-3 text-center">
-            <div className="rounded-2xl bg-berry/10 p-3">
+            <div className="paper-card bg-berry/10 p-3">
               <p className="text-sm font-bold text-berry">きみの よそう</p>
               <p className="text-xl font-bold">{describeGuess(guess, unit)}</p>
               {type === "compare" && guess.kind === "compare" && question.compare && (
@@ -70,7 +74,7 @@ export function ResultSummary({
                 </p>
               )}
             </div>
-            <div className="rounded-2xl bg-[#e1ecff] p-3">
+            <div className="paper-card bg-[#e1ecff] p-3">
               <p className="text-sm font-bold text-brand-dark">せいかい</p>
               <p className="text-2xl font-bold">
                 {animate ? <CountUp value={actual} from={0} format={formatNumber} /> : formatNumber(actual)}
@@ -84,7 +88,9 @@ export function ResultSummary({
             </div>
           </div>
 
-          <NumberLine guess={guessValue} actual={actual} unit={unit} intro={animate} />
+          <div className="paper-card px-2 pb-1 pt-2">
+            <NumberLine guess={guessValue} actual={actual} unit={unit} intro={animate} />
+          </div>
           <p className="text-center text-xl font-bold">{gapText(guessValue, actual)}</p>
           {type === "compare" && evaluation.correct === false && (
             <p className="text-center text-base">大きいのは、きみが えらんだ ほうでは なかったよ。</p>
@@ -107,7 +113,7 @@ function Familiar({ question, actual }: { question: Question; actual: number }) 
   const parts = refParts(question, actual);
   if (!parts) return null;
   return (
-    <p className="rounded-2xl bg-sun/20 p-3 text-center text-base">
+    <p className="paper-card bg-sun/25 p-3 text-center text-base">
       <RubyText text={parts.label} /> <b className="text-lg">{isApprox(parts.value) ? "約" : ""}{formatNumber(parts.value)}</b>
       <RubyText text={`${parts.unit}${parts.suffix}`} />
     </p>

@@ -19,7 +19,7 @@ export function SafetyNotice({ once = false }: { once?: boolean }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/60 p-4 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="safety-title">
-      <div className="w-full max-w-sm space-y-4 rounded-3xl bg-white p-6 text-center shadow-xl">
+      <div className="w-full max-w-sm space-y-4 paper-card p-6 text-center">
         <div className="flex justify-center">
           <Navigator mood="happy" size={88} />
         </div>

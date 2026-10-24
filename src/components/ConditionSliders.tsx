@@ -101,7 +101,7 @@ export function ConditionSliders({
         );
       })}
 
-      <div aria-live="polite" className="rounded-2xl bg-sun/20 p-3 text-center">
+      <div aria-live="polite" className="paper-card bg-sun/25 p-3 text-center">
         {current === null ? (
           <p>この じょうけんでは 計算できないよ</p>
         ) : question.type === "compare" ? (

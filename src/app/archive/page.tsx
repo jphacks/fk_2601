@@ -58,7 +58,7 @@ function ArchiveContent() {
                 <ul className="grid grid-cols-2 gap-3">
                   {items.map((a) => (
                     <li key={a.id}>
-                      <Link href={`/archive/${a.id}`} className="block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-ink/5">
+                      <Link href={`/archive/${a.id}`} className="paper-card paper-card-press block overflow-hidden">
                         {/* eslint-disable-next-line @next/next/no-img-element -- 保存した切り抜き（data URL） */}
                         <img src={a.image} alt={a.question.target} className="aspect-square w-full bg-paper object-cover" />
                         <div className="flex items-center justify-between gap-1 px-3 py-2">

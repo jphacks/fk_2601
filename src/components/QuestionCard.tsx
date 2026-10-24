@@ -17,10 +17,10 @@ const SUBJECT_COLOR = {
 export function Chips({ question }: { question: Question }) {
   return (
     <div className="flex flex-wrap gap-2">
-      <span className={`rounded-full px-3 py-0.5 text-sm font-bold ${SUBJECT_COLOR[question.subject]}`}>
+      <span className={`rounded-full border-2 border-ink px-3 py-0.5 text-sm font-black ${SUBJECT_COLOR[question.subject]}`}>
         {SUBJECT_LABEL[question.subject]}
       </span>
-      <span className="rounded-full bg-berry/10 px-3 py-0.5 text-sm font-bold text-berry">{TYPE_LABEL[question.type]}</span>
+      <span className="rounded-full border-2 border-ink bg-white px-3 py-0.5 text-sm font-black text-berry">{TYPE_LABEL[question.type]}</span>
     </div>
   );
 }

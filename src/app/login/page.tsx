@@ -61,7 +61,7 @@ export default function LoginPage() {
                 setMode(value);
                 setError(null);
               }}
-              className={`min-h-11 rounded-xl text-base font-bold ${mode === value ? "bg-white text-brand shadow-sm" : "text-ink/60"}`}
+              className={`min-h-11 rounded-xl text-base font-bold ${mode === value ? "border-2 border-ink bg-white text-ink shadow-[0_2px_0_var(--color-ink)]" : "text-ink/60"}`}
             >
               {label}
             </button>

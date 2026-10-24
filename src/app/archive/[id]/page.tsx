@@ -58,7 +58,7 @@ function DetailContent() {
   return (
     <Page title={question.target} back="/archive">
       {/* eslint-disable-next-line @next/next/no-img-element -- 保存した切り抜き（data URL） */}
-      <img src={record.image} alt={question.target} className="mx-auto max-h-72 rounded-3xl bg-white object-contain shadow-sm" />
+      <img src={record.image} alt={question.target} className="mx-auto max-h-72 paper-card bg-white object-contain p-1" />
       <p className="text-center text-sm text-ink/60">{formatDate(record.createdAt)}</p>
 
       <Card className="space-y-3">
