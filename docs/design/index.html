@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>デザイン見本（MVP・ポップ案）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { margin: 0; background: var(--color-cloud); font-family: var(--font-body); color: var(--color-ink); }
+  header { padding: 32px 24px 8px; max-width: 1400px; margin: 0 auto; }
+  h1 { margin: 0; font-family: var(--font-pop); font-weight: 400; font-size: 32px; }
+  header p { margin: 8px 0 0; font-weight: 700; line-height: 1.7; color: var(--color-ink-sub); }
+  main { max-width: 1400px; margin: 0 auto; padding: 0 24px 64px; }
+  h2 { margin: 40px 0 16px; font-family: var(--font-pop); font-weight: 400; font-size: 22px; }
+  .row { display: flex; flex-wrap: wrap; gap: 28px; }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .frame { width: 195px; height: 422px; overflow: hidden; border: 3px solid var(--color-ink); border-radius: 24px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); }
+  .frame.wide { width: 410px; }
+  .frame iframe { width: 390px; height: 844px; border: 0; transform: scale(0.5); transform-origin: 0 0; }
+  .frame.wide iframe { width: 820px; }
+  figcaption { display: flex; flex-direction: column; gap: 2px; max-width: 195px; }
+  .wide + figcaption { max-width: 410px; }
+  figcaption a { font-weight: 900; color: var(--color-navi-dark); }
+  figcaption span { font-size: 13px; font-weight: 700; color: var(--color-ink-sub); }
+</style>
+</head>
+<body>
+<header>
+  <h1>デザイン見本（MVP・ポップ案）</h1>
+  <p>アプリのコードではなく、見た目とうごきの見本です。各画面の名前を押すと1画面だけ開けます（ボタンで次の画面に進めます）。<br>色・文字・部品のルールとアプリへの取り込み方は README.md を見てください。</p>
+</header>
+<main>
+  <h2>コンセプト</h2>
+  <div class="row">
+    <figure><div class="frame wide"><iframe src="screens/00-concept.html" title="コンセプトボード" loading="lazy"></iframe></div><figcaption><a href="screens/00-concept.html">00 コンセプトボード</a><span>せかいかん・色・ナビの表情・文字</span></figcaption></figure>
+  </div>
+
+  <h2>はじめて開いたとき</h2>
+  <div class="row">
+    <figure><div class="frame"><iframe src="screens/01-yakusoku.html" title="やくそく" loading="lazy"></iframe></div><figcaption><a href="screens/01-yakusoku.html">01 やくそく</a><span>起動・注意表示（F-16）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/02-login.html" title="ログイン" loading="lazy"></iframe></div><figcaption><a href="screens/02-login.html">02 ログイン</a><span>認証（F-09）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/03-profile.html" title="プロフィール作成" loading="lazy"></iframe></div><figcaption><a href="screens/03-profile.html">03 プロフィール作成</a><span>ニックネーム・学年（F-10）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/04-home.html" title="ホーム" loading="lazy"></iframe></div><figcaption><a href="screens/04-home.html">04 ホーム</a><span>撮影の入口・今日のお題（F-17）</span></figcaption></figure>
+  </div>
+
+  <h2>さがす → つかまえる → えらぶ</h2>
+  <div class="row">
+    <figure><div class="frame"><iframe src="screens/05-camera.html" title="さがす" loading="lazy"></iframe></div><figcaption><a href="screens/05-camera.html">05 さがす</a><span>撮影・アルバム（F-01）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/06-kakomu.html" title="つかまえる" loading="lazy"></iframe></div><figcaption><a href="screens/06-kakomu.html">06 つかまえる</a><span>投げ縄で囲む（F-02）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/07-wait.html" title="つかまえた" loading="lazy"></iframe></div><figcaption><a href="screens/07-wait.html">07 つかまえた！</a><span>待ち時間・まめちしきクイズ</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/08-check.html" title="これは○○だね？" loading="lazy"></iframe></div><figcaption><a href="screens/08-check.html">08 これは○○だね？</a><span>認識結果の確認（F-03）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/09-chigau.html" title="ちがったとき" loading="lazy"></iframe></div><figcaption><a href="screens/09-chigau.html">09 ちがったとき</a><span>撮り直す／囲み直す（F-03）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/10-toi3.html" title="はてなを えらぶ" loading="lazy"></iframe></div><figcaption><a href="screens/10-toi3.html">10 はてなを えらぶ</a><span>3択（F-04）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/11-toi-write.html" title="はてなを かく" loading="lazy"></iframe></div><figcaption><a href="screens/11-toi-write.html">11 はてなを かく</a><span>自分で書く（F-04）</span></figcaption></figure>
+  </div>
+
+  <h2>せーの！ → しょうたい → なぞとき → もしも</h2>
+  <div class="row">
+    <figure><div class="frame"><iframe src="screens/12-yoso.html" title="せーの（5年生から）" loading="lazy"></iframe></div><figcaption><a href="screens/12-yoso.html">12 せーの！（5年生から）</a><span>スライダー＋数の入力（F-05）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/13-yoso-low.html" title="せーの（4年生まで）" loading="lazy"></iframe></div><figcaption><a href="screens/13-yoso-low.html">13 せーの！（4年生まで）</a><span>5つの範囲から選ぶ（F-05）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/14-pitari.html" title="ピタリ" loading="lazy"></iframe></div><figcaption><a href="screens/14-pitari.html">14 しょうたい：ピタリ</a><span>±5%以内（F-05・F-06）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/15-oshii.html" title="おしい" loading="lazy"></iframe></div><figcaption><a href="screens/15-oshii.html">15 しょうたい：おしい</a><span>2倍以内（F-05・F-06）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/16-hazure.html" title="大はずれ" loading="lazy"></iframe></div><figcaption><a href="screens/16-hazure.html">16 しょうたい：大はずれ</a><span>それ以上（F-05・F-06）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/17-nazo.html" title="なぞとき" loading="lazy"></iframe></div><figcaption><a href="screens/17-nazo.html">17 なぞとき</a><span>解説（F-06）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/18-moshimo.html" title="もしも" loading="lazy"></iframe></div><figcaption><a href="screens/18-moshimo.html">18 もしも</a><span>条件変更・再計算（F-07）</span></figcaption></figure>
+  </div>
+
+  <h2>ゲット → ずかん → みんな</h2>
+  <div class="row">
+    <figure><div class="frame"><iframe src="screens/19-get.html" title="はてなゲット" loading="lazy"></iframe></div><figcaption><a href="screens/19-get.html">19 はてなゲット！</a><span>保存・スタンプ・称号（F-08・F-12）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/20-zukan.html" title="はてなずかん" loading="lazy"></iframe></div><figcaption><a href="screens/20-zukan.html">20 はてなずかん</a><span>アーカイブ・スタンプカード（F-08・F-12）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/21-minna.html" title="みんなのはてな" loading="lazy"></iframe></div><figcaption><a href="screens/21-minna.html">21 みんなのはてな</a><span>匿名公開（F-14）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/22-settings.html" title="せってい" loading="lazy"></iframe></div><figcaption><a href="screens/22-settings.html">22 せってい</a><span>出し方・学年・ログアウト（F-15・F-10）</span></figcaption></figure>
+  </div>
+</main>
+</body>
+</html>

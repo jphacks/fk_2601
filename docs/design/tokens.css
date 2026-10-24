@@ -1,0 +1,71 @@
+/*
+ * デザイントークン（色・文字・影・角丸）
+ * 見本の HTML（design/screens/）が読み込む素の CSS です。
+ * アプリ（Next.js + Tailwind）では、同じ名前・同じ値を tailwind-theme.css の @theme で定義しています。
+ * 値を変えるときは、このファイルと tailwind-theme.css の両方を直してください。
+ */
+:root {
+  /* 文字・線（ぜんぶの線と影はこの色） */
+  --color-ink: #22223A;
+  --color-ink-sub: #4A4E6A;
+  --color-ink-muted: #6B7090;
+  --color-placeholder: #8A8FA6;
+
+  /* 地の色 */
+  --color-white: #FFFFFF;
+  --color-cloud: #F1F2F7;
+  --color-photo: #EAF0F8;
+
+  /* ナビ・メインボタン・こたえ・さんすう */
+  --color-navi: #4A5AE8;
+  --color-navi-dark: #2F3CB8;
+  --color-navi-light: #E8EBFF;
+
+  /* ほめる・おだい・スコアボード */
+  --color-yellow: #FFC83D;
+  --color-yellow-dark: #6E4D00;
+  --color-yellow-deep: #9A6B00;
+  --color-yellow-soft: #FFF1C2;
+  --color-yellow-light: #FFF6D6;
+
+  /* きみ・せーの！・わくわく */
+  --color-pink: #FF6F9C;
+  --color-pink-dark: #A12A55;
+  --color-pink-deep: #C23668;
+  --color-pink-light: #FFE8F0;
+
+  /* りか・「うん！」 */
+  --color-mint: #24C3A0;
+  --color-mint-dark: #0F7A63;
+  --color-mint-light: #DDF7F0;
+
+  /* じょうほう・しょうごう */
+  --color-purple: #8B5CF6;
+  --color-purple-dark: #6A3FD6;
+  --color-purple-light: #F0E9FF;
+
+  /* おしい・ズレ */
+  --color-orange: #FF8A3D;
+  --color-orange-dark: #9A4410;
+  --color-orange-light: #FFEEDF;
+  --color-zure: #FFB547;
+
+  /* ピタリ（正解）だけに使う赤 */
+  --color-red: #F0444F;
+  --color-red-dark: #C42F39;
+  --color-red-light: #FFE8EA;
+
+  /* 文字 */
+  --font-pop: "Mochiy Pop One", "Zen Maru Gothic", sans-serif;
+  --font-body: "Zen Maru Gothic", sans-serif;
+
+  /* 「シール」の影（下にずらした線色の影。ぼかさない） */
+  --shadow-pop: 0 6px 0 var(--color-ink);
+  --shadow-pop-md: 0 5px 0 var(--color-ink);
+  --shadow-pop-sm: 0 4px 0 var(--color-ink);
+  --shadow-pop-xs: 0 3px 0 var(--color-ink);
+
+  /* 角丸 */
+  --radius-btn: 26px;
+  --radius-card: 24px;
+}
