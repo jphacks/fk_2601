@@ -11,12 +11,12 @@ export function formatNumber(value: number): string {
   return value.toExponential(2).replace("e-", "×10^-");
 }
 
-/** 倍率を「約50倍」「約1/20」のように書く */
+/** 倍率を「約50倍」「約20分の1」のように書く */
 export function formatRatio(ratio: number): string {
   if (!Number.isFinite(ratio) || ratio <= 0) return "—";
   if (ratio >= 1) return `約${formatNumber(ratio >= 10 ? Math.round(ratio) : Math.round(ratio * 10) / 10)}倍`;
   const inverse = 1 / ratio;
-  return `約1/${formatNumber(inverse >= 10 ? Math.round(inverse) : Math.round(inverse * 10) / 10)}`;
+  return `約${formatNumber(inverse >= 10 ? Math.round(inverse) : Math.round(inverse * 10) / 10)}分の1`;
 }
 
 export function formatDate(timestamp: number): string {

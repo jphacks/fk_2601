@@ -1,4 +1,5 @@
 import { computeAnswer } from "./calc";
+import { formatNumber } from "./format";
 import type { Question } from "@/server/llm/schema";
 
 export type Rating = "pita" | "oshii" | "ohazure";
@@ -19,6 +20,8 @@ export type Evaluation = {
   actual: number | null;
   /** compare：どちらが大きいか。why：選んだ理由が正しいか */
   correct: boolean | null;
+  /** compare：実さいに大きいほう */
+  bigger: "a" | "b" | null;
 };
 
 export const BIN_COUNT = 5;
@@ -55,7 +58,7 @@ function rateNumbers(guess: number, actual: number): Rating {
 export function evaluate(question: Question, guess: Guess, scope?: Record<string, number>): Evaluation {
   if (question.type === "why" && guess.kind === "reason") {
     const correct = question.choices?.[guess.index]?.correct === true;
-    return { rating: correct ? "pita" : "ohazure", type: "why", guessValue: null, actual: null, correct };
+    return { rating: correct ? "pita" : "ohazure", type: "why", guessValue: null, actual: null, correct, bigger: null };
   }
 
   const answer = computeAnswer(question, scope);
@@ -71,6 +74,7 @@ export function evaluate(question: Question, guess: Guess, scope?: Record<string
       guessValue: guess.ratio,
       actual: magnitude,
       correct: sideRight,
+      bigger,
     };
   }
 
@@ -82,11 +86,12 @@ export function evaluate(question: Question, guess: Guess, scope?: Record<string
       guessValue: guess.value,
       actual: answer,
       correct: null,
+      bigger: null,
     };
   }
 
   if (question.type === "estimate" && guess.kind === "number") {
-    return { rating: rateNumbers(guess.value, answer), type: "estimate", guessValue: guess.value, actual: answer, correct: null };
+    return { rating: rateNumbers(guess.value, answer), type: "estimate", guessValue: guess.value, actual: answer, correct: null, bigger: null };
   }
 
   throw new Error("予想の形が問いと合っていません");
@@ -100,3 +105,11 @@ export const RATING_LABEL: Record<Rating, string> = {
 
 /** 子どもの予想が低学年向けの選択肢か（4年生まで）、スライダー・自由入力か（5年生から） */
 export const usesChoices = (grade: number) => grade <= 4;
+
+/** 子どもの予想を、画面に出す文字にする（選択肢で答えたときは、選んだ範囲のまま出す） */
+export function describeGuess(guess: Guess, unit: string): string {
+  if (guess.kind === "bin") return `${formatNumber(guess.edges[guess.index])}〜${formatNumber(guess.edges[guess.index + 1])}${unit}`;
+  if (guess.kind === "number") return `${formatNumber(guess.value)}${unit}`;
+  if (guess.kind === "compare") return `約${formatNumber(guess.ratio)}倍`;
+  return "";
+}
