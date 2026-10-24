@@ -79,7 +79,7 @@ function CaptureContent() {
           <p className="relative px-6 text-center text-lg font-black leading-relaxed text-ink-sub">
             カメラが つかえなかったよ。
             <br />
-            おうちの ひとに 「カメラの きょか」を たのむか、アルバムから えらんでね。
+            おうちの ひとに 「カメラを つかって いいよ」の せっていを たのむか、アルバムから えらんでね。
           </p>
         )}
 
