@@ -76,8 +76,9 @@ export async function callStructured<S extends ZodType>(
     if (error instanceof Anthropic.APIError) {
       // 429（利用が多い）と 529（Anthropic 側の混雑）は、少し待てば直る
       if (error instanceof Anthropic.RateLimitError || error.status === 529) throw new LlmError("busy");
-      // 401・403 は、キーの設定まちがい（メッセージにはキーの一部が入ることがあるので、状態だけ残す）
-      console.error("LLM error: status", error.status);
+      // 400（残高不足など）・401・403（キーの設定まちがい）を、すぐ調べられるよう、状態と理由を残す（キーの文字列は伏せる）
+      const detail = String(error.message).replace(/sk-ant-[A-Za-z0-9_-]+/g, "sk-ant-***").slice(0, 200);
+      console.error("LLM error: status", error.status, detail);
       throw new LlmError("llm_error");
     }
     // 出力が JSON として読めない・形が合わないときは、SDK が AnthropicError を投げる（本文を含むので、ログには出さない）
