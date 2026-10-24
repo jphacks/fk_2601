@@ -16,7 +16,7 @@ export const SourceSchema = z.object({
   kind: z.enum(["data", "book", "site"]),
   title: z.string(),
   url: z.string().nullable().describe("確実に実在する URL だけ。分からなければ null"),
-  assumption: z.string().describe("前提条件・根拠の説明"),
+  assumption: z.string().describe("何を もとに 考えたか（「おふろは 200L と する」など）。子どもが読むので、やさしいことばで書く（「前提」「仮定」「根拠」などの むずかしいことばは使わない）"),
 });
 
 export const QuestionSchema = z.object({
@@ -25,7 +25,7 @@ export const QuestionSchema = z.object({
   subject: SubjectSchema,
   topic: z.string().describe("単元（例: 場合の数・時間・光）。ふりがな記法は使わない"),
   target: z.string().describe("写真の対象（例: ガチャガチャ）。ふりがな記法は使わない"),
-  hint: z.string().describe("問いの見かた・前提を1文で（答えのヒントは書かない）。なければ空文字"),
+  hint: z.string().describe("問いの見かた・どう考えるかの決まりを、やさしいことばで1文で（「〜と する」など。答えのヒントは書かない）。なければ空文字"),
   formula: z
     .string()
     .nullable()
