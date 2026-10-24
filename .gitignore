@@ -22,4 +22,11 @@ desktop.ini
 # ログ
 *.log
 
-# 技術スタック確定後に追加する（例：node_modules/、ビルド成果物など）
+# Node.js / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.vercel/
+coverage/
