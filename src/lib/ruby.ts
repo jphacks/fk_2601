@@ -1,5 +1,6 @@
 /** LLM の出力のふりがな記法：{漢字|よみ}（出力が短くなる）。以前の <ruby> タグも読める */
 const MARKUP = /\{([^{}|]+)\|([^{}|]+)\}/g;
+const HAN = /\p{Script=Han}/u;
 
 /**
  * LLM が出した文章を、画面に出せる HTML にする。
@@ -15,7 +16,10 @@ export function sanitizeRuby(text: string): string {
     .replace(/'/g, "&#39;");
   return escaped
     .replace(/&lt;(\/?)(ruby|rt|rp)&gt;/gi, (_, slash: string, tag: string) => `<${slash}${tag.toLowerCase()}>`)
-    .replace(MARKUP, (_, base: string, yomi: string) => `<ruby>${base}<rt>${yomi}</rt></ruby>`);
+    .replace(MARKUP, (_, base: string, yomi: string) =>
+      // 漢字のない部分（数字・ひらがななど）や、同じ読みのものには、ふりがなをつけない（AI がつけてしまうことがある）
+      HAN.test(base) && base !== yomi ? `<ruby>${base}<rt>${yomi}</rt></ruby>` : base,
+    );
 }
 
 /** ふりがなを取り除いた文字（見出し・画像の説明・グループ分けなど、ふりがなを出せない所に使う） */
