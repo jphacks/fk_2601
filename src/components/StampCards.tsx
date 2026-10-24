@@ -2,7 +2,7 @@ import { STAMP_GOAL, SUBJECT_LABEL, SUBJECTS, TITLE_LABEL } from "@/lib/constant
 import type { Subject } from "@/server/llm/schema";
 
 const COLOR: Record<Subject, { dot: string; card: string }> = {
-  math: { dot: "bg-brand", card: "bg-brand/10" },
+  math: { dot: "bg-brand", card: "bg-[#e1ecff]" },
   science: { dot: "bg-mint", card: "bg-mint/15" },
   info: { dot: "bg-sun", card: "bg-sun/20" },
 };
