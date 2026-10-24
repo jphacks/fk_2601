@@ -1,6 +1,11 @@
+/** LLM の出力のふりがな記法：{漢字|よみ}（出力が短くなる）。以前の <ruby> タグも読める */
+const MARKUP = /\{([^{}|]+)\|([^{}|]+)\}/g;
+const HAN = /\p{Script=Han}/u;
+
 /**
  * LLM が出した文章を、画面に出せる HTML にする。
- * すべての記号を文字として扱い、<ruby>・<rt>・<rp> のタグだけをもとに戻す（それ以外のタグは文字のまま見える）
+ * すべての記号を文字として扱い、ふりがなの記法（{漢字|よみ}）と <ruby>・<rt>・<rp> のタグだけを、ふりがなに変える
+ * （それ以外のタグは文字のまま見える）
  */
 export function sanitizeRuby(text: string): string {
   const escaped = text
@@ -9,10 +14,18 @@ export function sanitizeRuby(text: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-  return escaped.replace(/&lt;(\/?)(ruby|rt|rp)&gt;/gi, (_, slash: string, tag: string) => `<${slash}${tag.toLowerCase()}>`);
+  return escaped
+    .replace(/&lt;(\/?)(ruby|rt|rp)&gt;/gi, (_, slash: string, tag: string) => `<${slash}${tag.toLowerCase()}>`)
+    .replace(MARKUP, (_, base: string, yomi: string) =>
+      // 漢字のない部分（数字・ひらがななど）や、同じ読みのものには、ふりがなをつけない（AI がつけてしまうことがある）
+      HAN.test(base) && base !== yomi ? `<ruby>${base}<rt>${yomi}</rt></ruby>` : base,
+    );
 }
 
-/** ふりがなを取り除いた文字（アクセシビリティや文字数の確認用） */
+/** ふりがなを取り除いた文字（見出し・画像の説明・グループ分けなど、ふりがなを出せない所に使う） */
 export function stripRuby(text: string): string {
-  return text.replace(/<rt>.*?<\/rt>/gis, "").replace(/<\/?(ruby|rt|rp)>/gi, "");
+  return text
+    .replace(/<rt>.*?<\/rt>/gis, "")
+    .replace(/<\/?(ruby|rt|rp)>/gi, "")
+    .replace(MARKUP, (_, base: string) => base);
 }

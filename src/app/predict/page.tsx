@@ -6,7 +6,7 @@ import { useApp } from "@/components/AuthProvider";
 import { Gate } from "@/components/Gate";
 import { Page } from "@/components/Page";
 import { PredictionForm } from "@/components/PredictionForm";
-import { Chips, QuestionText } from "@/components/QuestionCard";
+import { Chips, QuestionHint, QuestionText } from "@/components/QuestionCard";
 import { useQuiz } from "@/components/QuizProvider";
 import { Card, Say } from "@/components/ui";
 
@@ -26,6 +26,7 @@ function PredictContent() {
       <Card className="space-y-3">
         <Chips question={selected} />
         <QuestionText question={selected} />
+        <QuestionHint question={selected} />
       </Card>
       <Say mood="think">こたえは まだ ひみつ！ まず、きみの 直感で よそうしてね。</Say>
       <PredictionForm

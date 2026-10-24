@@ -6,6 +6,7 @@ import { Gate } from "@/components/Gate";
 import { Loading } from "@/components/Loading";
 import { Page } from "@/components/Page";
 import { useQuiz } from "@/components/QuizProvider";
+import { RubyText } from "@/components/RubyText";
 import { Button, ErrorNotice, LinkButton, Say } from "@/components/ui";
 
 function RecognizeContent() {
@@ -55,7 +56,7 @@ function RecognizeContent() {
               "ごめんね！ もういちど やってみよう。"
             ) : (
               <>
-                これは「<b>{generation.data.recognition.label}</b>」だね？
+                これは「<b><RubyText text={generation.data.recognition.label} /></b>」だね？
               </>
             )}
           </Say>

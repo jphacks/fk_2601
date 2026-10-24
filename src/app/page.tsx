@@ -6,6 +6,7 @@ import { useApp } from "@/components/AuthProvider";
 import { Gate } from "@/components/Gate";
 import { Page } from "@/components/Page";
 import { SafetyNotice } from "@/components/SafetyNotice";
+import { SceneSamples } from "@/components/SceneSamples";
 import { LinkButton, Say } from "@/components/ui";
 import { stampCounts } from "@/lib/collection";
 import { APP_NAME, TITLE_LABEL } from "@/lib/constants";
@@ -42,6 +43,8 @@ function HomeContent() {
       <LinkButton href="/capture" className="min-h-20 text-2xl">
         しゃしんを とる
       </LinkButton>
+
+      <SceneSamples />
 
       <div className="grid grid-cols-2 gap-3">
         <Tile href="/archive" title="ずかん" note={total === 0 ? "まだ ないよ" : `スタンプ ${total}こ`} color="bg-[#e1ecff]" />

@@ -6,6 +6,7 @@ import { messageOf } from "@/lib/errors";
 import type { Crop, Photo } from "@/lib/image";
 import { buildGenerationContext } from "@/lib/progress";
 import type { Guess } from "@/lib/rating";
+import type { SceneKey } from "@/lib/scenes";
 import type { QuestionsResponse } from "@/server/llm/generate";
 import type { Question } from "@/server/llm/schema";
 import { useApp } from "./AuthProvider";
@@ -19,12 +20,14 @@ export type Generation =
 
 type QuizContext = {
   photo: Photo | null;
+  /** 見本の絵を使っているとき、その名前（撮った写真のときは null） */
+  scene: SceneKey | null;
   crop: Crop | null;
   generation: Generation;
   /** えらんだ問いと、その予想 */
   selected: Question | null;
   guess: Guess | null;
-  setPhoto: (photo: Photo) => void;
+  setPhoto: (photo: Photo, scene?: SceneKey) => void;
   /** 囲んだ直後に呼ぶ。裏で LLM を呼び始める（先読み生成） */
   startGeneration: (crop: Crop) => void;
   /** 同じ切り抜きで、問いを作り直す（ユーザーの操作で呼ぶ1回。自動リトライではない） */
@@ -52,6 +55,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
   const { backend, profile } = useApp();
   const { archives } = useArchive();
   const [photo, setPhotoState] = useState<Photo | null>(null);
+  const [scene, setSceneState] = useState<SceneKey | null>(null);
   const [crop, setCrop] = useState<Crop | null>(null);
   const [generation, setGeneration] = useState<Generation>({ status: "idle" });
   const [selected, setSelected] = useState<Question | null>(null);
@@ -71,11 +75,18 @@ function QuizState({ children }: { children: React.ReactNode }) {
       const id = ++latest.current;
       setGeneration({ status: "loading" });
       const context = buildGenerationContext(profile, archivesRef.current.map((a) => a.question));
-      requestQuestions(backend, {
+      const body = {
         image: nextCrop.base64,
         ...context,
         asked: [...context.asked, ...seen.current],
-      })
+        ...(scene ? { scene } : {}),
+      };
+      // 見本の絵のときだけ、AI が使えなかったら、AI を呼ばずに見本の問いに切り替える（1回だけ。自動リトライではない）
+      requestQuestions(backend, body)
+        .catch((error) => {
+          if (!scene) throw error;
+          return requestQuestions(backend, { ...body, fallback: true });
+        })
         .then((data) => {
           if (id !== latest.current) return;
           seen.current = [...seen.current, ...data.questions.map((q) => ({ target: q.target, topic: q.topic }))];
@@ -86,12 +97,13 @@ function QuizState({ children }: { children: React.ReactNode }) {
           setGeneration({ status: "error", message: messageOf(error) });
         });
     },
-    [backend, profile],
+    [backend, profile, scene],
   );
 
-  const setPhoto = useCallback((next: Photo) => {
+  const setPhoto = useCallback((next: Photo, nextScene?: SceneKey) => {
     latest.current++;
     seen.current = [];
+    setSceneState(nextScene ?? null);
     setPhotoState(next);
     setCrop(null);
     setSelected(null);
@@ -117,6 +129,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
   const reset = useCallback(() => {
     latest.current++;
     seen.current = [];
+    setSceneState(null);
     setPhotoState(null);
     setCrop(null);
     setSelected(null);
@@ -132,8 +145,8 @@ function QuizState({ children }: { children: React.ReactNode }) {
   const setGuess = useCallback((next: Guess) => setGuessState(next), []);
 
   const value = useMemo<QuizContext>(
-    () => ({ photo, crop, generation, selected, guess, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset }),
-    [photo, crop, generation, selected, guess, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset],
+    () => ({ photo, scene, crop, generation, selected, guess, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset }),
+    [photo, scene, crop, generation, selected, guess, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset],
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
