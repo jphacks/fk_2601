@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useApp } from "@/components/AuthProvider";
+import { Confetti } from "@/components/Decor";
+import { GradePicker, INPUT_STYLE } from "@/components/Fields";
 import { Gate } from "@/components/Gate";
 import { Page } from "@/components/Page";
-import { Button, Card, Say } from "@/components/ui";
-import { GRADES } from "@/lib/constants";
+import { Button, Say } from "@/components/ui";
 import { messageOf } from "@/lib/errors";
 
 function ProfileForm() {
@@ -21,7 +22,7 @@ function ProfileForm() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (grade === null) {
-      setError("学年を えらんでね");
+      setError("がくねんを えらんでね");
       return;
     }
     setBusy(true);
@@ -36,53 +37,64 @@ function ProfileForm() {
   }
 
   return (
-    <Page title={isNew ? "はじめに おしえてね" : "プロフィール"} back={isNew ? null : "/"}>
-      <Say mood="happy">
-        {isNew ? "ぼくは ナビ！ きみのことを おしえてね。学年に あわせた もんだいを だすよ。" : "学年は、すすんだら かえてね。"}
-      </Say>
-      <Card>
-        <form onSubmit={submit} className="space-y-5">
-          <label className="block">
-            <span className="mb-1 block text-base font-bold">ニックネーム</span>
-            <input
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              maxLength={10}
-              required
-              placeholder="ほんとうの なまえは いれないでね"
-              className="min-h-12 w-full rounded-xl border-2 border-ink/15 bg-white px-3 text-lg outline-none focus:border-brand"
-            />
+    <Page back={isNew ? null : "/settings"}>
+      <form onSubmit={submit} className="relative flex flex-1 flex-col gap-4">
+        <Confetti tone="calm" />
+        <Say mood="happy" size={108}>
+          <span className="font-pop text-[22px] font-normal leading-normal">
+            {isNew ? (
+              <>
+                きみの こと
+                <br />
+                おしえて！
+              </>
+            ) : (
+              <>
+                すすんだら
+                <br />
+                かえてね！
+              </>
+            )}
+          </span>
+        </Say>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="nick" className="font-pop text-[19px]">
+            ニックネーム
           </label>
+          <input
+            id="nick"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            maxLength={10}
+            required
+            placeholder="れい：そら"
+            className={INPUT_STYLE}
+          />
+          <span className="text-[15px] font-black text-pink-deep">ほんとうの なまえは いれないでね</span>
+        </div>
 
-          <fieldset>
-            <legend className="mb-2 text-base font-bold">学年</legend>
-            <div className="grid grid-cols-3 gap-2">
-              {GRADES.map((g) => (
-                <button
-                  key={g}
-                  type="button"
-                  aria-pressed={grade === g}
-                  onClick={() => setGrade(g)}
-                  className={`min-h-12 rounded-xl border-2 text-lg font-bold ${
-                    grade === g ? "border-brand bg-brand text-white" : "border-ink/15 bg-white"
-                  }`}
-                >
-                  {g}年生
-                </button>
-              ))}
-            </div>
-          </fieldset>
+        <fieldset className="flex flex-col gap-2.5 border-0 p-0">
+          <legend className="mb-2.5 p-0 font-pop text-[22px] leading-[1.6]">
+            <ruby>
+              学年<rt>がくねん</rt>
+            </ruby>
+          </legend>
+          <GradePicker value={grade} onChange={setGrade} />
+          <span className="text-[15px] font-bold text-ink-sub">あとから かえられるよ</span>
+        </fieldset>
 
-          {error && (
-            <p role="alert" className="rounded-xl bg-berry/10 px-3 py-2 text-base font-bold text-berry">
-              {error}
-            </p>
-          )}
+        {error && (
+          <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
+            {error}
+          </p>
+        )}
+        <div className="mt-auto pt-2">
           <Button type="submit" disabled={busy || nickname.trim().length === 0}>
-            {busy ? "ちょっと まってね…" : "これで きまり！"}
+            {busy ? "ちょっと まってね…" : "けってい！"}
           </Button>
-        </form>
-      </Card>
+        </div>
+      </form>
     </Page>
   );
 }
