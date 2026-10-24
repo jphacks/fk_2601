@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SCENES } from "./builtin";
 
 // 画像は base64（長辺 1024px の JPEG）。Vercel のリクエストは 4.5MB までなので余裕を持たせる
 const MAX_IMAGE_CHARS = 1_500_000;
@@ -16,6 +17,10 @@ export const QuestionsRequestSchema = z.object({
   archiveCount: z.number().int().min(0).max(100_000),
   /** 出題済みの対象×単元 */
   asked: z.array(Asked).max(200),
+  /** 見本の絵を使っているとき、その名前（開発用のモックや、AI が使えないときの見本の問いに使う） */
+  scene: z.enum(SCENES).optional(),
+  /** true のとき、AI を呼ばずに見本の問いを返す（見本の絵のときだけ） */
+  fallback: z.boolean().optional(),
 });
 
 export const CustomRequestSchema = QuestionsRequestSchema.extend({
