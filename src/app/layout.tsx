@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AuthProvider } from "@/components/AuthProvider";
 import { APP_NAME } from "@/lib/constants";
 import "./globals.css";
 
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ja">
       <body>
-        <div className="mx-auto min-h-dvh w-full max-w-md">{children}</div>
+        <AuthProvider>
+          <div className="mx-auto min-h-dvh w-full max-w-md">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );
