@@ -18,7 +18,7 @@
 |---|---|---|
 | プラットフォーム | Web アプリ（PWA） | URL を開くだけでスマホ実機で動き、ストアへの提出が要らない |
 | フロントエンド | Next.js（React + TypeScript） | 画面とサーバー側の処理（LLM の呼び出し）を1つのリポジトリで書ける |
-| CSS | Tailwind CSS | スマホ幅への対応が書きやすく、分担しても書き方がそろいやすい |
+| CSS | Tailwind CSS | スマホ幅への対応が書きやすく、分担しても書き方がそろいやすい。色・影・角丸は `docs/design/tailwind-theme.css` と同じ値を `src/app/globals.css` の `@theme` に置く。フォント（Mochiy Pop One・Zen Maru Gothic）は `next/font/google` で読み込む |
 | パッケージ管理 | npm | 全員が追加のインストールなしで使える |
 | DB | Firebase（Firestore） | 導入が速く、セキュリティルールで「本人だけ」を制御できる |
 | 画像の保存先 | Firebase（Firestore に直接保存） | Storage は従量課金の Blaze プラン（クレジットカード登録）が必須のため。切り抜き画像は数百KBで、1件 1MiB の上限に収まる |

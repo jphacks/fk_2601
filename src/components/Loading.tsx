@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Confetti } from "./Decor";
+import { CropCircle } from "./CropCircle";
+import { Icon } from "./Icons";
 import { Navigator } from "./Navigator";
 import { TRIVIA } from "@/lib/trivia";
 
-/** 待ち時間：ナビゲーターキャラが豆知識を話す */
-export function Loading({ message = "かんがえているよ…" }: { message?: string }) {
+/**
+ * 待ち時間（見本 07「つかまえた！」）：切り抜きを見せて、ナビがしらべ中。まめちしきをときどき入れかえる。
+ * image を渡すと、つかまえたところを丸く見せる
+ */
+export function Loading({ message = "いま しらべてるよ", image }: { message?: string; image?: string }) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -19,14 +25,32 @@ export function Loading({ message = "かんがえているよ…" }: { message?:
   }, []);
 
   return (
-    <div className="flex flex-col items-center gap-4 py-6 text-center" role="status" aria-live="polite">
-      <div className="animate-bounce">
-        <Navigator mood="think" size={96} />
+    <div className="relative flex flex-col gap-3.5" role="status" aria-live="polite">
+      <Confetti />
+      <div className="mt-1.5 flex items-center gap-3.5">
+        {image && <CropCircle src={image} alt="つかまえた ところ" size={128} />}
+        <div className="flex flex-col gap-2">
+          <span className="font-pop text-[32px] leading-tight text-pink [-webkit-text-stroke:1.5px_var(--color-ink)]">つかまえた！</span>
+          <span className="self-start rounded-[14px] border-[2.5px] border-ink bg-yellow-light px-3 py-1 text-[15px] font-black">{message}</span>
+        </div>
       </div>
-      <p className="text-lg font-bold">{message}</p>
-      <div className="rounded-2xl bg-white px-4 py-3 text-left shadow-sm ring-1 ring-ink/5">
-        <p className="mb-1 text-sm font-bold text-brand">まめちしき</p>
-        <p className="text-base">{TRIVIA[index]}</p>
+
+      <div className="flex items-center gap-3">
+        <Navigator mood="effort" size={76} />
+        <div className="flex grow flex-col gap-2">
+          <div className="relative h-6 overflow-hidden rounded-xl border-3 border-ink bg-white">
+            <div className="absolute inset-y-0 w-2/5 animate-[indeterminate_1.6s_ease-in-out_infinite] border-r-3 border-ink bg-navi" />
+          </div>
+          <span className="text-[15px] font-black text-ink-sub">1ぷんくらい かかる ことも あるよ</span>
+        </div>
+      </div>
+
+      <div className="rounded-[26px] border-3 border-ink bg-yellow-light px-[18px] py-3.5 shadow-pop-md">
+        <p className="flex items-center gap-1.5 text-[15px] font-black text-yellow-dark">
+          <Icon name="bulb" size={20} />
+          まめちしき
+        </p>
+        <p className="mt-1 text-[19px] font-black leading-[1.75]">{TRIVIA[index]}</p>
       </div>
     </div>
   );

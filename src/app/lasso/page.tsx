@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Gate } from "@/components/Gate";
+import { Icon } from "@/components/Icons";
 import { LassoPicker } from "@/components/LassoPicker";
 import { Page } from "@/components/Page";
 import { useQuiz } from "@/components/QuizProvider";
-import { Button, Say } from "@/components/ui";
+import { Button, LinkButton, Say } from "@/components/ui";
 import { messageOf } from "@/lib/errors";
 import { cropLasso, type Point } from "@/lib/image";
 
@@ -38,22 +39,45 @@ function LassoContent() {
   }
 
   return (
-    <Page title="きになる ところを かこもう" back="/capture">
-      <Say mood={points ? "happy" : "think"}>
-        {points ? "これで いいかな？ ちがうときは、もういちど なぞってね。" : "ゆびで ぐるっと なぞって、気になる ところを 囲んでね。"}
-      </Say>
+    <Page title="ぐるっと つかまえよう！" back="/capture">
       <LassoPicker photo={photo} points={points} onChange={setPoints} />
+      <Say mood={points ? "happy" : "think"} size={84}>
+        {points ? (
+          <>
+            これで いいかな？
+            <br />
+            ちがうときは もういちど！
+          </>
+        ) : (
+          <>
+            <ruby>
+              気<rt>き</rt>
+            </ruby>
+            になる ところを
+            <br />
+            ゆびで ぐるっと！
+          </>
+        )}
+      </Say>
       {error && (
-        <p role="alert" className="rounded-xl bg-berry/10 px-3 py-2 text-base font-bold text-berry">
+        <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
           {error}
         </p>
       )}
-      <div className="mt-auto grid grid-cols-2 gap-3">
-        <Button variant="secondary" onClick={() => setPoints(null)} disabled={!points || busy}>
-          やりなおす
+      <div className="flex gap-2.5">
+        <Button variant="sub" className="flex-1 !h-14 !text-lg" onClick={() => setPoints(null)} disabled={!points || busy}>
+          <Icon name="undo" size={22} strokeWidth={2.6} />
+          もどす
         </Button>
+        <LinkButton href="/capture" variant="sub" className="flex-1 !h-14 !text-lg">
+          <Icon name="camera" size={22} />
+          とりなおす
+        </LinkButton>
+      </div>
+      <div className="mt-auto pt-1.5">
         <Button onClick={confirm} disabled={!points || busy}>
-          {busy ? "まってね…" : "これで OK！"}
+          <Icon name="lasso" size={30} strokeWidth={2.6} />
+          {busy ? "まってね…" : "つかまえる！"}
         </Button>
       </div>
     </Page>

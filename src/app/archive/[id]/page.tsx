@@ -5,16 +5,19 @@ import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useArchive } from "@/components/ArchiveProvider";
 import { ConditionSliders } from "@/components/ConditionSliders";
-import { Explanation, Related, Sources } from "@/components/Explanation";
+import { CropCircle } from "@/components/CropCircle";
+import { ExplanationSteps, Related, Sources } from "@/components/Explanation";
 import { Gate } from "@/components/Gate";
 import { Page } from "@/components/Page";
-import { Chips, QuestionText } from "@/components/QuestionCard";
+import { QuestionHint, QuestionText, SUBJECT_STYLE, Eyebrow } from "@/components/QuestionCard";
 import { ResultSummary } from "@/components/ResultSummary";
-import { Button, Card, LinkButton, Say } from "@/components/ui";
+import { RubyText } from "@/components/RubyText";
+import { Button, LinkButton, Say } from "@/components/ui";
 import { defaultScope } from "@/lib/calc";
 import { messageOf } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
 import { evaluate } from "@/lib/rating";
+import { stripRuby } from "@/lib/ruby";
 
 function DetailContent() {
   const router = useRouter();
@@ -37,13 +40,14 @@ function DetailContent() {
   if (!record) {
     return (
       <Page title="ずかん" back="/archive">
-        <Say mood="sorry">この もんだいは 見つからなかったよ。</Say>
+        <Say mood="sorry">この はてなは みつからなかったよ。</Say>
         <LinkButton href="/archive">ずかんへ もどる</LinkButton>
       </Page>
     );
   }
 
   const { question } = record;
+  const style = SUBJECT_STYLE[question.subject];
   const related = archives.filter((a) => a.id !== record.id && a.question.topic === question.topic).slice(0, 5);
 
   async function run(action: () => Promise<void>) {
@@ -56,63 +60,68 @@ function DetailContent() {
   }
 
   return (
-    <Page title={question.target} back="/archive">
-      {/* eslint-disable-next-line @next/next/no-img-element -- 保存した切り抜き（data URL） */}
-      <img src={record.image} alt={question.target} className="mx-auto max-h-72 rounded-3xl bg-white object-contain shadow-sm" />
-      <p className="text-center text-sm text-ink/60">{formatDate(record.createdAt)}</p>
+    <Page title={stripRuby(question.target)} back="/archive">
+      <div className="flex items-center gap-4">
+        <CropCircle src={record.image} alt={stripRuby(question.target)} size={120} />
+        <p className="text-sm font-black text-ink-sub">{formatDate(record.createdAt)} に つかまえたよ</p>
+      </div>
 
-      <Card className="space-y-3">
-        <Chips question={question} />
-        <QuestionText question={question} />
-      </Card>
+      <section className={`rounded-[26px] border-3 border-ink px-5 py-3.5 shadow-pop-md ${style.light}`}>
+        <Eyebrow question={question} />
+        <QuestionText question={question} size={21} />
+        <QuestionHint question={question} />
+      </section>
 
       {evaluation && <ResultSummary question={question} guess={record.guess} evaluation={evaluation} animate={false} />}
 
-      <Card>
-        <Explanation question={question} />
-      </Card>
+      <div className="flex items-start gap-3 rounded-card border-3 border-ink bg-white px-4 py-3 shadow-pop-sm">
+        <span className="text-[19px] font-black leading-[1.75]">
+          <RubyText text={question.explanation.short} />
+        </span>
+      </div>
+      <ExplanationSteps question={question} />
 
       {question.variables.length > 0 && question.type !== "why" && (
-        <Card className="space-y-3">
-          <h2 className="text-lg font-bold">じょうけんを かえてみよう</h2>
-          <ConditionSliders question={question} values={values ?? defaultScope(question)} onChange={setValues} guess={record.guess} />
-        </Card>
+        <section className="flex flex-col gap-3">
+          <h2 className="font-pop text-xl font-normal">もしも…？</h2>
+          <ConditionSliders question={question} values={values ?? defaultScope(question)} onChange={setValues} />
+        </section>
       )}
 
       <Related question={question} />
       <Sources question={question} />
 
       {related.length > 0 && (
-        <Card className="space-y-2">
-          <h2 className="text-lg font-bold">おなじ たんげんの もんだい</h2>
-          <ul className="space-y-1">
+        <section className="flex flex-col gap-2 rounded-card border-3 border-ink bg-white px-4 py-3">
+          <h2 className="font-pop text-base font-normal">おなじ たんげんの はてな</h2>
+          <ul className="flex flex-col gap-1">
             {related.map((a) => (
               <li key={a.id}>
-                <Link href={`/archive/${a.id}`} className="text-brand underline">
-                  {a.question.target}（{formatDate(a.createdAt)}）
+                <Link href={`/archive/${a.id}`} className="text-base font-black text-navi-dark underline">
+                  {stripRuby(a.question.target)}（{formatDate(a.createdAt)}）
                 </Link>
               </li>
             ))}
           </ul>
-        </Card>
+        </section>
       )}
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-2 flex flex-col gap-3">
         {error && (
-          <p role="alert" className="rounded-xl bg-berry/10 px-3 py-2 text-base font-bold text-berry">
+          <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
             {error}
           </p>
         )}
         {record.publicId && (
-          <Button variant="secondary" onClick={() => run(() => unpublish(record.id))}>
-            みんなに 見せるのを やめる
+          <Button variant="sub" onClick={() => run(() => unpublish(record.id))}>
+            みんなに みせるのを やめる
           </Button>
         )}
         {confirming ? (
           <>
-            <p className="text-center text-base font-bold">この もんだいを けすよ。いいかな？</p>
+            <p className="text-center text-base font-black">この はてなを けすよ。いいかな？</p>
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="secondary" onClick={() => setConfirming(false)}>
+              <Button variant="sub" onClick={() => setConfirming(false)}>
                 やめる
               </Button>
               <Button
@@ -130,7 +139,7 @@ function DetailContent() {
           </>
         ) : (
           <Button variant="ghost" onClick={() => setConfirming(true)}>
-            この もんだいを けす
+            この はてなを けす
           </Button>
         )}
       </div>
