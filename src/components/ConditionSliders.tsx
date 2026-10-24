@@ -1,31 +1,34 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { answerBounds, computeAnswer, defaultScope } from "@/lib/calc";
-import { formatNumber, formatRatio } from "@/lib/format";
+import { computeAnswer, defaultScope } from "@/lib/calc";
+import { formatNumber } from "@/lib/format";
 import { refParts } from "@/lib/ref";
-import type { Guess } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
 import { CountUp } from "./CountUp";
-import { NumberLine } from "./NumberLine";
+import { Icon } from "./Icons";
+import { ratioRuby } from "./ResultSummary";
 import { RubyText } from "./RubyText";
 
-const THUMB = 34;
+const THUMB = 44;
 
-/** 数直線に置く値（compare は、大きいほうが小さいほうの何倍か） */
-const onLine = (question: Question, value: number) => (question.type === "compare" ? Math.max(value, 1 / value) : value);
+/** 数の大きさに合わせた字の大きさ（見本 18 は 80px） */
+function bigSize(text: string): number {
+  if (text.length <= 3) return 80;
+  if (text.length <= 5) return 64;
+  if (text.length <= 7) return 48;
+  return 36;
+}
 
-/** 条件（変数）をスライダーで動かして、答えがどう変わるかを、数・数直線・倍率で見せる */
+/** 条件（変数）をスライダーで動かして、答えがどう変わるかを、数・ぼうグラフ・倍率で見せる（見本 18「もしも」） */
 export function ConditionSliders({
   question,
   values,
   onChange,
-  guess,
 }: {
   question: Question;
   values: Record<string, number>;
   onChange: (values: Record<string, number>) => void;
-  guess?: Guess;
 }) {
   const [bumped, setBumped] = useState(0);
   const lastRatio = useRef(1);
@@ -44,56 +47,55 @@ export function ConditionSliders({
 
   if (question.variables.length === 0 || question.type === "why") return null;
 
-  const guessValue = guess?.kind === "number" || guess?.kind === "bin" ? guess.value : guess?.kind === "compare" ? guess.ratio : null;
-  const bounds = answerBounds(question);
   const unit = question.type === "compare" ? "倍" : question.answerUnit;
+  // 比べる問いは、大きいほうが小さいほうの何倍か
+  const onLine = (v: number) => (question.type === "compare" ? Math.max(v, 1 / v) : v);
   const parts = current !== null && question.type === "estimate" ? refParts(question, current) : null;
+  const shown = current === null ? "" : formatNumber(onLine(current));
+  const top = original !== null && current !== null ? Math.max(onLine(original), onLine(current)) : 1;
+  const pct = (v: number) => Math.max(2, Math.min(100, (onLine(v) / top) * 100));
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-3.5">
       {question.variables.map((v) => {
         const now = values[v.name];
         const moved = now !== v.value;
         const frac = (v.value - v.min) / (v.max - v.min);
         return (
-          <div key={v.name}>
-            <div className="flex items-baseline justify-between gap-2 text-base font-bold">
-              <RubyText text={v.label} />
-              <span className="shrink-0">
-                {moved && (
-                  <span className="mr-2 text-sm font-normal text-ink/60">
-                    もと {formatNumber(v.value)}
-                    {v.unit}
-                  </span>
-                )}
-                <span className={`rounded-lg px-2 py-0.5 ${moved ? "bg-sun text-ink" : "text-brand"}`}>
-                  {formatNumber(now)}
-                  {v.unit}
-                </span>
+          <div key={v.name} className="flex flex-col gap-1.5 rounded-[26px] border-3 border-ink bg-yellow-light px-[18px] py-3.5 shadow-pop-md">
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor={`v-${v.name}`} className="font-pop text-[17px] leading-snug">
+                <RubyText text={v.label} />
+              </label>
+              <span className="shrink-0 font-pop text-[26px] leading-[1.4]">
+                {formatNumber(now)}
+                <span className="text-lg">{v.unit}</span>
               </span>
             </div>
             <div className="relative">
               <input
+                id={`v-${v.name}`}
                 type="range"
                 min={v.min}
                 max={v.max}
                 step={v.step}
                 value={now}
-                aria-label={`${v.label.replace(/\{([^{}|]+)\|[^{}|]+\}/g, "$1")}を かえる`}
                 onChange={(e) => onChange({ ...values, [v.name]: Number(e.target.value) })}
               />
+              {/* もとの値の目印 */}
               <span
                 aria-hidden
-                className="pointer-events-none absolute top-1/2 h-5 w-1 -translate-x-1/2 -translate-y-1/2 rounded bg-ink/50"
+                className="pointer-events-none absolute top-1/2 h-6 w-1 -translate-x-1/2 -translate-y-1/2 rounded bg-ink/40"
                 style={{ left: `calc(${THUMB / 2}px + (100% - ${THUMB}px) * ${Math.min(1, Math.max(0, frac))})` }}
               />
             </div>
+            <div className="flex justify-between px-3.5 font-pop text-sm text-ink-sub" aria-hidden>
+              <span>{formatNumber(v.min)}</span>
+              {moved && <span className="text-ink-muted">もと {formatNumber(v.value)}</span>}
+              <span>{formatNumber(v.max)}</span>
+            </div>
             {moved && (
-              <button
-                type="button"
-                className="text-sm font-bold text-brand underline"
-                onClick={() => onChange({ ...values, [v.name]: v.value })}
-              >
+              <button type="button" onClick={() => onChange({ ...values, [v.name]: v.value })} className="self-start text-sm font-black text-navi-dark underline">
                 もとに もどす
               </button>
             )}
@@ -101,53 +103,65 @@ export function ConditionSliders({
         );
       })}
 
-      <div aria-live="polite" className="rounded-2xl bg-sun/20 p-3 text-center">
+      <div aria-live="polite" className="flex flex-col items-center rounded-[26px] border-3 border-ink bg-white px-[18px] pb-4 pt-3 shadow-pop-md">
         {current === null ? (
-          <p>この じょうけんでは 計算できないよ</p>
+          <p className="text-lg font-black">この じょうけんでは 計算できないよ</p>
         ) : question.type === "compare" ? (
-          <p key={bumped} className="animate-bump text-xl font-bold">
-            <RubyText
-              text={
-                current >= 1
-                  ? `${question.compare?.a ?? "A"}は ${question.compare?.b ?? "B"}の ${formatRatio(current)}`
-                  : `${question.compare?.b ?? "B"}は ${question.compare?.a ?? "A"}の ${formatRatio(1 / current)}`
-              }
-            />
+          <p key={bumped} className="animate-bump text-center text-[20px] font-black leading-[1.75]">
+            <RubyText text={`${current >= 1 ? question.compare?.a ?? "A" : question.compare?.b ?? "B"} は ${current >= 1 ? question.compare?.b ?? "B" : question.compare?.a ?? "A"} の `} />
+            <b className="font-pop text-navi">
+              <RubyText text={ratioRuby(onLine(current))} />
+            </b>
           </p>
         ) : (
-          <p key={bumped} className="animate-bump text-3xl font-bold">
-            <CountUp value={current} duration={400} format={formatNumber} />
-            <span className="text-lg">{unit}</span>
-          </p>
+          <>
+            <span className="text-[20px] font-black leading-[1.75]">こたえは</span>
+            <div key={bumped} className="animate-bump flex items-baseline gap-1 text-navi">
+              <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(shown) }}>
+                <CountUp value={current} duration={400} format={formatNumber} />
+              </span>
+              <span className="font-pop text-[30px] leading-[1.6]">{unit}</span>
+            </div>
+          </>
         )}
-
-        {changed && current !== null && original !== null && original > 0 && (
-          <p
-            className={`mx-auto mt-2 w-fit rounded-full px-4 py-1 text-lg font-bold ${
-              ratio > 1.0001 ? "bg-berry/15 text-berry" : ratio < 0.9999 ? "bg-brand/15 text-brand-dark" : "bg-white"
-            }`}
-          >
-            {ratio > 1.0001 ? "▲ " : ratio < 0.9999 ? "▼ " : ""}
-            {Math.abs(ratio - 1) < 0.0001 ? "もとと おなじ" : `もとの こたえの ${formatRatio(ratio)}`}
-          </p>
+        {changed && original !== null && current !== null && original > 0 && Math.abs(ratio - 1) > 1e-4 && (
+          <span className={`mt-1 rounded-[18px] border-[2.5px] border-ink px-4 py-0.5 font-pop text-lg ${ratio > 1 ? "bg-yellow" : "bg-navi-light text-navi-dark"}`}>
+            {ratio > 1 ? "▲ " : "▼ "}
+            もとの <RubyText text={ratioRuby(ratio)} />
+          </span>
         )}
-
         {parts && (
-          <p className="mt-2 text-base">
-            <RubyText text={parts.label} /> <b className="text-lg">{formatNumber(parts.value)}</b>
+          <p className="mt-2 text-center text-[17px] font-black leading-[1.7]">
+            <RubyText text={parts.label} /> {formatNumber(parts.value)}
             <RubyText text={`${parts.unit}${parts.suffix}`} />
           </p>
         )}
       </div>
 
-      {current !== null && original !== null && current > 0 && original > 0 && (
-        <NumberLine
-          guess={guessValue !== null && guessValue > 0 ? guessValue : onLine(question, original)}
-          actual={onLine(question, current)}
-          original={changed ? onLine(question, original) : null}
-          bounds={bounds}
-          unit={unit}
-        />
+      {current !== null && original !== null && (
+        <div role="img" aria-label={`さっきは ${formatNumber(onLine(original))}${unit}、いまは ${shown}${unit}`} className="mt-1 flex flex-col gap-2">
+          <div className="grid grid-cols-[56px_minmax(0,1fr)_72px] items-center gap-2">
+            <span className="text-[15px] font-black text-ink-sub">さっき</span>
+            <span className="block h-[22px] overflow-hidden rounded-[11px] border-3 border-ink bg-cloud">
+              <span className="block h-full bg-[#C9CFFF] transition-[width] duration-300" style={{ width: `${pct(original)}%` }} />
+            </span>
+            <span className="text-right font-pop text-[15px] text-ink-sub">{formatNumber(onLine(original))}</span>
+          </div>
+          <div className="grid grid-cols-[56px_minmax(0,1fr)_72px] items-center gap-2">
+            <span className="text-[15px] font-black">いま</span>
+            <span className="block h-[22px] overflow-hidden rounded-[11px] border-3 border-ink bg-cloud">
+              <span className="block h-full bg-navi transition-[width] duration-300" style={{ width: `${pct(current)}%` }} />
+            </span>
+            <span className="text-right font-pop text-[15px] text-navi-dark">{shown}</span>
+          </div>
+        </div>
+      )}
+
+      {changed && (
+        <p className="flex items-center gap-1.5 text-sm font-black text-ink-sub">
+          <Icon name="info" size={18} strokeWidth={2.4} />
+          スライダーを もとの いちに もどすと、さいしょの こたえに なるよ
+        </p>
       )}
     </div>
   );
