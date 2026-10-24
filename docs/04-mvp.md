@@ -66,7 +66,7 @@
 - 全体構成：`docs/03-technical.md` 3章
 - 使用技術：`docs/03-technical.md` 2章（Next.js・Firebase・Vercel・Claude）
 - 外部サービス・API連携：Claude API、Firebase（Authentication・Firestore）、Vercel
-- ディレクトリ構成：【未決】（Issue #6 で決める。決まったら AGENTS.md も更新する）
+- ディレクトリ構成：AGENTS.md の「アーキテクチャ・ディレクトリ構成の要約」を参照
 
 ## 7. データ
 - 主要なデータ（エンティティ）と関係：`docs/03-technical.md` 6章

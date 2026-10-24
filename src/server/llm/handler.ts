@@ -4,13 +4,14 @@ import { verifyRequest } from "@/server/auth";
 import { LlmError } from "./client";
 import { NoValidQuestionError } from "./generate";
 
-export type ApiErrorCode = "unauthorized" | "bad_request" | "refusal" | "timeout" | "invalid_output" | "llm_error";
+export type ApiErrorCode = "unauthorized" | "bad_request" | "refusal" | "timeout" | "busy" | "invalid_output" | "llm_error";
 
 const STATUS: Record<ApiErrorCode, number> = {
   unauthorized: 401,
   bad_request: 400,
   refusal: 422,
   timeout: 504,
+  busy: 429,
   invalid_output: 502,
   llm_error: 502,
 };
@@ -20,6 +21,7 @@ const MESSAGE: Record<ApiErrorCode, string> = {
   bad_request: "しゃしんを うまく おくれなかったよ。もういちど ためしてね",
   refusal: "この しゃしんからは もんだいが 作れなかったよ。べつの ものを 囲んでみてね",
   timeout: "じかんが かかりすぎたよ。もういちど ためしてね",
+  busy: "いま みんなが たくさん つかっているよ。すこし まってから もういちど ためしてね",
   invalid_output: "もんだいを うまく 作れなかったよ。もういちど ためしてね",
   llm_error: "うまくいかなかったよ。もういちど ためしてね",
 };

@@ -6,6 +6,7 @@ import { Gate } from "@/components/Gate";
 import { Loading } from "@/components/Loading";
 import { Page } from "@/components/Page";
 import { useQuiz } from "@/components/QuizProvider";
+import { SafetyNotice } from "@/components/SafetyNotice";
 import { Button, Say } from "@/components/ui";
 import { messageOf } from "@/lib/errors";
 import { photoFromFile, photoFromVideo } from "@/lib/image";
@@ -73,6 +74,7 @@ function CaptureContent() {
 
   return (
     <Page title="しゃしんを とろう" back="/">
+      <SafetyNotice />
       {busy ? (
         <Loading message="しゃしんを よみこんでいるよ…" />
       ) : (
@@ -101,7 +103,7 @@ function CaptureContent() {
           )}
 
           <div className="mt-auto space-y-3">
-            {camera === "live" && <Button onClick={shoot}>📷 とる</Button>}
+            {camera === "live" && <Button onClick={shoot}>とる</Button>}
             <label className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-2xl border-2 border-brand bg-white px-5 py-3 text-lg font-bold text-brand active:bg-brand/10">
               アルバムから えらぶ
               <input type="file" accept="image/*" className="sr-only" onChange={pick} />
