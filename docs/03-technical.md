@@ -23,8 +23,8 @@
 | DB | Firebase（Firestore） | 導入が速く、セキュリティルールで「本人だけ」を制御できる |
 | 画像の保存先 | Firebase（Firestore に直接保存） | Storage は従量課金の Blaze プラン（クレジットカード登録）が必須のため。切り抜き画像は数百KBで、1件 1MiB の上限に収まる |
 | 認証 | Firebase Authentication | 認証を自作しない。Firestore のルールと連携できる |
-| ホスティング | Vercel | Next.js をそのまま公開でき、PR ごとに HTTPS のプレビュー URL が出る（スマホでカメラを試せる） |
-| LLM | Claude Opus 5.5（`claude-opus-5-5`） | 画像入力と JSON の構造化出力に対応。問いの質と正確さを優先 |
+| ホスティング | Vercel | Next.js をそのまま公開できる。HTTPS なので、スマホでカメラを試せる（公開のしかたは 10章） |
+| LLM | Claude（既定は Opus 5.5 `claude-opus-5-5`。本番は Sonnet 5.5 `claude-sonnet-5-5`・effort low） | 画像入力と JSON の構造化出力に対応。本番は、待ち時間と費用のバランスで Sonnet にしている（9章の実測） |
 | 式の計算 | math.js | LLM が出した式を、eval を使わずに安全に計算できる。単位の変換もできる |
 | JSON の検証 | Zod | JSON の形を1か所で定義し、型と検証の両方に使える |
 
@@ -42,13 +42,14 @@
 - API はログインした人だけが呼べるようにする。画面から Firebase の ID トークンを送り、サーバー側で、Google の公開鍵を使って署名・期限・発行元・対象を検証する（`src/server/auth.ts`。`firebase-admin` は本番の Vercel で読み込みエラーになったため使わない）（URL を知っている人に使われて課金が膨らむのを防ぐ）
 - 出力は構造化出力（`output_config.format`）で JSON の形を指定し、受け取った後に Zod でも検証する
 - 断られたとき（`stop_reason: "refusal"`）は別のモデルに切り替えず（`fallbacks` は使わない）、「別のものを囲んでみてね」と表示する。`content` を読む前に必ず `stop_reason` を確認する
-- effort（考える深さ）は medium。環境変数 `LLM_EFFORT` で変えられるようにし、Hack Day で同じ写真を使って low / high と比べる。待ち時間はナビゲーターキャラの豆知識コーナーでつなぐ
+- effort（考える深さ）の既定は medium。環境変数 `LLM_EFFORT` で変える（本番は low）。待ち時間はナビゲーターキャラの豆知識（まめちしき）でつなぐ
 - 料金と時間の目安：9章の実測（モデルと設定で、1回あたり約 0.3セント〜12セント、3秒〜45秒）
 
 ### 2.3 Vercel の制限（Hobby プラン）
 - 関数の実行時間：最大 300 秒。60 秒で打ち切る（5.4）ので収まる。ストリーミングは使わない
 - リクエスト・レスポンスの大きさ：4.5 MB まで。画像を長辺 1024px に縮小する（5.1）ので収まる
-- 関数が動く地域：初期設定はアメリカ（`iad1`）なので、東京（`hnd1`）に変える
+- 関数が動く地域：初期設定はアメリカ（`iad1`）なので、東京（`hnd1`）にしている（`vercel.json`）
+- Node.js：22.12 以上（`package.json` の `engines`）。Vercel のプロジェクト設定は 24.x
 
 ## 3 全体構成
 ```
@@ -88,7 +89,7 @@
 | 項目 | 内容 | 型・形式 |
 |---|---|---|
 | 認識結果 | 「これは○○だね？」に使う名前と、問いが作れるか | `recognition: { label: string, canAsk: boolean }` |
-| 問い | 問題文（学年に合わせた漢字・ふりがな） | `questions[].text: string`（ふりがなは `{漢字\|よみ}` の短い記法で書かせる。表示前に `<ruby>` に変換し、それ以外のタグはすべて文字として表示する。古い `<ruby>` タグの保存データも読める） |
+| 問い | 問題文（学年に合わせた漢字・ふりがな） | `questions[].text: string`（ふりがなは `{漢字\|よみ}` の短い記法で書かせる。熟語はことば全体に1つ付ける（`{前提\|ぜんてい}` ○／`{前\|まえ}{提\|てい}` ✕）。文はわかち書き。表示前に、22px 以上は `<ruby>` に、それより小さいときは読みに置きかえる（`src/lib/ruby.ts`）。それ以外のタグはすべて文字として表示する。古い `<ruby>` タグの保存データも読める） |
 | 問いのタイプ | 数量推定・比較・「なぜ？」型 | `questions[].type: "estimate" \| "compare" \| "why"` |
 | 分類 | 算数・理科・情報／単元／対象 | `subject: "math" \| "science" \| "info"`、`topic: string`、`target: string` |
 | 式 | math.js で計算できる式。「なぜ？」型は null | `formula: string \| null`（例：`"length * width / tileArea"`） |
@@ -115,6 +116,7 @@
 - 直感が外れやすい問いの例を与える
 - 確率・場合の数の式用に、`harmonic(n)`・`fact(n)`・`comb(n,k)`・`birthday(n)` を使えるようにしてある（`src/lib/calc.ts`）
 - 学年に合わせた問い・漢字・単位にする
+- むずかしいことば（前提・仮定・根拠 など）を使わず、やさしいことばに言いかえさせる（言いかえの表は `docs/02-spec.md` 2.2）。出力の形の説明（`schema.ts` の describe）にも、むずかしいことばを書かない（AI がそのまま使うため）
 - 出題済みの組み合わせと同じ問いを出さない
 - 子ども向けとして不適切・危険な内容（火・刃物・電気・薬品・高い所・道路など）を出さないよう制約する
 - 計算は LLM にさせず、式と変数を出させる
@@ -145,45 +147,53 @@ src/
 | アーカイブ | 問い・式・変数・予想・結果・解説・出典・分類 | Firestore |
 | 切り抜き画像 | JPEG（base64） | Firestore（アーカイブと同じドキュメント） |
 | 出題済み | 対象×分野（単元） | アーカイブから取り出す（別に保存しない） |
-| 収集要素 | スタンプ・称号 | 【未決】（アーカイブから数えるか、別に保存するか） |
+| 収集要素 | スタンプ・称号 | 【未決】（アーカイブから数えるか、別に保存するか）。仮の実装：スタンプはアーカイブから数える。使っている称号はプロフィールの `title` |
 | 匿名公開 | 切り抜き画像・問い・称号 | Firestore（公開用の別コレクション。位置情報・ユーザー名は入れない） |
 
-- 構成：
+- 構成（いまの実装。型は `src/lib/types.ts`）：
 ```
 Firestore:
   users/{uid}
-    └ profiles/{profileId}          nickname, grade, createdAt
-         └ archives/{archiveId}     question（5.2 の問い 1 つ分）, guess, result,
-                                    image（base64）, createdAt
-  public/{postId}                   公開する問い・切り抜き画像・称号（詳細：【未決】）
+    └ profiles/{profileId}          id, nickname, grade, title（使っている称号の分類 or null）,
+         │                          firstMode（"choices" | "custom"）, createdAt
+         └ archives/{archiveId}     id, createdAt, grade, question（5.2 の問い 1 つ分）,
+                                    guess（予想）, rating（"pita" | "oshii" | "ohazure"）,
+                                    image（切り抜きの data URL）, publicId（公開中なら public の ID）
+  public/{postId}                   id, ownerUid, createdAt, image, text, subject, topic, title
+                                    （ユーザー名・ニックネーム・位置情報は入れない）
 ```
+- 開発用のローカル版（`NEXT_PUBLIC_BACKEND=local`）は、同じ形をブラウザの localStorage に保存する（`src/lib/backend/local.ts`）
 - 画像の大きさ：Firestore の1件は 1MiB まで。base64 にすると元の約1.33倍になるので、JPEG の品質を調整して 1件が 1MiB 未満に収まるようにする
 - アクセス制御：Firestore のセキュリティルールで、`users/{uid}` の下は uid が自分のときだけ読み書きできるようにする。`public` はログインした人が読めて、書けるのは投稿した本人だけ（不適切な投稿を消す手段：【未決】）
 - 削除：個別・一括で削除できる（Firestore のドキュメントを消す）
 
 ## 7 開発環境
-- 環境変数：`.env.example` にキー名だけを載せ、実際の値は `.env`（git 管理外）に置く。Vercel には管理画面で設定する
-  - サーバー側だけ：`ANTHROPIC_API_KEY`、`LLM_EFFORT`、Firebase のプロジェクト ID（`FIREBASE_PROJECT_ID`。なければ `NEXT_PUBLIC_FIREBASE_PROJECT_ID` を使う）
+- 環境変数：`.env.example` にキー名だけを載せ、実際の値は `.env.local`（git 管理外）に置く。Vercel には管理画面で設定する
+  - サーバー側だけ：`ANTHROPIC_API_KEY`、`LLM_MODEL`、`LLM_EFFORT`、`LLM_THINKING`、Firebase のプロジェクト ID（`FIREBASE_PROJECT_ID`。なければ `NEXT_PUBLIC_FIREBASE_PROJECT_ID` を使う）。サービスアカウントの鍵は使わない（2.2）
   - クライアント側（公開されても問題ない値）：Firebase の設定値（`NEXT_PUBLIC_FIREBASE_*`）
+  - 開発用：`NEXT_PUBLIC_BACKEND=local`（Firebase なしでブラウザに保存）・`LLM_MODE=mock`（AI を呼ばず見本の問いを返す）。本番（Vercel）では設定しない
 - Windows（PowerShell）でも動くようにする
-- コマンド（予定。ひな形を作った後に確定して AGENTS.md に書く）
+- コマンド（AGENTS.md と同じ）
   | 用途 | コマンド |
   |---|---|
   | 依存関係のインストール | `npm install` |
   | 開発サーバーの起動 | `npm run dev` |
   | lint | `npm run lint` |
-  | 型チェック | `npx tsc --noEmit` |
+  | 型チェック | `npm run typecheck` |
+  | 本番ビルド | `npm run build` |
   | テスト | なし（MVP では書かない） |
-- スマホ実機で試すときは Vercel のプレビュー URL（HTTPS）を使う（カメラは HTTPS か localhost でしか動かないため）
+- スマホ実機で試すときは、本番かプレビューの URL（HTTPS）を使う（カメラは HTTPS か localhost でしか動かないため）
 
 ## 8 未決事項
-| 項目 | 候補 |
-|---|---|
-| 比較型の式と答えの持ち方 | 例：2つの量の式を出させ、「どちらが大きいか」と「何倍か」をアプリで計算する |
-| 学習の進み具合の測り方 | アーカイブの件数・正答の傾向 など |
-| ユーザー名の長さの上限 | 16進数に変換するなら10文字程度 |
-| 収集要素の保存方法 | アーカイブから数える／別に保存する |
-| 匿名公開の詳細と、不適切な投稿を消す手段 | 通報・管理者による削除 など |
+チームで決まるまでは、右の「仮の実装」で動いている。決まったら、この表と `docs/02-spec.md` を書きかえる。
+
+| 項目 | 候補 | 仮の実装 |
+|---|---|---|
+| 比較型の式と答えの持ち方 | 例：2つの量の式を出させ、「どちらが大きいか」と「何倍か」をアプリで計算する | 式は「A÷B」の1つ。アプリが「どちらが大きいか」と「大きいほうが小さいほうの何倍か」を計算する |
+| 学習の進み具合の測り方 | アーカイブの件数・正答の傾向 など | ずかんの件数で レベル1〜5（4件ごとに1つ上がる） |
+| ユーザー名の長さの上限 | 16進数に変換するなら10文字程度 | 変換前で 32 バイトまで（ひらがな10文字・英数字32文字） |
+| 収集要素の保存方法 | アーカイブから数える／別に保存する | アーカイブから数える。称号に必要な数は5 |
+| 匿名公開の詳細と、不適切な投稿を消す手段 | 通報・管理者による削除 など | 投稿した本人だけが消せる（ずかんの詳細の「みんなに みせるのを やめる」）。通報・管理者の削除はない |
 
 ## 9 費用と待ち時間（実測）
 2026-10-24 に、タイルの床のテスト画像（切り抜き・学年4年生・問い3つ）で、本物の API を1回ずつ測った値。1回の測定なので、ばらつきがある。入力は約6,700トークン（画像とプロンプト）。
@@ -203,4 +213,15 @@ Firestore:
 - モデルは環境変数 `LLM_MODEL`（`claude-opus-5-5`・`claude-sonnet-5-5`・`claude-haiku-5-5`）、考える深さは `LLM_EFFORT`、考える処理のオフは `LLM_THINKING=off`（Haiku だけ）で変える
 - 利用が多いときは API が 429（混雑）を返す。画面には「すこし まってから もういちど ためしてね」と出す（自動で再試行はしない）
 - 匿名公開を広げるときは、モデレーション API（`docs/01-overview.md` 11章）と、不適切な投稿を消す手段が必要
+
+## 10 公開（デプロイ）
+- 本番の URL：https://fk2601.vercel.app （Vercel のプロジェクト `fk_2601`。チーム `csennkai`）
+- いまは Vercel と GitHub が接続されていない。`develop` にマージしても、本番は自動では変わらない
+  - 公開するときは、`csennkai` のメンバーのアカウントで、最新の `develop` から `npx vercel --prod` を実行する
+  - 手元の `develop` が古いまま実行すると、古い版で本番が上書きされる。先に `git fetch origin` → `git switch --detach origin/develop` で最新にする（実際に一度起きた）
+  - まちがえて古い版を出したときは、Vercel の Deployments から正しいデプロイを選んで Promote する（`npx vercel promote <URL>` でもよい）
+  - 【未決】Vercel の Settings → Git で GitHub とつなぎ、`develop`（または `main`）へのマージで自動公開するか
+- 本番の環境変数（Vercel の Settings → Environment Variables）：`ANTHROPIC_API_KEY`・`LLM_MODEL`・`LLM_EFFORT`・`FIREBASE_PROJECT_ID`・`NEXT_PUBLIC_FIREBASE_*`（4つ）。`NEXT_PUBLIC_BACKEND` と `LLM_MODE` は設定しない
+- Firebase の Authentication → 設定 → 承認済みドメインに、本番のドメイン（`fk2601.vercel.app`・`fk2601-csennkai.vercel.app`）を入れてある。ドメインを増やしたときは、ここにも足す
+- 公開したあとの確認：本番の `/api/questions` にでたらめなトークンを送ると 401 が返る／Vercel の Logs にエラーが出ていない／ログインして見本の絵から問いが3つ出る
 
