@@ -1,16 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useApp } from "@/components/AuthProvider";
+import { GradePicker, RadioRow } from "@/components/Fields";
 import { Gate } from "@/components/Gate";
+import { Icon, Medal } from "@/components/Icons";
 import { Page } from "@/components/Page";
-import { Button, Card, LinkButton } from "@/components/ui";
+import { Button } from "@/components/ui";
+import { TITLE_LABEL } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import type { FirstMode } from "@/lib/types";
 
-const OPTIONS: { value: FirstMode; label: string; note: string }[] = [
-  { value: "choices", label: "3つから えらぶ", note: "さきに 3つの もんだいが 出るよ" },
-  { value: "custom", label: "じぶんで かく", note: "さきに もんだいを かく 場所が 出るよ" },
+const OPTIONS: { value: FirstMode; label: string }[] = [
+  { value: "choices", label: "「3つから えらぶ」を さきに" },
+  { value: "custom", label: "「じぶんで かく」を さきに" },
 ];
 
 function SettingsContent() {
@@ -18,60 +22,70 @@ function SettingsContent() {
   const [error, setError] = useState<string | null>(null);
   if (!profile) return null;
 
-  async function choose(firstMode: FirstMode) {
+  async function update(change: { grade?: number; firstMode?: FirstMode }) {
     if (!profile) return;
     setError(null);
     try {
-      await saveProfile({ nickname: profile.nickname, grade: profile.grade, firstMode });
+      await saveProfile({ nickname: profile.nickname, grade: change.grade ?? profile.grade, firstMode: change.firstMode ?? profile.firstMode });
     } catch (e) {
       setError(messageOf(e));
     }
   }
 
   return (
-    <Page title="せってい" back="/">
-      <Card className="space-y-3">
-        <h2 className="text-lg font-bold">もんだいの だしかた</h2>
-        <p className="text-base">さいしょに 出す ほうを えらんでね。あとで いつでも きりかえられるよ。</p>
-        <div className="space-y-2" role="radiogroup" aria-label="もんだいの だしかた">
+    <Page tab="settings">
+      <h1 className="flex h-[46px] items-center font-pop text-[26px] font-normal">せってい</h1>
+
+      <section className="flex flex-col gap-2.5 rounded-card border-3 border-ink bg-white px-4 py-3.5 shadow-pop-md">
+        <div className="flex items-center justify-between">
+          <span className="text-[17px] font-black text-ink-sub">ニックネーム</span>
+          <Link href="/profile" className="flex items-center gap-1 font-pop text-xl">
+            {profile.nickname}
+            <Icon name="pencil" size={18} strokeWidth={2.4} />
+          </Link>
+        </div>
+        <span className="font-pop text-xl leading-[1.6]">
+          <ruby>
+            学年<rt>がくねん</rt>
+          </ruby>
+        </span>
+        <GradePicker size="sm" value={profile.grade} onChange={(grade) => void update({ grade })} />
+      </section>
+
+      <fieldset className="flex flex-col gap-2.5 border-0 p-0">
+        <legend className="mb-2.5 p-0 font-pop text-lg">はてなの だしかた</legend>
+        <div role="radiogroup" aria-label="はてなの だしかた" className="flex flex-col gap-2.5">
           {OPTIONS.map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              role="radio"
-              aria-checked={profile.firstMode === o.value}
-              onClick={() => void choose(o.value)}
-              className={`w-full rounded-2xl border-2 px-4 py-3 text-left ${
-                profile.firstMode === o.value ? "border-brand bg-brand/10" : "border-ink/15 bg-white"
-              }`}
-            >
-              <span className="block text-lg font-bold">{o.label}</span>
-              <span className="block text-sm text-ink/70">{o.note}</span>
-            </button>
+            <RadioRow key={o.value} selected={profile.firstMode === o.value} onClick={() => void update({ firstMode: o.value })}>
+              {o.label}
+            </RadioRow>
           ))}
         </div>
-        {error && (
-          <p role="alert" className="rounded-xl bg-berry/10 px-3 py-2 text-base font-bold text-berry">
-            {error}
-          </p>
+      </fieldset>
+
+      <Link
+        href="/archive"
+        className="flex h-[62px] items-center gap-2.5 rounded-[22px] border-3 border-ink bg-white px-4 shadow-pop-sm active:translate-y-1 active:shadow-none"
+      >
+        <Medal size={28} />
+        <span className="text-[17px] font-black">しょうごう</span>
+        {profile.title ? (
+          <span className="ml-auto rounded-xl border-2 border-ink bg-purple px-2.5 py-0.5 text-sm font-black text-white">{TITLE_LABEL[profile.title]}</span>
+        ) : (
+          <span className="ml-auto text-sm font-bold text-ink-muted">まだ ないよ</span>
         )}
-      </Card>
+        <Icon name="next" size={20} strokeWidth={3} />
+      </Link>
 
-      <Card className="space-y-3">
-        <h2 className="text-lg font-bold">プロフィール</h2>
-        <p className="text-base">
-          {profile.nickname}さん（{profile.grade}年生）
+      {error && (
+        <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
+          {error}
         </p>
-        <LinkButton href="/profile" variant="secondary">
-          ニックネームと 学年を かえる
-        </LinkButton>
-      </Card>
+      )}
 
-      <div className="mt-auto">
-        <Button variant="ghost" onClick={() => void signOut()}>
-          ログアウト
-        </Button>
-      </div>
+      <Button variant="danger" onClick={() => void signOut()}>
+        ログアウト
+      </Button>
     </Page>
   );
 }

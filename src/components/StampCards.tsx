@@ -1,13 +1,12 @@
-import { STAMP_GOAL, SUBJECT_LABEL, SUBJECTS, TITLE_LABEL } from "@/lib/constants";
+import { STAMP_GOAL, SUBJECT_KANA, SUBJECTS, TITLE_LABEL } from "@/lib/constants";
 import type { Subject } from "@/server/llm/schema";
+import { Icon } from "./Icons";
+import { SUBJECT_STYLE } from "./QuestionCard";
 
-const COLOR: Record<Subject, { dot: string; card: string }> = {
-  math: { dot: "bg-brand", card: "bg-[#e1ecff]" },
-  science: { dot: "bg-mint", card: "bg-mint/15" },
-  info: { dot: "bg-sun", card: "bg-sun/20" },
-};
-
-/** 分類ごとのスタンプカード。目標の数を集めると称号がもらえる（称号は切り替えて使える） */
+/**
+ * 分類ごとのスタンプカード（見本 20）。目標の数を集めると称号がもらえる（称号は切り替えて使える）。
+ * そろった分類には、星のスタンプと、称号をつかうボタンが出る
+ */
 export function StampCards({
   counts,
   equipped,
@@ -18,38 +17,47 @@ export function StampCards({
   onEquip?: (title: Subject | null) => void;
 }) {
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {SUBJECTS.map((subject) => {
         const count = counts[subject];
         const earned = count >= STAMP_GOAL;
+        const s = SUBJECT_STYLE[subject];
         return (
-          <div key={subject} className={`space-y-2 rounded-3xl p-4 ${COLOR[subject].card}`}>
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-lg font-bold">{SUBJECT_LABEL[subject]}のスタンプ</h3>
-              <span className="text-base font-bold">{count}こ</span>
+          <section
+            key={subject}
+            className={`flex flex-col gap-2 rounded-[22px] border-3 border-ink px-3.5 pb-3 pt-2.5 ${s.light} ${earned ? "shadow-pop-sm" : ""}`}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className={`font-pop text-xl font-normal ${s.dark}`}>{SUBJECT_KANA[subject]}</h3>
+              <span className={`font-pop text-base ${s.dark}`}>{earned ? `${STAMP_GOAL}/${STAMP_GOAL} コンプリート！` : `${count}/${STAMP_GOAL}`}</span>
             </div>
-            <div className="flex flex-wrap gap-2" aria-label={`スタンプ ${Math.min(count, STAMP_GOAL)} / ${STAMP_GOAL}`}>
-              {Array.from({ length: STAMP_GOAL }, (_, i) => (
-                <span
-                  key={i}
-                  className={`flex size-9 items-center justify-center rounded-full text-lg ${
-                    i < count ? `${COLOR[subject].dot} text-white` : "border-2 border-dashed border-ink/25 bg-white/60"
-                  }`}
-                >
-                  {i < count ? "★" : ""}
-                </span>
-              ))}
+            <div className="grid grid-cols-5 justify-items-center" aria-label={`スタンプ ${Math.min(count, STAMP_GOAL)} / ${STAMP_GOAL}`}>
+              {Array.from({ length: STAMP_GOAL }, (_, i) => {
+                const last = earned && i === STAMP_GOAL - 1;
+                return (
+                  <span
+                    key={i}
+                    className={`flex size-11 items-center justify-center rounded-full ${
+                      i < count
+                        ? `border-3 border-ink ${last ? "bg-yellow" : s.solid}`
+                        : "border-[2.5px] border-dashed border-ink-muted bg-white"
+                    }`}
+                  >
+                    {last && <Icon name="star" size={22} fill="#FFFFFF" stroke="#22223A" strokeWidth={2} />}
+                  </span>
+                );
+              })}
             </div>
             {earned ? (
               <div className="flex items-center justify-between gap-2">
-                <p className="text-base font-bold">「{TITLE_LABEL[subject]}」を ゲット！</p>
+                <span className={`text-sm font-black ${s.dark}`}>「{TITLE_LABEL[subject]}」を ゲット！</span>
                 {onEquip && (
                   <button
                     type="button"
                     aria-pressed={equipped === subject}
                     onClick={() => onEquip(equipped === subject ? null : subject)}
-                    className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-bold ${
-                      equipped === subject ? "bg-ink text-white" : "border-2 border-ink/30 bg-white"
+                    className={`min-h-10 shrink-0 rounded-[14px] border-[2.5px] border-ink px-3.5 text-sm font-black shadow-pop-xs active:translate-y-[3px] active:shadow-none ${
+                      equipped === subject ? "bg-ink text-white" : "bg-white"
                     }`}
                   >
                     {equipped === subject ? "つかっている" : "つかう"}
@@ -57,9 +65,11 @@ export function StampCards({
                 )}
               </div>
             ) : (
-              <p className="text-base">あと {STAMP_GOAL - count}こで「{TITLE_LABEL[subject]}」！</p>
+              <span className={`text-sm font-black ${s.dark}`}>
+                あと {STAMP_GOAL - count}こで「{TITLE_LABEL[subject]}」
+              </span>
             )}
-          </div>
+          </section>
         );
       })}
     </div>
