@@ -6,6 +6,7 @@
 # AIエージェントの個人用設定
 CLAUDE.local.md
 .claude/settings.local.json
+*:Zone.Identifier
 
 # OS が自動で作るファイル
 .DS_Store

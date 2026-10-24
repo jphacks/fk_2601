@@ -9,15 +9,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../screen.css">
+<style>
+.navi{animation:navi-puni 2.6s ease-in-out infinite;transform-origin:50% 92%}
+.navi-react{animation:navi-pop .6s cubic-bezier(.3,1.6,.5,1) both,navi-puni 2.6s .6s ease-in-out infinite;transform-origin:50% 92%}
+@keyframes navi-puni{0%,100%{transform:translateY(0) scale(1.03,.97)}50%{transform:translateY(-4px) scale(.98,1.03)}}
+@keyframes navi-pop{0%{transform:translateY(24px) scale(.4);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.navi,.navi-react{animation:none}}
+</style>
 </head>
 <body>
 <div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 16px">
-  <svg aria-hidden="true" width="390" height="844" viewBox="0 0 390 844" style="position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none"><circle cx="372" cy="30" r="6" fill="#FFC83D"></circle><path d="M14 40l12 4-9 9z" fill="#FF6F9C"></path><path d="M350 330q7-9 14 0t14 0" fill="none" stroke="#8B5CF6" stroke-width="4" stroke-linecap="round"></path></svg>
+  <svg aria-hidden="true" width="390" height="844" viewBox="0 0 390 844" style="position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none"><circle cx="372" cy="30" r="6" fill="#FFC83D"></circle><path d="M14 40l12 4-9 9z" fill="#FF6F9C"></path></svg>
 
-  <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px">
-    <img src="../assets/navi/navi-smile.png" alt="ナビ（にこにこ）" style="width: 108px; height: 108px; flex-shrink: 0">
-    <div style="position: relative; flex-grow: 1; padding: 14px 18px; border: 3px solid var(--color-ink); border-radius: 24px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); font-family: var(--font-pop); font-size: 22px; line-height: 1.5">
-      <div style="position: absolute; left: -11px; top: calc(50% - 9px); width: 16px; height: 16px; background: var(--color-white); border-left: 3px solid var(--color-ink); border-bottom: 3px solid var(--color-ink); transform: rotate(45deg)"></div>
+  <div style="display: flex; align-items: center; gap: 12px; margin-top: auto">
+    <img class="navi" src="../assets/navi/navi-smile.png" alt="ナビ（にこにこ）" style="width: 108px; height: 108px; flex-shrink: 0">
+    <div style="position: relative; flex-grow: 1; padding: 14px 18px; border-radius: 24px; background: var(--color-navi-light); font-family: var(--font-pop); font-size: 22px; line-height: 1.5">
+      <div style="position: absolute; left: -8px; top: calc(50% - 8px); width: 16px; height: 16px; background: var(--color-navi-light); transform: rotate(45deg)"></div>
       きみの こと<br>おしえて！
     </div>
   </div>
@@ -28,7 +35,7 @@
     <span style="font-size: 15px; font-weight: 900; color: var(--color-pink-deep)">ほんとうの なまえは いれないでね</span>
   </div>
 
-  <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+  <fieldset style="border: none; margin: auto 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
     <legend style="padding: 0; margin-bottom: 10px; font-family: var(--font-pop); font-size: 22px; line-height: 1.6"><ruby>学年<rt>がくねん</rt></ruby></legend>
     <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
       <button type="button" class="grade lg" data-c="1" aria-pressed="false" aria-label="1ねんせい"><span class="grade-n">1</span><span class="grade-l">ねんせい</span></button>

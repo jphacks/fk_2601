@@ -9,9 +9,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../screen.css">
+<style>
+.navi{animation:navi-puni 2.6s ease-in-out infinite;transform-origin:50% 92%}
+.navi-react{animation:navi-pop .6s cubic-bezier(.3,1.6,.5,1) both,navi-puni 2.6s .6s ease-in-out infinite;transform-origin:50% 92%}
+@keyframes navi-puni{0%,100%{transform:translateY(0) scale(1.03,.97)}50%{transform:translateY(-4px) scale(.98,1.03)}}
+@keyframes navi-pop{0%{transform:translateY(24px) scale(.4);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.navi,.navi-react{animation:none}}
+</style>
 </head>
 <body>
-<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 12px">
+<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 16px">
   <div style="display: flex; align-items: center; gap: 10px; height: 52px">
     <a href="10-toi3.html" aria-label="もどる" style="width: 50px; height: 50px; flex-shrink: 0; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-white); box-shadow: var(--shadow-pop-xs); display: flex; align-items: center; justify-content: center; text-decoration: none">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22223A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
@@ -19,12 +26,18 @@
     <span style="font-family: var(--font-pop); font-size: 22px">せーので よそう！</span>
   </div>
 
-  <div style="padding: 14px 20px; border: 3px solid var(--color-ink); border-radius: 26px; background: var(--color-purple-light); box-shadow: var(--shadow-pop-md)">
+  <div style="padding: 14px 20px; border-radius: 26px; background: var(--color-purple-light)">
     <span style="font-size: 14px; font-weight: 900; color: var(--color-purple-dark)">じょうほうの はてな</span>
     <h1 style="margin: 2px 0 0; font-size: 23px; font-weight: 900; line-height: 1.75">しんごうは 1<ruby>日<rt>にち</rt></ruby>に<br><ruby>何<rt>なん</rt></ruby><ruby>回<rt>かい</rt></ruby> <ruby>赤<rt>あか</rt></ruby>に なる？</h1>
   </div>
 
-  <span style="margin-top: 6px; font-family: var(--font-pop); font-size: 18px; text-align: center">どれくらいだと おもう？</span>
+  <div style="display: flex; align-items: center; gap: 10px; margin-top: auto">
+    <img class="navi" src="../assets/navi/navi-effort.png" alt="ナビ（ぎゅっ）" style="width: 66px; height: 66px; flex-shrink: 0">
+    <div style="position: relative; flex-grow: 1; padding: 8px 14px; border-radius: 20px; background: var(--color-navi-light); font-family: var(--font-pop); font-size: 17px; line-height: 1.5">
+      <div style="position: absolute; left: -8px; top: calc(50% - 8px); width: 16px; height: 16px; background: var(--color-navi-light); transform: rotate(45deg)"></div>
+      どれくらいだと おもう？
+    </div>
+  </div>
 
   <div role="radiogroup" aria-label="よそう" style="display: flex; flex-direction: column; gap: 10px">
     <button type="button" role="radio" aria-checked="false" class="lowopt" data-c="0">
