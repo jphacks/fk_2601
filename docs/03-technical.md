@@ -188,7 +188,7 @@ Firestore:
 | Claude Sonnet 5.5 | $2／$10 | 約 $0.024 |
 | Claude Haiku 5.5 | $0.10／$0.50 | 約 $0.0012 |
 
-- モデルは `src/server/llm/client.ts` の1か所で変えられる。小さいモデルで問いの質が足りるかは、Hack Day に同じ写真で比べる
+- モデルは環境変数 `LLM_MODEL`（`claude-opus-5-5`・`claude-sonnet-5-5`・`claude-haiku-5-5`）で変えられる。小さいモデルで問いの質が足りるかは、Hack Day に同じ写真で比べる
 - 利用が多いときは API が 429（混雑）を返す。画面には「すこし まってから もういちど ためしてね」と出す（自動で再試行はしない）
 - 匿名公開を広げるときは、モデレーション API（`docs/01-overview.md` 11章）と、不適切な投稿を消す手段が必要
 

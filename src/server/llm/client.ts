@@ -4,7 +4,12 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { ZodError, type ZodType, type z } from "zod";
 import { LLM_TIMEOUT_MS } from "@/lib/constants";
 
-const MODEL = "claude-opus-5-5";
+// LLM_MODEL で切り替えられる（安いモデルで質と速さを比べるため）。許可した3つ以外は、既定の Opus 5.5 になる
+const MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"];
+function model(): string {
+  const value = process.env.LLM_MODEL;
+  return value && MODELS.includes(value) ? value : MODELS[0];
+}
 
 export type LlmErrorCode = "refusal" | "timeout" | "busy" | "invalid_output" | "llm_error";
 
@@ -42,7 +47,7 @@ export async function callStructured<S extends ZodType>(
   const startedAt = Date.now();
   try {
     const response = await anthropic().messages.parse({
-      model: MODEL,
+      model: model(),
       max_tokens: 16000,
       system,
       messages: [
@@ -62,6 +67,7 @@ export async function callStructured<S extends ZodType>(
       ms: Date.now() - startedAt,
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
+      model: model(),
       effort: effort(),
       stop: response.stop_reason,
     });
