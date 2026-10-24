@@ -62,7 +62,7 @@ export function ResultSummary({
                 <p className="text-sm">{question.compare?.[guess.side]} が 大きい</p>
               )}
             </div>
-            <div className="rounded-2xl bg-brand/10 p-3">
+            <div className="rounded-2xl bg-[#e1ecff] p-3">
               <p className="text-sm font-bold text-brand-dark">せいかい</p>
               <p className="text-xl font-bold">
                 {formatNumber(actual)}

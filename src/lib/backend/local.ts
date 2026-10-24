@@ -1,5 +1,5 @@
 import { UserFacingError } from "@/lib/errors";
-import type { AuthUser, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, Profile, PublicPost } from "@/lib/types";
 import { usernameToLocalId, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -9,6 +9,8 @@ import type { Backend } from "./types";
 const KEY_USERS = "local:users";
 const KEY_SESSION = "local:session";
 const profilesKey = (uid: string) => `local:profiles:${uid}`;
+const archivesKey = (uid: string, profileId: string) => `local:archives:${uid}:${profileId}`;
+const KEY_PUBLIC = "local:public";
 
 export function readJson<T>(key: string, fallback: T): T {
   try {
@@ -91,5 +93,36 @@ export const localBackend: Backend = {
       ? all.map((p) => (p.id === profile.id ? profile : p))
       : [...all, profile];
     writeJson(profilesKey(uid), next);
+  },
+
+  async listArchives(uid, profileId) {
+    return readJson<ArchiveRecord[]>(archivesKey(uid, profileId), []).sort((a, b) => b.createdAt - a.createdAt);
+  },
+
+  async saveArchive(uid, profileId, record) {
+    const all = readJson<ArchiveRecord[]>(archivesKey(uid, profileId), []).filter((r) => r.id !== record.id);
+    writeJson(archivesKey(uid, profileId), [...all, record]);
+  },
+
+  async deleteArchive(uid, profileId, id) {
+    const all = readJson<ArchiveRecord[]>(archivesKey(uid, profileId), []);
+    writeJson(archivesKey(uid, profileId), all.filter((r) => r.id !== id));
+  },
+
+  async deleteAllArchives(uid, profileId) {
+    localStorage.removeItem(archivesKey(uid, profileId));
+  },
+
+  async listPublic() {
+    return readJson<PublicPost[]>(KEY_PUBLIC, []).sort((a, b) => b.createdAt - a.createdAt);
+  },
+
+  async savePublic(post) {
+    const all = readJson<PublicPost[]>(KEY_PUBLIC, []).filter((p) => p.id !== post.id);
+    writeJson(KEY_PUBLIC, [...all, post]);
+  },
+
+  async deletePublic(id) {
+    writeJson(KEY_PUBLIC, readJson<PublicPost[]>(KEY_PUBLIC, []).filter((p) => p.id !== id));
   },
 };
