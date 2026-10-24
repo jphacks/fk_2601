@@ -9,6 +9,7 @@ import { Page } from "@/components/Page";
 import { Chips, QuestionText } from "@/components/QuestionCard";
 import { useQuiz } from "@/components/QuizProvider";
 import { ResultSummary } from "@/components/ResultSummary";
+import { SavePanel } from "@/components/SavePanel";
 import { Button, Card, ErrorNotice, Say } from "@/components/ui";
 import { defaultScope } from "@/lib/calc";
 import { describeGuess, evaluate } from "@/lib/rating";
@@ -85,6 +86,8 @@ function ResultContent() {
           )}
 
           <Sources question={selected} />
+
+          {crop && <SavePanel question={selected} guess={guess} rating={evaluation.rating} image={crop.dataUrl} />}
 
           <div className="mt-4 space-y-3">
             <Button onClick={() => next("/capture")}>つぎの しゃしんを とる</Button>
