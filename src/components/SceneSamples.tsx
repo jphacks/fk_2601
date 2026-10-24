@@ -10,7 +10,7 @@ function Thumb({ scene }: { scene: SceneKey }) {
   useEffect(() => {
     if (ref.current) paintThumb(ref.current, scene);
   }, [scene]);
-  return <canvas ref={ref} aria-hidden className="aspect-[3/4] w-full rounded-xl bg-paper object-cover" />;
+  return <canvas ref={ref} aria-hidden className="aspect-[3/4] w-full rounded-xl border-2 border-ink bg-paper object-cover" />;
 }
 
 /** 撮影できないとき（会場・AI が使えないとき）にも、囲む操作から最後まで試せる見本の絵 */
@@ -20,9 +20,9 @@ export function SceneSamples() {
 
   return (
     <section className="space-y-2">
-      <h2 className="text-base font-bold">みほんの えで ためす</h2>
-      <div className="grid grid-cols-3 gap-2">
-        {SCENE_KEYS.map((key) => (
+      <h2 className="font-display text-base">みほんの えで ためす</h2>
+      <div className="grid grid-cols-3 gap-3">
+        {SCENE_KEYS.map((key, i) => (
           <button
             key={key}
             type="button"
@@ -30,10 +30,10 @@ export function SceneSamples() {
               setPhoto(scenePhoto(key), key);
               router.push("/lasso");
             }}
-            className="space-y-1 rounded-2xl bg-white p-2 text-center shadow-sm ring-1 ring-ink/5 active:scale-[0.98]"
+            className={`paper-card paper-card-press space-y-1 p-2 text-center ${i === 1 ? "rotate-1" : i === 0 ? "-rotate-1" : "-rotate-[0.5deg]"}`}
           >
             <Thumb scene={key} />
-            <span className="block text-sm font-bold">{SCENE_NAMES[key]}</span>
+            <span className="block text-sm font-black">{SCENE_NAMES[key]}</span>
           </button>
         ))}
       </div>
