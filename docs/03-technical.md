@@ -28,7 +28,7 @@
 | 式の計算 | math.js | LLM が出した式を、eval を使わずに安全に計算できる。単位の変換もできる |
 | JSON の検証 | Zod | JSON の形を1か所で定義し、型と検証の両方に使える |
 
-- 使うパッケージ（予定）：`next` `react` `tailwindcss` `firebase` `firebase-admin` `@anthropic-ai/sdk` `mathjs` `zod`。追加するときは AGENTS.md の禁止事項3に従って確認する
+- 使うパッケージ（予定）：`next` `react` `tailwindcss` `firebase` `@anthropic-ai/sdk` `mathjs` `zod`。追加するときは AGENTS.md の禁止事項3に従って確認する
 
 ### 2.1 認証の方式
 - ログイン ID はユーザー名。内部で `<ユーザー名>@<FirebaseのプロジェクトID>.firebaseapp.com` に変換して、Firebase Authentication のメール／パスワード方式で登録する（アプリからメールは送らない）
@@ -39,7 +39,7 @@
 
 ### 2.2 LLM の呼び出し
 - Next.js の Route Handler（サーバー側）から公式 SDK（`@anthropic-ai/sdk`）で呼ぶ。`ANTHROPIC_API_KEY` はサーバー側の環境変数だけに置く
-- API はログインした人だけが呼べるようにする。画面から Firebase の ID トークンを送り、サーバー側で `firebase-admin` を使って検証する（URL を知っている人に使われて課金が膨らむのを防ぐ）
+- API はログインした人だけが呼べるようにする。画面から Firebase の ID トークンを送り、サーバー側で、Google の公開鍵を使って署名・期限・発行元・対象を検証する（`src/server/auth.ts`。`firebase-admin` は本番の Vercel で読み込みエラーになったため使わない）（URL を知っている人に使われて課金が膨らむのを防ぐ）
 - 出力は構造化出力（`output_config.format`）で JSON の形を指定し、受け取った後に Zod でも検証する
 - 断られたとき（`stop_reason: "refusal"`）は別のモデルに切り替えず（`fallbacks` は使わない）、「別のものを囲んでみてね」と表示する。`content` を読む前に必ず `stop_reason` を確認する
 - effort（考える深さ）は medium。環境変数 `LLM_EFFORT` で変えられるようにし、Hack Day で同じ写真を使って low / high と比べる。待ち時間はナビゲーターキャラの豆知識コーナーでつなぐ
@@ -59,7 +59,7 @@
    ├─ Firestore ………………………… プロフィール・アーカイブ・切り抜き画像を読み書き（ルールで本人だけ。匿名公開分は別コレクション）
    │
    └─ Next.js の Route Handler（Vercel・東京）
-         │  ID トークンを firebase-admin で検証
+         │  ID トークンを検証（Google の公開鍵）
          └─ Claude API（API キーはここだけ）
 ```
 - クライアント：撮影、囲む操作と切り抜き、予想の入力、可視化、再計算、アーカイブの表示。Firebase に直接読み書きする
@@ -163,7 +163,7 @@ Firestore:
 
 ## 7 開発環境
 - 環境変数：`.env.example` にキー名だけを載せ、実際の値は `.env`（git 管理外）に置く。Vercel には管理画面で設定する
-  - サーバー側だけ：`ANTHROPIC_API_KEY`、`LLM_EFFORT`、firebase-admin のサービスアカウントの値
+  - サーバー側だけ：`ANTHROPIC_API_KEY`、`LLM_EFFORT`、Firebase のプロジェクト ID（`FIREBASE_PROJECT_ID`。なければ `NEXT_PUBLIC_FIREBASE_PROJECT_ID` を使う）
   - クライアント側（公開されても問題ない値）：Firebase の設定値（`NEXT_PUBLIC_FIREBASE_*`）
 - Windows（PowerShell）でも動くようにする
 - コマンド（予定。ひな形を作った後に確定して AGENTS.md に書く）
