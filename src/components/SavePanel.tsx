@@ -12,30 +12,31 @@ import { Confetti, Hanko } from "./Decor";
 import { Icon, Medal } from "./Icons";
 import { SUBJECT_STYLE, TYPE_LABEL } from "./QuestionCard";
 import { useQuiz } from "./QuizProvider";
-import { RubyText } from "./RubyText";
 import { Button } from "./ui";
+import { kanaOf, stripRuby } from "@/lib/ruby";
 
 /** ずかんのカード（見本 19）：つかまえた写真・はてな・きみのよそう→こたえ・はんこ */
 export function CollectCard({ question, image, summary, rating }: { question: Question; image: string; summary: string; rating: Rating }) {
   const s = SUBJECT_STYLE[question.subject];
+  // 「なぜ？」型は、ピタリ・はずれ ではなく、せいかい・ざんねん
+  const label = question.type === "why" ? (rating === "pita" ? "せいかい" : "ざんねん") : undefined;
   return (
     <div className={`w-[300px] max-w-full -rotate-3 self-center rounded-[28px] border-3 border-ink p-2 shadow-pop ${s.solid}`}>
       <div className="relative overflow-hidden rounded-[20px] border-3 border-ink bg-white">
         <div className="flex h-28 items-center justify-center border-b-3 border-ink bg-photo">
           {/* eslint-disable-next-line @next/next/no-img-element -- 囲んだ部分の切り抜き（data URL） */}
-          <img src={image} alt={question.target} className="size-full object-contain" />
+          <img src={image} alt={stripRuby(question.target)} className="size-full object-contain" />
         </div>
         <div className="flex flex-col gap-1.5 px-3.5 pb-3.5 pt-2.5">
           <span className={`self-start rounded-[10px] border-2 border-ink px-2.5 py-0.5 text-[13px] font-black ${s.light} ${s.dark}`}>
             {SUBJECT_KANA[question.subject]} ・ {TYPE_LABEL[question.type]}
           </span>
-          <span className="text-[17px] font-black leading-[1.45]">
-            <RubyText text={question.text} />
-          </span>
+          {/* 小さい文字なので、ひらがなで出す */}
+          <span className="text-[17px] font-black leading-[1.45]">{kanaOf(question.text)}</span>
           <span className="font-pop text-[15px]">{summary}</span>
         </div>
         <div className="absolute right-1.5 top-[70px]">
-          <Hanko rating={rating} size={74} />
+          <Hanko rating={rating} label={label} size={74} />
         </div>
       </div>
     </div>
@@ -58,27 +59,28 @@ export function SavePanel({
   summary: string;
 }) {
   const router = useRouter();
-  const { reset } = useQuiz();
+  // 保存したかは、問いの状態に持つ（画面をもどっても、同じ問いを2回保存しない）
+  const { saved, markSaved } = useQuiz();
   const { archives, add } = useArchive();
   const [publish, setPublish] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   async function save() {
+    if (saved || busy) return;
     setBusy(true);
     setError(null);
     try {
       await add({ question, guess, rating, image, publish });
-      setSaved(true);
+      markSaved();
     } catch (e) {
       setError(messageOf(e));
     }
     setBusy(false);
   }
 
+  // ここで問いの状態を消すと、答え合わせの画面が先に「撮影へ」と動いてしまうので、消さずに移動する（次に撮ったときに入れかわる）
   function leave(to: string) {
-    reset();
     router.push(to);
   }
 
@@ -129,7 +131,8 @@ export function SavePanel({
         </div>
         <div className="grid grid-cols-5 justify-items-center gap-2" aria-label={`スタンプ ${shownStamps} / ${STAMP_GOAL}`}>
           {Array.from({ length: STAMP_GOAL }, (_, i) => {
-            const isNew = i === shownStamps - 1;
+            // いま もらったスタンプを光らせる（もう そろっているときは、どれも ふつうに出す）
+            const isNew = count <= STAMP_GOAL && i === shownStamps - 1;
             return (
               <span
                 key={i}

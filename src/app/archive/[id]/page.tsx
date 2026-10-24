@@ -17,15 +17,17 @@ import { defaultScope } from "@/lib/calc";
 import { messageOf } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
 import { evaluate } from "@/lib/rating";
-import { stripRuby } from "@/lib/ruby";
+import { kanaOf, stripRuby } from "@/lib/ruby";
+import { Loading } from "@/components/Loading";
 
 function DetailContent() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const { archives, remove, unpublish } = useArchive();
+  const { status, archives, remove, unpublish } = useArchive();
   const record = archives.find((a) => a.id === id);
   const [values, setValues] = useState<Record<string, number> | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const evaluation = useMemo(() => {
@@ -36,6 +38,15 @@ function DetailContent() {
       return null;
     }
   }, [record]);
+
+  // ずかんを読みこんでいるあいだ・けしている あいだは、「みつからない」と出さない
+  if (status === "loading" || deleting) {
+    return (
+      <Page back="/archive">
+        <Loading message={deleting ? "けしているよ" : "ずかんを ひらいているよ"} />
+      </Page>
+    );
+  }
 
   if (!record) {
     return (
@@ -60,15 +71,15 @@ function DetailContent() {
   }
 
   return (
-    <Page title={stripRuby(question.target)} back="/archive">
+    <Page title="はてなの きろく" back="/archive">
       <div className="flex items-center gap-4">
         <CropCircle src={record.image} alt={stripRuby(question.target)} size={120} />
-        <p className="text-sm font-black text-ink-sub">{formatDate(record.createdAt)} に つかまえたよ</p>
+        <p className="text-base font-black text-ink-sub">{formatDate(record.createdAt)} に つかまえたよ</p>
       </div>
 
       <section className={`rounded-[26px] border-3 border-ink px-5 py-3.5 shadow-pop-md ${style.light}`}>
         <Eyebrow question={question} />
-        <QuestionText question={question} size={21} />
+        <QuestionText question={question} size={22} />
         <QuestionHint question={question} />
       </section>
 
@@ -76,7 +87,7 @@ function DetailContent() {
 
       <div className="flex items-start gap-3 rounded-card border-3 border-ink bg-white px-4 py-3 shadow-pop-sm">
         <span className="text-[19px] font-black leading-[1.75]">
-          <RubyText text={question.explanation.short} />
+          <RubyText text={question.explanation.short} kana />
         </span>
       </div>
       <ExplanationSteps question={question} />
@@ -93,12 +104,12 @@ function DetailContent() {
 
       {related.length > 0 && (
         <section className="flex flex-col gap-2 rounded-card border-3 border-ink bg-white px-4 py-3">
-          <h2 className="font-pop text-base font-normal">おなじ たんげんの はてな</h2>
-          <ul className="flex flex-col gap-1">
+          <h2 className="font-pop text-base font-normal">にている はてな</h2>
+          <ul className="flex flex-col gap-1.5">
             {related.map((a) => (
               <li key={a.id}>
-                <Link href={`/archive/${a.id}`} className="text-base font-black text-navi-dark underline">
-                  {stripRuby(a.question.target)}（{formatDate(a.createdAt)}）
+                <Link href={`/archive/${a.id}`} className="line-clamp-2 text-base font-black text-navi-dark underline">
+                  {kanaOf(a.question.text)}（{formatDate(a.createdAt)}）
                 </Link>
               </li>
             ))}
@@ -128,8 +139,14 @@ function DetailContent() {
                 variant="danger"
                 onClick={() =>
                   run(async () => {
-                    await remove(record.id);
-                    router.replace("/archive");
+                    setDeleting(true);
+                    try {
+                      await remove(record.id);
+                      router.replace("/archive");
+                    } catch (e) {
+                      setDeleting(false);
+                      throw e;
+                    }
                   })
                 }
               >

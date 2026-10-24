@@ -27,9 +27,11 @@ function ProfileForm() {
     }
     setBusy(true);
     setError(null);
+    // はじめての人は ホームへ、せっていから なおしに来た人は せっていへ もどす
+    const next = isNew ? "/" : "/settings";
     try {
       await saveProfile({ nickname: nickname.trim(), grade });
-      router.replace("/");
+      router.replace(next);
     } catch (e) {
       setError(messageOf(e));
       setBusy(false);
@@ -50,9 +52,9 @@ function ProfileForm() {
               </>
             ) : (
               <>
-                すすんだら
+                なまえや がくねんを
                 <br />
-                かえてね！
+                かえられるよ！
               </>
             )}
           </span>
