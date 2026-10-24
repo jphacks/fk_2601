@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/AuthProvider";
+import { QuizProvider } from "@/components/QuizProvider";
 import { APP_NAME } from "@/lib/constants";
 import "./globals.css";
 
@@ -19,7 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ja">
       <body>
         <AuthProvider>
-          <div className="mx-auto min-h-dvh w-full max-w-md">{children}</div>
+          <QuizProvider>
+            <div className="mx-auto min-h-dvh w-full max-w-md">{children}</div>
+          </QuizProvider>
         </AuthProvider>
       </body>
     </html>
