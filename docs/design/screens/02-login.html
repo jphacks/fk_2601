@@ -9,19 +9,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../screen.css">
+<style>
+.navi{animation:navi-puni 2.6s ease-in-out infinite;transform-origin:50% 92%}
+.navi-react{animation:navi-pop .6s cubic-bezier(.3,1.6,.5,1) both,navi-puni 2.6s .6s ease-in-out infinite;transform-origin:50% 92%}
+@keyframes navi-puni{0%,100%{transform:translateY(0) scale(1.03,.97)}50%{transform:translateY(-4px) scale(.98,1.03)}}
+@keyframes navi-pop{0%{transform:translateY(24px) scale(.4);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.navi,.navi-react{animation:none}}
+</style>
 </head>
 <body>
-<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 14px">
-  <div style="position: relative; margin: -24px -24px 4px; padding: 28px 24px 22px; background: var(--color-navi-light); border-bottom: 3px solid var(--color-ink); border-radius: 0 0 44px 44px; display: flex; align-items: center; gap: 12px">
-    <svg aria-hidden="true" width="390" height="190" viewBox="0 0 390 190" style="position: absolute; left: 0; top: 0"><path d="M350 30l5 10 11 2-8 7 2 11-10-6-10 6 2-11-8-7 11-2z" fill="#FFC83D" stroke="#22223A" stroke-width="2.5" stroke-linejoin="round"></path><circle cx="300" cy="150" r="7" fill="#FF6F9C" stroke="#22223A" stroke-width="2.5"></circle></svg>
-    <img src="../assets/navi/navi-smile.png" alt="ナビ（にこにこ）" style="position: relative; width: 120px; height: 120px; flex-shrink: 0">
+<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 16px">
+  <div style="position: relative; margin: auto 0 0; padding: 20px; background: var(--color-navi-light); border-radius: 32px; display: flex; align-items: center; justify-content: center; gap: 12px; overflow: hidden">
+    <svg aria-hidden="true" width="342" height="160" viewBox="0 0 342 160" style="position: absolute; left: 0; top: 0"><path d="M314 112l5 10 11 2-8 7 2 11-10-6-10 6 2-11-8-7 11-2z" fill="#FFC83D" stroke="#22223A" stroke-width="2.5" stroke-linejoin="round"></path><circle cx="26" cy="26" r="7" fill="#FF6F9C" stroke="#22223A" stroke-width="2.5"></circle></svg>
+    <img class="navi" src="../assets/navi/navi-smile.png" alt="ナビ（にこにこ）" style="position: relative; width: 112px; height: 112px; flex-shrink: 0">
     <div style="position: relative; display: flex; flex-direction: column; gap: 4px">
       <h1 style="margin: 0; font-family: var(--font-pop); font-weight: 400; font-size: 30px">ようこそ！</h1>
-      <span style="font-size: 17px; font-weight: 900; line-height: 1.5">はてなハンターに<br>なろう！</span>
+      
     </div>
   </div>
 
-  <div role="tablist" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 5px; border: 3px solid var(--color-ink); border-radius: 26px; background: var(--color-white)">
+  <div role="tablist" style="margin-top: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 5px; border: 3px solid var(--color-ink); border-radius: 26px; background: var(--color-white)">
     <button type="button" role="tab" class="tab" data-mode="new" aria-selected="true">はじめて</button>
     <button type="button" role="tab" class="tab" data-mode="back" aria-selected="false">つづきから</button>
   </div>

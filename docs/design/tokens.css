@@ -16,6 +16,11 @@
   --color-cloud: #F1F2F7;
   --color-photo: #EAF0F8;
 
+  /* ずかんの 地の色（えらんだ分類。ごく うすく） */
+  --color-math-bg: #F0F7FF;
+  --color-sci-bg: #F4FAE6;
+  --color-info-bg: #F6F2FF;
+
   /* ナビ・メインボタン・こたえ・さんすう */
   --color-navi: #4A5AE8;
   --color-navi-dark: #2F3CB8;

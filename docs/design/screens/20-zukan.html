@@ -9,83 +9,231 @@
 <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../screen.css">
+<style>
+.navi{animation:navi-puni 2.6s ease-in-out infinite;transform-origin:50% 92%}
+.navi-react{animation:navi-pop .6s cubic-bezier(.3,1.6,.5,1) both,navi-puni 2.6s .6s ease-in-out infinite;transform-origin:50% 92%}
+@keyframes navi-puni{0%,100%{transform:translateY(0) scale(1.03,.97)}50%{transform:translateY(-4px) scale(.98,1.03)}}
+@keyframes navi-pop{0%{transform:translateY(24px) scale(.4);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.navi,.navi-react{animation:none}}
+.cat{height:56px;padding:0;border:none;border-radius:20px;background:transparent;color:var(--color-ink-sub);font-family:'Mochiy Pop One',sans-serif;font-size:17px;line-height:1.2;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.cat .n{font-family:var(--font-body);font-size:13px;font-weight:900}
+.cat-m[aria-selected="true"]{background:var(--color-navi);color:var(--color-white)}
+.cat-s[aria-selected="true"]{background:var(--color-mint);color:var(--color-ink)}
+.cat-i[aria-selected="true"]{background:var(--color-purple);color:var(--color-white)}
+.units{display:flex;gap:8px;margin:0 -24px;padding:0 24px;overflow-x:auto;scrollbar-width:none}
+.units::-webkit-scrollbar{display:none}
+.unit{flex-shrink:0;height:44px;padding:0 16px;box-sizing:border-box;border:2.5px solid var(--color-ink);border-radius:22px;background:var(--color-white);color:var(--color-ink-sub);font-family:var(--font-body);font-size:16px;font-weight:900;white-space:nowrap;cursor:pointer}
+.p-m .unit[aria-pressed="true"]{background:var(--color-navi);color:var(--color-white)}
+.p-s .unit[aria-pressed="true"]{background:var(--color-mint);color:var(--color-ink)}
+.p-i .unit[aria-pressed="true"]{background:var(--color-purple);color:var(--color-white)}
+</style>
 </head>
 <body>
-<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 12px">
+<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 16px">
+  <!-- えらんだ ぶんるいで 画面の 地の色を かえる（ごく うすい色） -->
+  <div class="if" data-if="bgM" hidden>
+    <div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: -1; background: var(--color-math-bg)"></div>
+  </div>
+  <div class="if" data-if="bgS" hidden>
+    <div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: -1; background: var(--color-sci-bg)"></div>
+  </div>
+  <div class="if" data-if="bgI">
+    <div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: -1; background: var(--color-info-bg)"></div>
+  </div>
+
   <div style="display: flex; align-items: center; gap: 8px; height: 50px">
     <h1 style="margin: 0; font-family: var(--font-pop); font-weight: 400; font-size: 24px">はてなずかん</h1>
-    <span style="padding: 2px 10px; border: 2.5px solid var(--color-ink); border-radius: 12px; background: var(--color-yellow); font-family: var(--font-pop); font-size: 14px">9こ</span>
+    <span style="padding: 2px 10px; border-radius: 12px; background: var(--color-yellow); font-family: var(--font-pop); font-size: 14px">9こ</span>
     <button type="button" style="margin-left: auto; height: 44px; padding: 0 12px; border: 2.5px solid var(--color-ink); border-radius: 16px; background: var(--color-white); box-shadow: var(--shadow-pop-xs); color: var(--color-ink); font-family: inherit; font-size: 14px; font-weight: 900; cursor: pointer">えらんで けす</button>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-purple); box-shadow: var(--shadow-pop-sm); color: var(--color-white)">
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="#FFC83D" stroke="#22223A" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="9" r="6"></circle><path d="M8.5 14L7 22l5-3 5 3-1.5-8" fill="#FF6F9C"></path></svg>
-    <span style="font-size: 14px; font-weight: 900">いまの しょうごう</span>
-    <span style="margin-left: auto; font-family: var(--font-pop); font-size: 18px">エンジニアレベル</span>
+  <div role="tablist" aria-label="ぶんるい" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 5px; border: 3px solid var(--color-ink); border-radius: 26px; background: var(--color-white)">
+    <button type="button" role="tab" class="cat cat-m" aria-selected="false" data-cat="M">さんすう<span class="n">3こ</span></button>
+    <button type="button" role="tab" class="cat cat-s" aria-selected="false" data-cat="S">りか<span class="n">1こ</span></button>
+    <button type="button" role="tab" class="cat cat-i" aria-selected="true" data-cat="I">じょうほう<span class="n">5こ</span></button>
   </div>
 
-  <div style="padding: 10px 14px 12px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-navi-light); display: flex; flex-direction: column; gap: 8px">
-    <div style="display: flex; align-items: center; justify-content: space-between">
-      <span style="font-family: var(--font-pop); font-size: 20px; color: var(--color-navi-dark); line-height: 1.6"><ruby>算数<rt>さんすう</rt></ruby></span>
-      <span style="font-family: var(--font-pop); font-size: 16px; color: var(--color-navi-dark)">3/5</span>
+  <div class="if" data-if="cM" hidden>
+    <div class="panel p-m" style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 16px">
+      <div class="units" role="group" aria-label="さんすうの たんげん">
+        <button type="button" class="unit" aria-pressed="true" data-u="all">すべて</button>
+        <button type="button" class="unit" aria-pressed="false" data-u="0">めんせき</button>
+        <button type="button" class="unit" aria-pressed="false" data-u="1">はやさ</button>
+        <button type="button" class="unit" aria-pressed="false" data-u="2">わりあい</button>
+      </div>
+      <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 -4px; padding: 0 4px 6px; display: flex; flex-direction: column; gap: 12px">
+        <div class="if" data-if="m0">
+          <a href="18-moshimo.html" class="zitem" data-unit="0" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
+            <span role="img" aria-label="しゃしん" style="width: 60px; height: 60px; flex-shrink: 0; border-radius: 16px; background: var(--color-orange-light); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 48 48" width="42" height="42"><rect x="4" y="20" width="40" height="20" rx="5" fill="#F5D38A" stroke="#22223A" stroke-width="2"></rect><path d="M32 20l5-11" stroke="#22223A" stroke-width="2.5" stroke-linecap="round"></path><path d="M34 8l6 3" stroke="#22223A" stroke-width="3" stroke-linecap="round"></path><path d="M10 26h8l-1.5 8h-5z" fill="#FF8A3D" stroke="#22223A" stroke-width="2" stroke-linejoin="round"></path></svg></span>
+            <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 900; line-height: 1.45">すなばは たたみ なんまいぶん？</span>
+              <span style="font-size: 13px; font-weight: 900; color: var(--color-navi-dark)">めんせき</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-orange); border-radius: 10px; color: var(--color-orange-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">おしい</span>
+          </a>
+        </div>
+        <div class="if" data-if="m1">
+          <a href="18-moshimo.html" class="zitem" data-unit="1" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
+            <span role="img" aria-label="しゃしん" style="width: 60px; height: 60px; flex-shrink: 0; border-radius: 16px; background: #EEF3FA; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 48 48" width="42" height="42"><path d="M4 38h10l20-24h10" fill="none" stroke="#22223A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4 38h10l20-24h10" fill="none" stroke="#B7BCCD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="30" cy="10" r="3" fill="#FF6F9C" stroke="#22223A" stroke-width="1.6"></circle></svg></span>
+            <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 900; line-height: 1.45">エスカレーターは 1ぷんで なんメートル？</span>
+              <span style="font-size: 13px; font-weight: 900; color: var(--color-navi-dark)">はやさ</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-red); border-radius: 10px; color: var(--color-red-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">ピタリ</span>
+          </a>
+        </div>
+        <div class="if" data-if="m2">
+          <a href="18-moshimo.html" class="zitem" data-unit="2" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
+            <span role="img" aria-label="しゃしん" style="width: 60px; height: 60px; flex-shrink: 0; border-radius: 16px; background: #FDEFEF; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 48 48" width="40" height="40"><rect x="10" y="4" width="28" height="40" rx="3" fill="#FF6F9C" stroke="#22223A" stroke-width="2"></rect><rect x="14" y="8" width="20" height="16" rx="2" fill="#FFFFFF" stroke="#22223A" stroke-width="2"></rect><rect x="17" y="11" width="4" height="10" rx="1" fill="#24C3A0"></rect><rect x="22" y="11" width="4" height="10" rx="1" fill="#24C3A0"></rect><rect x="27" y="11" width="4" height="10" rx="1" fill="#FFC83D"></rect><rect x="15" y="33" width="18" height="5" rx="1" fill="#22223A"></rect></svg></span>
+            <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 900; line-height: 1.45">じはんきの のみもの、なんわりが おちゃ？</span>
+              <span style="font-size: 13px; font-weight: 900; color: var(--color-navi-dark)">わりあい</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-navi); border-radius: 10px; color: var(--color-navi-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">大はずれ</span>
+          </a>
+        </div>
+        <div class="if" data-if="mEmpty" hidden>
+          <div style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; border-radius: 24px; background: var(--color-white)">
+            <img class="navi" src="../assets/navi/navi-think.png" alt="ナビ（はてな）" style="width: 96px; height: 96px">
+            <span style="font-family: var(--font-pop); font-size: 22px; color: var(--color-navi-dark)">まだ ないよ</span>
+            <span style="font-size: 16px; font-weight: 900; color: var(--color-ink-sub)">まちで さがして みよう！</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); justify-items: center">
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-navi)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-navi)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-navi)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 2.5px dashed var(--color-ink-muted); border-radius: 50%; background: var(--color-white)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 2.5px dashed var(--color-ink-muted); border-radius: 50%; background: var(--color-white)"></span>
+  </div>
+  <div class="if" data-if="cS" hidden>
+    <div class="panel p-s" style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 16px">
+      <div class="units" role="group" aria-label="りかの たんげん">
+        <button type="button" class="unit" aria-pressed="true" data-u="all">すべて</button>
+        <button type="button" class="unit" aria-pressed="false" data-u="0">ひかりと かげ</button>
+        <button type="button" class="unit" aria-pressed="false" data-u="1">いきもの</button>
+        <button type="button" class="unit" aria-pressed="false" data-u="2">ちから</button>
+      </div>
+      <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 -4px; padding: 0 4px 6px; display: flex; flex-direction: column; gap: 12px">
+        <div class="if" data-if="s0">
+          <a href="18-moshimo.html" class="zitem" data-unit="0" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
+            <span role="img" aria-label="しゃしん" style="width: 60px; height: 60px; flex-shrink: 0; border-radius: 16px; background: #EAF6EF; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 48 48" width="42" height="42"><circle cx="38" cy="10" r="5" fill="#FFC83D" stroke="#22223A" stroke-width="2"></circle><path d="M14 40l24 4" stroke="#8A8FA6" stroke-width="5" stroke-linecap="round"></path><circle cx="14" cy="13" r="4" fill="#FFFFFF" stroke="#22223A" stroke-width="2"></circle><path d="M14 17v12M14 21l-5 4M14 21l5 4M14 29l-4 10M14 29l4 10" stroke="#22223A" stroke-width="2.5" stroke-linecap="round"></path></svg></span>
+            <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 900; line-height: 1.45">かげの ながさは せの なんばい？</span>
+              <span style="font-size: 13px; font-weight: 900; color: var(--color-mint-dark)">ひかりと かげ</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-orange); border-radius: 10px; color: var(--color-orange-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">おしい</span>
+          </a>
+        </div>
+        <div class="if" data-if="sEmpty" hidden>
+          <div style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; border-radius: 24px; background: var(--color-white)">
+            <img class="navi" src="../assets/navi/navi-think.png" alt="ナビ（はてな）" style="width: 96px; height: 96px">
+            <span style="font-family: var(--font-pop); font-size: 22px; color: var(--color-mint-dark)">まだ ないよ</span>
+            <span style="font-size: 16px; font-weight: 900; color: var(--color-ink-sub)">まちで さがして みよう！</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <span style="font-size: 14px; font-weight: 900; color: var(--color-navi-dark)">あと 2こで「すうがく はかせ」</span>
+  </div>
+  <div class="if" data-if="cI">
+    <div class="panel p-i" style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 16px">
+      <div class="units" role="group" aria-label="じょうほうの たんげん">
+        <button type="button" class="unit" aria-pressed="true" data-u="all">すべて</button>
+        <button type="button" class="unit" aria-pressed="false" data-u="0">じかんと かいすう</button>
+        <button type="button" class="unit" aria-pressed="false" data-u="1">きごうと コード</button>
+        <button type="button" class="unit" aria-pressed="false" data-u="2">しくみ</button>
+      </div>
+      <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 -4px; padding: 0 4px 6px; display: flex; flex-direction: column; gap: 12px">
+        <div class="if" data-if="i0">
+          <a href="18-moshimo.html" class="zitem" data-unit="0" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
+            <span role="img" aria-label="しゃしん" style="width: 60px; height: 60px; flex-shrink: 0; border-radius: 16px; background: var(--color-photo); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="10 30 220 110" width="46" height="23"><rect x="16" y="44" width="208" height="76" rx="38" fill="#3B3F52"></rect><circle cx="58" cy="82" r="24" fill="#5B6074"></circle><circle cx="120" cy="82" r="24" fill="#5B6074"></circle><circle cx="182" cy="82" r="24" fill="#F0444F"></circle></svg></span>
+            <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 900; line-height: 1.45">しんごうは 1にちに なんかい あかに なる？</span>
+              <span style="font-size: 13px; font-weight: 900; color: var(--color-purple-dark)">じかんと かいすう</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-navi); border-radius: 10px; color: var(--color-navi-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">大はずれ</span>
+          </a>
+        </div>
+        <div class="if" data-if="i1">
+          <a href="18-moshimo.html" class="zitem" data-unit="0" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
+            <span role="img" aria-label="しゃしん" style="width: 60px; height: 60px; flex-shrink: 0; border-radius: 16px; background: var(--color-yellow-light); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 48 48" width="42" height="42"><rect x="9" y="10" width="4" height="32" rx="2" fill="#8A8FA6"></rect><rect x="4" y="16" width="40" height="8" rx="3" fill="#FFC83D" stroke="#22223A" stroke-width="2"></rect><path d="M16 16l-4 8M24 16l-4 8M32 16l-4 8M40 16l-4 8" stroke="#22223A" stroke-width="2.5"></path><circle cx="11" cy="32" r="4" fill="#F0444F" stroke="#22223A" stroke-width="2"></circle></svg></span>
+            <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 900; line-height: 1.45">ふみきりは 1じかんに なんかい しまる？</span>
+              <span style="font-size: 13px; font-weight: 900; color: var(--color-purple-dark)">じかんと かいすう</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-orange); border-radius: 10px; color: var(--color-orange-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">おしい</span>
+          </a>
+        </div>
+        <div class="if" data-if="i2">
+          <a href="18-moshimo.html" class="zitem" data-unit="1" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
+            <span role="img" aria-label="しゃしん" style="width: 60px; height: 60px; flex-shrink: 0; border-radius: 16px; background: var(--color-cloud); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 48 48" width="40" height="40"><rect x="6" y="6" width="36" height="36" rx="4" fill="#FFFFFF" stroke="#22223A" stroke-width="2"></rect><rect x="10" y="10" width="10" height="10" fill="#22223A"></rect><rect x="28" y="10" width="10" height="10" fill="#22223A"></rect><rect x="10" y="28" width="10" height="10" fill="#22223A"></rect><rect x="24" y="24" width="4" height="4" fill="#22223A"></rect><rect x="30" y="30" width="4" height="4" fill="#22223A"></rect><rect x="34" y="36" width="4" height="2" fill="#22223A"></rect></svg></span>
+            <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 900; line-height: 1.45">QRコードの マスは ぜんぶで いくつ？</span>
+              <span style="font-size: 13px; font-weight: 900; color: var(--color-purple-dark)">きごうと コード</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-red); border-radius: 10px; color: var(--color-red-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">ピタリ</span>
+          </a>
+        </div>
+        <div class="if" data-if="i3">
+          <a href="18-moshimo.html" class="zitem" data-unit="1" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
+            <span role="img" aria-label="しゃしん" style="width: 60px; height: 60px; flex-shrink: 0; border-radius: 16px; background: var(--color-cloud); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 48 48" width="42" height="42"><rect x="4" y="10" width="40" height="28" rx="3" fill="#FFFFFF" stroke="#22223A" stroke-width="2"></rect><path d="M10 15v18M15 15v18M22 15v18M27 15v18M33 15v18M38 15v18" stroke="#22223A" stroke-width="2"></path><path d="M12.5 15v18M19 15v18M30 15v18M35.5 15v18" stroke="#22223A" stroke-width="1"></path></svg></span>
+            <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 900; line-height: 1.45">バーコードの せんは なんぼん？</span>
+              <span style="font-size: 13px; font-weight: 900; color: var(--color-purple-dark)">きごうと コード</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-orange); border-radius: 10px; color: var(--color-orange-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">おしい</span>
+          </a>
+        </div>
+        <div class="if" data-if="i4">
+          <a href="18-moshimo.html" class="zitem" data-unit="2" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
+            <span role="img" aria-label="しゃしん" style="width: 60px; height: 60px; flex-shrink: 0; border-radius: 16px; background: #EEF3FA; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 48 48" width="40" height="40"><rect x="8" y="5" width="32" height="38" rx="3" fill="#D5DAE6" stroke="#22223A" stroke-width="2"></rect><path d="M24 9v30" stroke="#22223A" stroke-width="2"></path><path d="M12 25l4-5 4 5z" fill="#22223A"></path><path d="M28 20l4 5 4-5z" fill="#22223A"></path></svg></span>
+            <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 900; line-height: 1.45">エレベーターは どの じゅんばんで とまる？</span>
+              <span style="font-size: 13px; font-weight: 900; color: var(--color-purple-dark)">しくみ</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-navi); border-radius: 10px; color: var(--color-navi-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">大はずれ</span>
+          </a>
+        </div>
+        <div class="if" data-if="iEmpty" hidden>
+          <div style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; border-radius: 24px; background: var(--color-white)">
+            <img class="navi" src="../assets/navi/navi-think.png" alt="ナビ（はてな）" style="width: 96px; height: 96px">
+            <span style="font-family: var(--font-pop); font-size: 22px; color: var(--color-purple-dark)">まだ ないよ</span>
+            <span style="font-size: 16px; font-weight: 900; color: var(--color-ink-sub)">まちで さがして みよう！</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div style="padding: 10px 14px 12px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-mint-light); display: flex; flex-direction: column; gap: 8px">
-    <div style="display: flex; align-items: center; justify-content: space-between">
-      <span style="font-family: var(--font-pop); font-size: 20px; color: var(--color-mint-dark); line-height: 1.6"><ruby>理科<rt>りか</rt></ruby></span>
-      <span style="font-family: var(--font-pop); font-size: 16px; color: var(--color-mint-dark)">1/5</span>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); justify-items: center">
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-mint)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 2.5px dashed var(--color-ink-muted); border-radius: 50%; background: var(--color-white)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 2.5px dashed var(--color-ink-muted); border-radius: 50%; background: var(--color-white)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 2.5px dashed var(--color-ink-muted); border-radius: 50%; background: var(--color-white)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 2.5px dashed var(--color-ink-muted); border-radius: 50%; background: var(--color-white)"></span>
-    </div>
-    <span style="font-size: 14px; font-weight: 900; color: var(--color-mint-dark)">あと 4こで「りか マスター」</span>
-  </div>
-
-  <div style="padding: 10px 14px 12px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-purple-light); box-shadow: var(--shadow-pop-sm); display: flex; flex-direction: column; gap: 8px">
-    <div style="display: flex; align-items: center; justify-content: space-between">
-      <span style="font-family: var(--font-pop); font-size: 20px; color: var(--color-purple-dark); line-height: 1.6"><ruby>情報<rt>じょうほう</rt></ruby></span>
-      <span style="font-family: var(--font-pop); font-size: 16px; color: var(--color-purple-dark)">5/5 コンプリート！</span>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); justify-items: center">
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-purple)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-purple)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-purple)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-purple)"></span>
-      <span style="width: 44px; height: 44px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-yellow); display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="#FFFFFF" stroke="#22223A" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"></path></svg></span>
-    </div>
-  </div>
-
-  <a href="18-moshimo.html" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); text-decoration: none; color: var(--color-ink)">
-    <span role="img" aria-label="しんごうの しゃしん" style="width: 54px; height: 54px; flex-shrink: 0; box-sizing: border-box; border: 2.5px solid var(--color-ink); border-radius: 16px; background: var(--color-photo); display: flex; align-items: center; justify-content: center">
-      <svg aria-hidden="true" viewBox="10 30 220 110" width="40" height="20"><rect x="16" y="44" width="208" height="76" rx="38" fill="#3B3F52"></rect><circle cx="182" cy="82" r="24" fill="#F0444F"></circle></svg>
-    </span>
-    <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
-      <span style="font-size: 15px; font-weight: 900; line-height: 1.4">しんごうは 1にちに なんかい あかに なる？</span>
-      <span style="font-size: 13px; font-weight: 900; color: var(--color-purple-dark)">じょうほう ・ じかんと かいすう</span>
-    </span>
-    <span style="flex-shrink: 0; padding: 2px 8px; border: 2px solid var(--color-navi); border-radius: 10px; color: var(--color-navi-dark); font-size: 12px; font-weight: 900; transform: rotate(8deg)">大はずれ</span>
-  </a>
-
-  <nav style="margin: auto -24px -24px; height: 84px; flex-shrink: 0; box-sizing: border-box; border-top: 3px solid var(--color-ink); background: var(--color-white); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
-    <a href="04-home.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--color-ink-muted); font-size: 14px; font-weight: 700"><span style="width: 58px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg></span>ホーム</a>
-    <a href="20-zukan.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--color-yellow-deep); font-size: 14px; font-weight: 900"><span style="width: 58px; height: 34px; border-radius: 17px; background: var(--color-yellow-soft); display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9A6B00" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"></path><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"></path></svg></span>ずかん</a>
-    <a href="21-minna.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--color-ink-muted); font-size: 14px; font-weight: 700"><span style="width: 58px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M16.5 14.2c2.9.3 5 2.5 5 5.8"></path></svg></span>みんな</a>
-    <a href="22-settings.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--color-ink-muted); font-size: 14px; font-weight: 700"><span style="width: 58px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg></span>せってい</a>
+  <nav aria-label="メニュー" style="margin: auto -24px -24px; padding-top: 18px; height: 102px; flex-shrink: 0; box-sizing: border-box; background: linear-gradient(var(--color-ink), var(--color-ink)) 0 18px / 100% 3px no-repeat, linear-gradient(var(--color-white), var(--color-white)) 0 18px / 100% 100% no-repeat; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr))">
+    <a href="20-zukan.html" aria-current="page" style="padding-top: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--color-yellow-deep); font-size: 14px; font-weight: 900"><span style="width: 56px; height: 34px; border-radius: 17px; background: var(--color-yellow-soft); display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9A6B00" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"></path><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"></path></svg></span>ずかん</a>
+    <a href="21-stamp.html" style="padding-top: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--color-ink-muted); font-size: 14px; font-weight: 700"><span style="width: 56px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5.5" r="2.5"></circle><path d="M10.5 8v4M13.5 8v4"></path><path d="M5 16a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2H5z"></path><path d="M5 21.5h14"></path></svg></span>スタンプ</a>
+    <a href="04-home.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none"><span style="margin-top: -14px; width: 76px; height: 76px; flex-shrink: 0; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 50%; background: var(--color-navi); box-shadow: var(--shadow-pop-sm); color: var(--color-white); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 900"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-5h4v5"></path></svg>ホーム</span></a>
+    <a href="22-minna.html" style="padding-top: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--color-ink-muted); font-size: 14px; font-weight: 700"><span style="width: 56px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M16.5 14.2c2.9.3 5 2.5 5 5.8"></path></svg></span>みんな</a>
+    <a href="23-settings.html" style="padding-top: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--color-ink-muted); font-size: 14px; font-weight: 700"><span style="width: 56px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg></span>せってい</a>
   </nav>
 </div>
 <script src="../screen.js"></script>
+<script>
+// ぶんるい（さんすう・りか・じょうほう）の タブ：えらんだ ぶんるいの パネルだけ だす
+group('.cat', 'aria-selected', function (tab) {
+  ['M', 'S', 'I'].forEach(function (c) {
+    document.querySelector('[data-if="c' + c + '"]').hidden = tab.dataset.cat !== c;
+    document.querySelector('[data-if="bg' + c + '"]').hidden = tab.dataset.cat !== c;
+  });
+});
+// たんげんの タブ：その たんげんの はてなだけ だす（1つも ないときは「まだ ないよ」）
+document.querySelectorAll('.panel').forEach(function (panel) {
+  var chips = Array.prototype.slice.call(panel.querySelectorAll('.unit'));
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      chips.forEach(function (x) { x.setAttribute('aria-pressed', String(x === chip)); });
+      var shown = 0;
+      panel.querySelectorAll('.zitem').forEach(function (item) {
+        var on = chip.dataset.u === 'all' || item.dataset.unit === chip.dataset.u;
+        item.parentElement.hidden = !on;
+        if (on) shown += 1;
+      });
+      panel.querySelector('[data-if$="Empty"]').hidden = shown > 0;
+    });
+  });
+});
+</script>
 </body>
 </html>
