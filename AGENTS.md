@@ -19,7 +19,6 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 
 ## アーキテクチャ・ディレクトリ構成の要約
 - 技術スタック：Next.js（TypeScript）・Firebase（Authentication・Firestore）・Vercel・Claude API（詳細は `docs/03-technical.md` 2章）
-- アプリ本体のディレクトリ構成は Issue #6 で作成予定。**後で記載**
 - 役割分担：
   - クライアント：撮影、囲む操作と切り抜き、予想の入力、可視化、再計算、アーカイブの表示。Firebase（認証・Firestore）に直接読み書きする
   - サーバー（Next.js の Route Handler）：LLM の呼び出しだけ（API キーを持つのはここだけ）。DB には書かない
@@ -32,25 +31,29 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 現在の構成：
 ```
 .
-├── AGENTS.md        # この指示書（全エージェント共通。ルールはここに書く）
-├── CLAUDE.md        # @AGENTS.md を読み込むだけ
-├── GEMINI.md        # @AGENTS.md を読み込むだけ
-├── README.md
-└── docs/            # 仕様の正（Source of Truth）。下の「参照先」を参照
+├── AGENTS.md / CLAUDE.md / GEMINI.md   # この指示書（ルールは AGENTS.md に書く。他は @AGENTS.md を読み込むだけ）
+├── docs/                 # 仕様の正（Source of Truth）。下の「参照先」を参照
+├── firestore.rules       # Firestore のセキュリティルール（本人だけが読み書きできる）
+└── src/
+    ├── app/              # 画面（Next.js の App Router）と API（app/api/questions）
+    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ
+    ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）など
+    └── server/           # サーバーだけで動く処理。llm/（prompts・client・validate・mock）と auth.ts
 ```
+- 画面の流れ：`/capture`（撮影）→ `/lasso`（囲む）→ `/recognize` → `/choose` → `/predict` → `/result`（保存）→ `/archive`
 
 ## セットアップ・コマンド
-技術スタック確定後に記載します。それまではコマンドを推測して実行しないでください。
-
 | 用途 | コマンド |
 |---|---|
-| 依存関係のインストール | 後で記載 |
-| 開発サーバーの起動 | 後で記載 |
-| lint / フォーマット | 後で記載 |
-| 型チェック | 後で記載 |
-| テスト（全体 / 1ファイルだけ） | 後で記載 |
+| 依存関係のインストール | `npm install` |
+| 開発サーバーの起動 | `npm run dev` |
+| lint | `npm run lint` |
+| 型チェック | `npm run typecheck` |
+| 本番ビルド | `npm run build` |
+| テスト | なし（MVP では書かない） |
 
-- 環境変数は `.env.example` にキー名だけを載せ、実際の値は `.env`（git 管理外）に置く
+- 環境変数は `.env.example` にキー名だけを載せ、実際の値は `.env.local`（git 管理外）に置く
+- Firebase も API キーもなしで動かすには、`.env.local` に `NEXT_PUBLIC_BACKEND=local` と `LLM_MODE=mock` を書く（データはブラウザに保存され、LLM はサンプルの問いを返す）。本番（Vercel）では使わない
 - メンバーの中に Windows（PowerShell）で開発している人がいる。OS に依存するコマンドやパスの書き方を避ける
 
 ## タスク管理、仕様の参照先
@@ -59,9 +62,9 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 | 知りたいこと | 参照先 |
 |---|---|
 | 目的・対象者・体験の動線・MVP / MVP以降の機能 | `docs/01-overview.md`（企画書） |
-| 画面・機能の詳細仕様 | `docs/02-spec.md`（仕様書・作成中） |
-| 技術スタック・構成・外部API | `docs/03-technical.md`（技術計画書・作成中） |
-| MVP の範囲とディレクトリ構成 | `docs/04-mvp.md`（最小構成書・作成中） |
+| 画面・機能の詳細仕様 | `docs/02-spec.md`（仕様書） |
+| 技術スタック・構成・外部API | `docs/03-technical.md`（技術計画書） |
+| MVP の範囲 | `docs/04-mvp.md`（最小構成書） |
 | ブランチ・コミット・PR のルール | `docs/05-contributing.md`（git/GitHub 開発手順書） |
 
 - タスクは GitHub Issues で管理している（Projects は使わない）。1 Issue = 1 ブランチ。作業がどの Issue に対応するか分からない場合は確認する
@@ -70,7 +73,6 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 
 ### 未決事項（エージェントが勝手に決めない）
 次の項目はまだ決まっていません。関係する作業では選択肢を提案したうえで、チームの Discord（dev共有・info チャンネル）で確認・決定するよう人間に伝えてください。決まったら `docs/` とこの一覧を更新します。
-- アプリのディレクトリ構成（Issue #6）
 - 学習の進み具合の測り方と、問いへの反映のしかた
 - 比較型の問いの式と答えの持ち方
 - 収集要素の細部（称号に必要な個数、保存方法）
@@ -138,7 +140,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 ## Definition of Done
 次をすべて満たしたら、作業完了として人間に報告してください。
 - 変更内容が `docs/` の仕様と「体験の設計」に反していない
-- lint / 型チェックが通る（コマンドはひな形を作った後に記載。MVP の間はテストを書かない：`docs/03-technical.md` 1章）
+- `npm run lint` と `npm run typecheck` が通る（MVP の間はテストを書かない：`docs/03-technical.md` 1章）
 - 画面の変更は、スマホ幅で表示と操作を確認した
 - LLM を使う変更は、正常時に加えて、形式の崩れ・エラー時の動作も確認した
 - 差分に秘密情報が含まれていない
