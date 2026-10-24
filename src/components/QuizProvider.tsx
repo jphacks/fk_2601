@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { requestQuestions } from "@/lib/api";
 import { messageOf } from "@/lib/errors";
 import type { Crop, Photo } from "@/lib/image";
@@ -9,6 +9,7 @@ import type { Guess } from "@/lib/rating";
 import type { QuestionsResponse } from "@/server/llm/generate";
 import type { Question } from "@/server/llm/schema";
 import { useApp } from "./AuthProvider";
+import { useArchive } from "./ArchiveProvider";
 
 export type Generation =
   | { status: "idle" }
@@ -49,12 +50,18 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
 
 function QuizState({ children }: { children: React.ReactNode }) {
   const { backend, profile } = useApp();
+  const { archives } = useArchive();
   const [photo, setPhotoState] = useState<Photo | null>(null);
   const [crop, setCrop] = useState<Crop | null>(null);
   const [generation, setGeneration] = useState<Generation>({ status: "idle" });
   const [selected, setSelected] = useState<Question | null>(null);
   const [guess, setGuessState] = useState<Guess | null>(null);
   const latest = useRef(0);
+  // 問いを作るときに、いまの図鑑（出題済みの組み合わせ・学習の進み具合）を使う
+  const archivesRef = useRef(archives);
+  useEffect(() => {
+    archivesRef.current = archives;
+  }, [archives]);
   // 作り直すときに、いま出ている問いと同じ対象×単元を避けるため、見たものを覚えておく
   const seen = useRef<{ target: string; topic: string }[]>([]);
 
@@ -63,7 +70,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
       if (!profile) return;
       const id = ++latest.current;
       setGeneration({ status: "loading" });
-      const context = buildGenerationContext(profile, []);
+      const context = buildGenerationContext(profile, archivesRef.current.map((a) => a.question));
       requestQuestions(backend, {
         image: nextCrop.base64,
         ...context,

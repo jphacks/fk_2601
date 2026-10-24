@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useArchive } from "@/components/ArchiveProvider";
 import { useApp } from "@/components/AuthProvider";
 import { Gate } from "@/components/Gate";
 import { Loading } from "@/components/Loading";
@@ -17,6 +18,7 @@ import type { FirstMode } from "@/lib/types";
 function ChooseContent() {
   const router = useRouter();
   const { backend, profile } = useApp();
+  const { archives } = useArchive();
   const { crop, generation, regenerate, selectQuestion } = useQuiz();
   const [mode, setMode] = useState<FirstMode>(profile?.firstMode ?? "choices");
   const [text, setText] = useState("");
@@ -38,7 +40,7 @@ function ChooseContent() {
     setSorry(null);
     setError(null);
     try {
-      const result = await requestCustom(backend, { image: crop.base64, ...buildGenerationContext(profile, []), text: text.trim() });
+      const result = await requestCustom(backend, { image: crop.base64, ...buildGenerationContext(profile, archives.map((a) => a.question)), text: text.trim() });
       if (result.answerable && result.question) {
         selectQuestion(result.question);
         router.push("/predict");
