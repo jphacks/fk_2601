@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Mochiy_Pop_One, Zen_Maru_Gothic } from "next/font/google";
 import { ArchiveProvider } from "@/components/ArchiveProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { QuizProvider } from "@/components/QuizProvider";
@@ -10,6 +11,10 @@ export const metadata: Metadata = {
   description: "日常の風景から、理系の問いを見つけるアプリ",
 };
 
+// 日本語の字は、使われる字だけが読み込まれる（preload は切る）
+const body = Zen_Maru_Gothic({ weight: ["500", "700", "900"], display: "swap", preload: false, variable: "--nf-body" });
+const display = Mochiy_Pop_One({ weight: "400", display: "swap", preload: false, variable: "--nf-display" });
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -18,7 +23,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja">
+    <html lang="ja" className={`${body.variable} ${display.variable}`}>
       <body>
         <AuthProvider>
           <ArchiveProvider>
