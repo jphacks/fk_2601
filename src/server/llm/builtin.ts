@@ -62,7 +62,7 @@ const BUILTIN: Record<Scene, Entry> = {
         variables: [{ name: "n", label: "おもちゃの しゅるい", value: 10, unit: "しゅるい", min: 2, max: 40, step: 1 }],
         answerUnit: "かい",
         llmAnswer: 29.3,
-        guessRange: { min: 3, max: 300 },
+        guessRange: { min: 10, max: 1000 },
         explanation: {
           short: "さいごの 1しゅるいが、なかなか {出|で|1}て こないんだ！",
           steps: [
@@ -93,7 +93,7 @@ const BUILTIN: Record<Scene, Entry> = {
         ],
         answerUnit: "とおり",
         llmAnswer: 27,
-        guessRange: { min: 3, max: 300 },
+        guessRange: { min: 10, max: 1000 },
         explanation: {
           short: "1かい ふえる ごとに、3ばいずつ ふえていくよ。",
           steps: ["1かい{目|め|1}の {色|いろ|2}は 3とおり。", "2かい{目|め|1}も、それぞれに 3とおり ずつ。3×3＝9とおり。", "3かい{目|め|1}も おなじ。9×3＝27とおり！"],
