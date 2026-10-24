@@ -1,0 +1,25 @@
+# 秘密情報（APIキーなど）。キー名の見本は .env.example に書いてコミットする
+.env
+.env.*
+!.env.example
+
+# AIエージェントの個人用設定
+CLAUDE.local.md
+.claude/settings.local.json
+
+# OS が自動で作るファイル
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# エディタ（VS Code はチームで共有する設定だけコミットする）
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# ログ
+*.log
+
+# 技術スタック確定後に追加する（例：node_modules/、ビルド成果物など）
