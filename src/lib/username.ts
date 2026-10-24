@@ -12,16 +12,16 @@ export function validateUsername(input: string): string {
   const name = normalizeUsername(input);
   if (name.length === 0) throw new UserFacingError("なまえを いれてね");
   if (!ALLOWED.test(name)) {
-    throw new UserFacingError("なまえには、ひらがな・カタカナ・えいごと数字だけ つかえるよ");
+    throw new UserFacingError("なまえには、ひらがな・カタカナ・えいご・すうじだけ つかえるよ");
   }
   if (new TextEncoder().encode(name).length > USERNAME_MAX_BYTES) {
-    throw new UserFacingError("なまえが ながすぎるよ（ひらがな10もじ、えいごと数字32もじまで）");
+    throw new UserFacingError("なまえが ながすぎるよ（ひらがなは 10もじ、えいごと すうじは 32もじまで）");
   }
   return name;
 }
 
 export function validatePassword(password: string): void {
-  if (password.length < 6) throw new UserFacingError("パスワードは 6もじ以上にしてね");
+  if (password.length < 6) throw new UserFacingError("パスワードは 6もじ いじょうに してね");
 }
 
 /** ひらがななどはメールアドレスに使えないので、UTF-8 のバイト列を16進数にしてから、メールの形にする */

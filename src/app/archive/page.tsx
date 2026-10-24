@@ -15,7 +15,7 @@ import { stampCounts } from "@/lib/collection";
 import { SUBJECT_KANA, TITLE_LABEL } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
-import { stripRuby } from "@/lib/ruby";
+import { kanaOf } from "@/lib/ruby";
 import type { Rating } from "@/lib/rating";
 import type { ArchiveRecord } from "@/lib/types";
 
@@ -46,7 +46,7 @@ function Row({ a, selecting, selected, onToggle }: { a: ArchiveRecord; selecting
       {/* eslint-disable-next-line @next/next/no-img-element -- 保存した切り抜き（data URL） */}
       <img src={a.image} alt={a.question.target} className="size-[54px] shrink-0 rounded-2xl border-[2.5px] border-ink bg-photo object-cover" />
       <span className="flex min-w-0 grow flex-col gap-0.5">
-        <span className="line-clamp-2 text-[15px] font-black leading-snug">{stripRuby(a.question.text)}</span>
+        <span className="line-clamp-2 text-[15px] font-black leading-snug">{kanaOf(a.question.text)}</span>
         <span className={`text-[13px] font-black ${s.dark}`}>
           {SUBJECT_KANA[a.question.subject]} ・ {formatDate(a.createdAt)}
         </span>

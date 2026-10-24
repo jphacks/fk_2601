@@ -3,6 +3,7 @@
 import { formatNumber, isApprox } from "@/lib/format";
 import { describeGuess, RATING_LABEL, type Evaluation, type Guess, type Rating } from "@/lib/rating";
 import { refParts } from "@/lib/ref";
+import { unitRuby } from "@/lib/ruby";
 import type { Question } from "@/server/llm/schema";
 import { Confetti, Hanko } from "./Decor";
 import { CountUp } from "./CountUp";
@@ -99,7 +100,7 @@ export function ResultSummary({
                 }`}
               >
                 <span className="mb-0.5 block text-sm font-black">{c.correct ? "◎ せいかい" : i === guess.index ? "× きみの よそう" : ""}</span>
-                <RubyText text={c.text} />
+                <RubyText kana text={c.text} />
               </li>
             ))}
           </ul>
@@ -131,7 +132,9 @@ export function ResultSummary({
           <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(shown) }}>
             {animate ? <CountUp value={actual} from={0} format={formatNumber} /> : shown}
           </span>
-          <span className="font-pop text-[32px] leading-[1.6]">{unit}</span>
+          <span className="font-pop text-[32px] leading-[1.6]">
+            <RubyText text={unitRuby(unit)} />
+          </span>
         </div>
         <span className={`rounded-[18px] border-[2.5px] border-ink px-4 py-1 font-pop text-[22px] leading-[1.7] ${look.chip}`}>
           <RubyText text={chipText} />
@@ -143,9 +146,9 @@ export function ResultSummary({
 
       {type === "compare" && question.compare && (
         <p className="rounded-card border-3 border-ink bg-pink-light px-4 py-2.5 text-[19px] font-black leading-[1.7] shadow-pop-sm">
-          {evaluation.correct === false ? "大きいのは、きみが えらんだ ほうでは なかったよ。" : "大きい ほうを あてたね！"}
+          {evaluation.correct === false ? "おおきいのは、きみが えらんだ ほうでは なかったよ。" : "おおきい ほうを あてたね！"}
           <br />
-          <RubyText text={question.compare[evaluation.bigger ?? "a"]} /> が 大きいよ
+          <RubyText kana text={question.compare[evaluation.bigger ?? "a"]} /> が おおきいよ
         </p>
       )}
 
@@ -155,9 +158,9 @@ export function ResultSummary({
         <div className="flex items-center gap-3.5 rounded-card border-3 border-ink bg-mint-light px-[18px] py-3 shadow-pop-sm">
           <Icon name="bulb" size={34} fill="#FFC83D" stroke="#22223A" strokeWidth={1.8} />
           <span className="text-[19px] font-black leading-[1.7]">
-            <RubyText text={ref.label} /> {isApprox(ref.value) ? "約" : ""}
+            <RubyText kana text={ref.label} /> {isApprox(ref.value) ? "やく " : ""}
             {formatNumber(ref.value)}
-            <RubyText text={`${ref.unit}${ref.suffix}`} />
+            <RubyText kana text={`${unitRuby(ref.unit)}${ref.suffix}`} />
           </span>
         </div>
       )}

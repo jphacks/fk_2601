@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { formatNumber } from "@/lib/format";
+import { unitKana } from "@/lib/ruby";
 import { binEdges, binValue, BIN_COUNT, usesChoices, type Guess } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
 import { LogSlider } from "./LogSlider";
@@ -93,7 +94,7 @@ function ReasonForm({ question, onSubmit, hint }: FormProps) {
             }`}
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full border-3 border-ink bg-white font-pop text-base">{i + 1}</span>
-            <RubyText text={c.text} />
+            <RubyText kana text={c.text} />
           </button>
         ))}
       </div>
@@ -127,7 +128,7 @@ function EstimateForm({ question, grade, onSubmit, hint }: FormProps & { grade: 
             >
               <BinIcon index={i} />
               <span>
-                {formatNumber(edges[i])} 〜 {formatNumber(edges[i + 1])} {question.answerUnit}
+                {formatNumber(edges[i])} 〜 {formatNumber(edges[i + 1])} {unitKana(question.answerUnit)}
               </span>
             </button>
           ))}
@@ -173,7 +174,7 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
                 side === s ? `${i === 0 ? "bg-pink" : "bg-navi text-white"} shadow-pop-md` : i === 0 ? "bg-pink-light" : "bg-navi-light"
               }`}
             >
-              <RubyText text={names[s]} />
+              <RubyText kana text={names[s]} />
             </button>
           ))}
         </div>
@@ -196,14 +197,14 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
             ))}
           </div>
         ) : (
-          <LogSlider min={1} max={1000} value={slider} unit="倍" onChange={setSlider} />
+          <LogSlider min={1} max={1000} value={slider} unit="倍" label="なんばいと よそうする？" onChange={setSlider} />
         )}
       </div>
 
       <SeenoButton
         hint={hint}
-        disabled={side === null || chosenRatio === null}
-        onClick={() => side !== null && chosenRatio !== null && onSubmit({ kind: "compare", side, ratio: Math.max(1, chosenRatio) })}
+        disabled={side === null || chosenRatio === null || !(chosenRatio > 0)}
+        onClick={() => side !== null && chosenRatio !== null && chosenRatio > 0 && onSubmit({ kind: "compare", side, ratio: Math.max(1, chosenRatio) })}
       />
     </>
   );

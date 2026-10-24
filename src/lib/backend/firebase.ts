@@ -50,7 +50,7 @@ function friendly(error: unknown): never {
   if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
     throw new UserFacingError("なまえか パスワードが ちがうよ");
   }
-  if (code === "auth/weak-password") throw new UserFacingError("パスワードは 6もじ以上にしてね");
+  if (code === "auth/weak-password") throw new UserFacingError("パスワードは 6もじ いじょうに してね");
   if (code === "auth/network-request-failed") throw new UserFacingError("ネットに つながらないよ。つながってから もういちど ためしてね");
   if (code === "auth/too-many-requests") throw new UserFacingError("なんども まちがえたので、しばらくしてから ためしてね");
   throw error;

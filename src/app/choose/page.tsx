@@ -87,7 +87,7 @@ function ChooseContent() {
           <Icon name="back" size={24} strokeWidth={3} />
         </button>
         <CropCircle src={crop.dataUrl} alt="つかまえた ところ" size={54} />
-        <h1 className="min-w-0 truncate font-pop text-xl font-normal">{label ? <RubyText text={label} /> : "はてな"} の はてな</h1>
+        <h1 className="min-w-0 truncate font-pop text-xl font-normal">{label ? <RubyText kana text={label} /> : "はてな"} の はてな</h1>
       </header>
 
       <div role="tablist" className="grid grid-cols-2 gap-1.5 rounded-[26px] border-3 border-ink bg-white p-[5px]">
@@ -169,7 +169,7 @@ function ChooseContent() {
           </Say>
           <div className="flex flex-col gap-2">
             <label htmlFor="q" className="font-pop text-lg">
-              はてなを かこう
+              はてなを かいてみよう
             </label>
             <textarea
               id="q"

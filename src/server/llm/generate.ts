@@ -67,7 +67,7 @@ export async function generateCustom(input: CustomRequest): Promise<CustomRespon
   }
   const result = validateQuestion(output.question);
   if (!result.ok) {
-    return { recognition: output.recognition, answerable: false, reason: "うまく 答えを 作れなかったよ。ちがう 問いに してみてね", question: null };
+    return { recognition: output.recognition, answerable: false, reason: "うまく こたえを つくれなかったよ。ちがう はてなに してみてね", question: null };
   }
   return { recognition: output.recognition, answerable: true, reason: null, question: result.question };
 }

@@ -62,7 +62,7 @@ export async function photoFromFile(file: Blob & { name?: string }): Promise<Pho
   } catch {
     // iPhone の HEIC 形式は、Windows や一部のブラウザでは開けない
     if (HEIC_PATTERN.test(file.type) || HEIC_PATTERN.test(file.name ?? "")) {
-      throw new UserFacingError("この しゃしんの かたち（HEIC）は ひらけないよ。「しゃしんを とる」で とるか、ほかの しゃしんを えらんでね");
+      throw new UserFacingError("この しゃしん（HEIC という かたち）は ひらけないよ。カメラで とるか、ほかの しゃしんを えらんでね");
     }
     throw new UserFacingError("この しゃしんは ひらけなかったよ。ほかの しゃしんを えらんでね");
   }
@@ -97,7 +97,7 @@ function polygonArea(points: Point[]): number {
  * 長辺 1024px の JPEG にして描き直す（EXIF も消える）。Firestore の 1MiB に収まるよう品質を調整する
  */
 export async function cropLasso(photo: Photo, points: Point[]): Promise<Crop> {
-  const tooSmall = new UserFacingError("ちいさすぎるよ。もういちど 大きく かこんでね");
+  const tooSmall = new UserFacingError("ちいさすぎるよ。もういちど おおきく かこんでね");
   if (points.length < 8) throw tooSmall;
 
   const longEdge = Math.max(photo.width, photo.height);
@@ -139,5 +139,5 @@ export async function cropLasso(photo: Photo, points: Point[]): Promise<Crop> {
     }
     edge = Math.round(edge * 0.75);
   }
-  throw new UserFacingError("しゃしんが 大きすぎたよ。もういちど かこんでね");
+  throw new UserFacingError("しゃしんが おおきすぎたよ。もういちど かこんでね");
 }

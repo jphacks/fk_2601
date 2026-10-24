@@ -7,7 +7,7 @@ import { Icon } from "@/components/Icons";
 import { Loading } from "@/components/Loading";
 import { Page } from "@/components/Page";
 import { SUBJECT_STYLE } from "@/components/QuestionCard";
-import { RubyText } from "@/components/RubyText";
+import { kanaOf } from "@/lib/ruby";
 import { ErrorNotice, Say } from "@/components/ui";
 import { TITLE_LABEL } from "@/lib/constants";
 import type { PublicPost } from "@/lib/types";
@@ -65,7 +65,8 @@ function OthersContent() {
                     <img src={p.image} alt="" className="size-full object-contain" />
                   </div>
                   <div className="flex flex-1 flex-col gap-1.5 px-2.5 pb-2.5 pt-2">
-                    <RubyText text={p.text} className="line-clamp-4 block text-[15px] font-black leading-snug" />
+                    {/* 小さい文字なので、ひらがなで出す */}
+                    <span className="line-clamp-4 block text-[15px] font-black leading-snug">{kanaOf(p.text)}</span>
                     <div className="mt-auto flex flex-wrap items-center gap-1">
                       {p.title && <span className={`rounded-[10px] px-2 py-px text-xs font-black ${s.light} ${s.dark}`}>{TITLE_LABEL[p.title]}</span>}
                       {p.ownerUid === user?.uid && <span className="text-xs font-black text-ink-muted">きみの はてな</span>}
