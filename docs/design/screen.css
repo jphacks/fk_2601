@@ -1,0 +1,69 @@
+/*
+ * 見本の HTML だけで使う共通の CSS（アプリには持ち込まない）
+ * 画面そのものの見た目は各 HTML のインラインスタイルにあります。
+ */
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #E3E6EF;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+}
+body > div { flex-shrink: 0; }
+a { color: var(--color-navi-dark); }
+rt { font-family: var(--font-body); font-size: 0.5em; font-weight: 900; letter-spacing: 0; }
+input::placeholder, textarea::placeholder { color: var(--color-placeholder); }
+[hidden] { display: none !important; }
+.if { display: contents; }
+
+/* ログイン：はじめて／つづきから */
+.tab { height: 50px; border: none; border-radius: 20px; background: transparent; color: var(--color-ink-sub); font-family: var(--font-body); font-size: 18px; font-weight: 900; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--color-navi); color: var(--color-white); font-family: var(--font-pop); font-weight: 400; }
+
+/* 学年ボタン（プロフィール作成・せってい） */
+.grade { box-sizing: border-box; border: 3px solid var(--color-ink); color: var(--color-ink); cursor: pointer; padding: 0; }
+.grade.lg { height: 92px; border-radius: var(--radius-card); font-family: var(--font-body); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.grade.lg .grade-n { font-family: var(--font-pop); font-size: 34px; line-height: 1.1; }
+.grade.lg .grade-l { font-size: 14px; font-weight: 900; }
+.grade.sm { height: 50px; border-radius: 16px; font-family: var(--font-pop); font-size: 20px; }
+.grade[data-c="1"] { background: var(--color-pink-light); }
+.grade[data-c="2"] { background: var(--color-orange-light); }
+.grade[data-c="3"] { background: var(--color-yellow-light); }
+.grade[data-c="4"] { background: var(--color-mint-light); }
+.grade[data-c="5"] { background: var(--color-navi-light); }
+.grade[data-c="6"] { background: var(--color-purple-light); }
+.grade[aria-pressed="true"] { box-shadow: var(--shadow-pop-md); }
+.grade.sm[aria-pressed="true"] { box-shadow: var(--shadow-pop-sm); }
+.grade.lg[aria-pressed="true"] { transform: translateY(-3px); }
+.grade[data-c="1"][aria-pressed="true"] { background: var(--color-pink); }
+.grade[data-c="2"][aria-pressed="true"] { background: var(--color-orange); }
+.grade[data-c="3"][aria-pressed="true"] { background: var(--color-yellow); }
+.grade[data-c="4"][aria-pressed="true"] { background: var(--color-mint); }
+.grade[data-c="5"][aria-pressed="true"] { background: var(--color-navi); color: var(--color-white); }
+.grade[data-c="6"][aria-pressed="true"] { background: var(--color-purple); color: var(--color-white); }
+
+/* よそう（4年生まで）：5つの範囲 */
+.lowopt { height: 66px; display: flex; align-items: center; gap: 14px; padding: 0 14px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 22px; font-family: var(--font-body); font-size: 21px; font-weight: 900; line-height: 1.6; text-align: left; cursor: pointer; color: var(--color-ink); }
+.lowopt[data-c="0"] { background: var(--color-pink-light); }
+.lowopt[data-c="1"] { background: var(--color-orange-light); }
+.lowopt[data-c="2"] { background: var(--color-yellow-light); }
+.lowopt[data-c="3"] { background: var(--color-mint-light); }
+.lowopt[data-c="4"] { background: var(--color-navi-light); }
+.lowopt[aria-checked="true"] { box-shadow: var(--shadow-pop-md); }
+.lowopt[data-c="0"][aria-checked="true"] { background: var(--color-pink); }
+.lowopt[data-c="1"][aria-checked="true"] { background: var(--color-orange); }
+.lowopt[data-c="2"][aria-checked="true"] { background: var(--color-yellow); }
+.lowopt[data-c="3"][aria-checked="true"] { background: var(--color-mint); }
+.lowopt[data-c="4"][aria-checked="true"] { background: var(--color-navi); color: var(--color-white); }
+
+/* せってい：はてなの だしかた */
+.radio { height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 16px; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 20px; background: var(--color-white); color: var(--color-ink); font-family: var(--font-body); font-size: 18px; font-weight: 700; cursor: pointer; text-align: left; }
+.radio[aria-pressed="true"] { background: var(--color-navi-light); box-shadow: var(--shadow-pop-sm); font-weight: 900; }
+.radio-dot { width: 24px; height: 24px; box-sizing: border-box; flex-shrink: 0; border-radius: 50%; border: 3px solid var(--color-ink); background: var(--color-white); }
+.radio[aria-pressed="true"] .radio-dot { border: 7px solid var(--color-navi); outline: 2.5px solid var(--color-ink); }
+
+/* 押したときに「シール」が沈む（ボタン・カード共通） */
+a[style*="box-shadow"]:active, button[style*="box-shadow"]:active { transform: translateY(4px); box-shadow: none !important; }
