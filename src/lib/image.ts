@@ -17,12 +17,12 @@ function canvasOf(width: number, height: number): [HTMLCanvasElement, CanvasRend
   return [canvas, ctx];
 }
 
-function photoFromSource(source: CanvasImageSource, srcWidth: number, srcHeight: number): Photo {
+function photoFromSource(source: CanvasImageSource, srcWidth: number, srcHeight: number, srcX = 0, srcY = 0): Photo {
   const scale = Math.min(1, PHOTO_MAX_EDGE / Math.max(srcWidth, srcHeight));
   const width = Math.round(srcWidth * scale);
   const height = Math.round(srcHeight * scale);
   const [canvas, ctx] = canvasOf(width, height);
-  ctx.drawImage(source, 0, 0, width, height);
+  ctx.drawImage(source, srcX, srcY, srcWidth, srcHeight, 0, 0, width, height);
   return { dataUrl: canvas.toDataURL("image/jpeg", 0.9), width, height };
 }
 
@@ -68,9 +68,18 @@ export async function photoFromFile(file: Blob & { name?: string }): Promise<Pho
   }
 }
 
+/** カメラの映像から、撮影画面に見えている範囲（object-cover で中央を切り出した部分）だけを写真にする */
 export function photoFromVideo(video: HTMLVideoElement): Photo {
-  if (video.videoWidth === 0 || video.videoHeight === 0) throw new UserFacingError("カメラが まだ じゅんびできていないよ");
-  return photoFromSource(video, video.videoWidth, video.videoHeight);
+  const videoW = video.videoWidth;
+  const videoH = video.videoHeight;
+  if (videoW === 0 || videoH === 0) throw new UserFacingError("カメラが まだ じゅんびできていないよ");
+  if (video.clientWidth === 0 || video.clientHeight === 0) return photoFromSource(video, videoW, videoH);
+
+  const boxRatio = video.clientWidth / video.clientHeight;
+  const wider = videoW / videoH > boxRatio;
+  const srcW = wider ? videoH * boxRatio : videoW;
+  const srcH = wider ? videoH : videoW / boxRatio;
+  return photoFromSource(video, srcW, srcH, (videoW - srcW) / 2, (videoH - srcH) / 2);
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
