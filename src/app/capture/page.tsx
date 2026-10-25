@@ -54,7 +54,7 @@ function CaptureContent() {
     const video = videoRef.current;
     if (!video) return;
     try {
-      setPhoto(photoFromVideo(video));
+      setPhoto(photoFromVideo(video), "/capture");
       router.push("/lasso");
     } catch (e) {
       setError(messageOf(e));

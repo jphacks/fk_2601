@@ -22,6 +22,8 @@ type QuizContext = {
   photo: Photo | null;
   /** 見本の絵を使っているとき、その名前（撮った写真のときは null） */
   scene: SceneKey | null;
+  /** 写真を手に入れた画面（囲む画面の「もどる」の行き先） */
+  photoFrom: string;
   crop: Crop | null;
   generation: Generation;
   /** えらんだ問いと、その予想 */
@@ -30,7 +32,8 @@ type QuizContext = {
   /** いまの問いを、ずかんに保存したか（保存したら、もどっても もう一度は保存しない） */
   saved: boolean;
   markSaved: () => void;
-  setPhoto: (photo: Photo, scene?: SceneKey) => void;
+  /** from は写真を手に入れた画面（撮影なら /capture、ホームの見本の絵・アルバムなら /） */
+  setPhoto: (photo: Photo, from: string, scene?: SceneKey) => void;
   /** 囲んだ直後に呼ぶ。裏で LLM を呼び始める（先読み生成） */
   startGeneration: (crop: Crop) => void;
   /** 同じ切り抜きで、問いを作り直す（ユーザーの操作で呼ぶ1回。自動リトライではない） */
@@ -59,6 +62,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
   const { archives } = useArchive();
   const [photo, setPhotoState] = useState<Photo | null>(null);
   const [scene, setSceneState] = useState<SceneKey | null>(null);
+  const [photoFrom, setPhotoFrom] = useState("/");
   const [crop, setCrop] = useState<Crop | null>(null);
   const [generation, setGeneration] = useState<Generation>({ status: "idle" });
   const [selected, setSelected] = useState<Question | null>(null);
@@ -104,10 +108,11 @@ function QuizState({ children }: { children: React.ReactNode }) {
     [backend, profile, scene],
   );
 
-  const setPhoto = useCallback((next: Photo, nextScene?: SceneKey) => {
+  const setPhoto = useCallback((next: Photo, from: string, nextScene?: SceneKey) => {
     latest.current++;
     seen.current = [];
     setSceneState(nextScene ?? null);
+    setPhotoFrom(from);
     setPhotoState(next);
     setCrop(null);
     setSelected(null);
@@ -136,6 +141,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
     latest.current++;
     seen.current = [];
     setSceneState(null);
+    setPhotoFrom("/");
     setPhotoState(null);
     setCrop(null);
     setSelected(null);
@@ -154,8 +160,8 @@ function QuizState({ children }: { children: React.ReactNode }) {
   const markSaved = useCallback(() => setSaved(true), []);
 
   const value = useMemo<QuizContext>(
-    () => ({ photo, scene, crop, generation, selected, guess, saved, markSaved, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset }),
-    [photo, scene, crop, generation, selected, guess, saved, markSaved, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset],
+    () => ({ photo, scene, photoFrom, crop, generation, selected, guess, saved, markSaved, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset }),
+    [photo, scene, photoFrom, crop, generation, selected, guess, saved, markSaved, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset],
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
