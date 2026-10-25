@@ -22,7 +22,7 @@ function Trivia() {
   }, []);
 
   return (
-    <div className="rounded-[26px] border-3 border-ink bg-yellow-light px-[18px] py-3.5 shadow-pop-md">
+    <div className="rounded-[26px] border-2 border-ink/15 bg-yellow-light px-[18px] py-3.5">
       <p className="flex items-center gap-1.5 text-[15px] font-black text-yellow-dark">
         <Icon name="bulb" size={20} />
         まめちしき

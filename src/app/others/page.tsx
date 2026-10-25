@@ -58,7 +58,7 @@ function OthersContent() {
           const s = SUBJECT_STYLE[p.subject];
           return (
             <li key={p.id}>
-              <article className={`h-full rounded-card border-3 border-ink p-1.5 shadow-pop-md ${s.solid}`}>
+              <article className={`h-full rounded-card border-2 border-ink/15 p-1.5 ${s.solid}`}>
                 <div className="flex h-full flex-col overflow-hidden rounded-[18px] border-[2.5px] border-ink bg-white">
                   <div className="flex h-24 items-center justify-center border-b-[2.5px] border-ink bg-photo">
                     {/* eslint-disable-next-line @next/next/no-img-element -- 公開された切り抜き（data URL） */}

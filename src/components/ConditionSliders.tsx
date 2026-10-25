@@ -63,7 +63,7 @@ export function ConditionSliders({
         const moved = now !== v.value;
         const frac = (v.value - v.min) / (v.max - v.min);
         return (
-          <div key={v.name} className="flex flex-col gap-1.5 rounded-[26px] border-3 border-ink bg-yellow-light px-[18px] py-3.5 shadow-pop-md">
+          <div key={v.name} className="flex flex-col gap-1.5 rounded-[26px] border-2 border-ink/15 bg-yellow-light px-[18px] py-3.5">
             <div className="flex items-center justify-between gap-2">
               <label htmlFor={`v-${v.name}`} className="font-pop text-[17px] leading-snug">
                 {kanaOf(v.label)}
@@ -104,7 +104,7 @@ export function ConditionSliders({
         );
       })}
 
-      <div aria-live="polite" className="flex flex-col items-center rounded-[26px] border-3 border-ink bg-white px-[18px] pb-4 pt-3 shadow-pop-md">
+      <div aria-live="polite" className="flex flex-col items-center rounded-[26px] border-2 border-ink/15 bg-white px-[18px] pb-4 pt-3">
         {current === null ? (
           <p className="text-lg font-black">この じょうけんでは けいさん できないよ</p>
         ) : question.type === "compare" ? (

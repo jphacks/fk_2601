@@ -126,7 +126,7 @@ function ArchiveContent() {
         )}
       </div>
 
-      <div className="flex items-center gap-3 rounded-[22px] border-3 border-ink bg-purple px-4 py-2.5 text-white shadow-pop-sm">
+      <div className="flex items-center gap-3 rounded-[22px] border-2 border-ink/15 bg-purple px-4 py-2.5 text-white">
         <Medal size={34} />
         <span className="text-sm font-black">いまの しょうごう</span>
         <span className="ml-auto font-pop text-lg">{profile.title ? TITLE_LABEL[profile.title] : "まだ ないよ"}</span>
@@ -164,7 +164,7 @@ function ArchiveContent() {
           <button
             type="button"
             onClick={() => setPicked(picked.size === archives.length ? new Set() : new Set(archives.map((a) => a.id)))}
-            className="self-center rounded-xl border-[2.5px] border-ink bg-white px-4 py-1 text-sm font-black shadow-pop-xs"
+            className="self-center rounded-xl border-[2.5px] border-ink bg-white px-4 py-1 text-sm font-black shadow-pop-xs active:translate-y-[3px] active:shadow-none"
           >
             {picked.size === archives.length ? "ぜんぶ はずす" : "ぜんぶ えらぶ"}
           </button>

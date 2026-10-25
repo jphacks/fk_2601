@@ -51,7 +51,7 @@ function PredictContent() {
 
   return (
     <Page title="せーので よそう！" back="/choose">
-      <section className={`rounded-[26px] border-3 border-ink px-5 py-3.5 shadow-pop-md ${style.light}`}>
+      <section className={`rounded-[26px] border-2 border-ink/15 px-5 py-3.5 ${style.light}`}>
         <span className={`text-sm font-black ${style.dark}`}>{SUBJECT_KANA[selected.subject]}の はてな</span>
         <QuestionText question={selected} size={23} />
         <QuestionHint question={selected} />

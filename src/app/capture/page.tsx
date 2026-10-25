@@ -102,7 +102,7 @@ function CaptureContent() {
 
         <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
           <Navigator mood="happy" size={68} />
-          <span className="rounded-[18px] border-[2.5px] border-ink bg-white px-3.5 py-2 text-base font-black shadow-pop-xs">どこに あるかな？</span>
+          <span className="rounded-[18px] border-[2.5px] border-ink bg-white px-3.5 py-2 text-base font-black">どこに あるかな？</span>
         </div>
       </div>
 

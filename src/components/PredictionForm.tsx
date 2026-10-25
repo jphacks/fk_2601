@@ -7,7 +7,7 @@ import { binEdges, binValue, BIN_COUNT, usesChoices, type Guess } from "@/lib/ra
 import type { Question } from "@/server/llm/schema";
 import { LogSlider } from "./LogSlider";
 import { RubyText } from "./RubyText";
-import { Button } from "./ui";
+import { Button, CHOICE_DOWN, CHOICE_UP } from "./ui";
 
 const RATIO_CHOICES = [1.5, 2, 3, 5, 10, 20, 50, 100];
 
@@ -90,7 +90,7 @@ function ReasonForm({ question, onSubmit, hint }: FormProps) {
             aria-checked={index === i}
             onClick={() => setIndex(i)}
             className={`flex items-center gap-3.5 rounded-[22px] border-3 border-ink px-3.5 py-3 text-left text-[19px] font-black leading-[1.7] ${
-              index === i ? `${CHOICE_ON[i % 3]} shadow-pop-md` : CHOICE_COLORS[i % 3]
+              index === i ? `${CHOICE_ON[i % 3]} ${CHOICE_DOWN}` : `${CHOICE_COLORS[i % 3]} ${CHOICE_UP}`
             }`}
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full border-3 border-ink bg-white font-pop text-base">{i + 1}</span>
@@ -123,7 +123,7 @@ function EstimateForm({ question, grade, onSubmit, hint }: FormProps & { grade: 
               aria-checked={index === i}
               onClick={() => setIndex(i)}
               className={`flex h-[66px] items-center gap-3.5 rounded-[22px] border-3 border-ink px-3.5 text-left text-[20px] font-black ${
-                index === i ? `${BIN_STYLE[i].on} shadow-pop-md` : BIN_STYLE[i].off
+                index === i ? `${BIN_STYLE[i].on} ${CHOICE_DOWN}` : `${BIN_STYLE[i].off} ${CHOICE_UP}`
               }`}
             >
               <BinIcon index={i} />
@@ -171,7 +171,7 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
               aria-checked={side === s}
               onClick={() => setSide(s)}
               className={`min-h-[84px] rounded-[22px] border-3 border-ink px-3 py-2 text-center text-[19px] font-black leading-[1.6] ${
-                side === s ? `${i === 0 ? "bg-pink" : "bg-navi text-white"} shadow-pop-md` : i === 0 ? "bg-pink-light" : "bg-navi-light"
+                side === s ? `${i === 0 ? "bg-pink" : "bg-navi text-white"} ${CHOICE_DOWN}` : `${i === 0 ? "bg-pink-light" : "bg-navi-light"} ${CHOICE_UP}`
               }`}
             >
               <RubyText kana text={names[s]} />
@@ -190,7 +190,7 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
                 type="button"
                 aria-pressed={ratio === r}
                 onClick={() => setRatio(r)}
-                className={`h-[54px] rounded-[20px] border-3 border-ink text-lg font-black ${ratio === r ? "bg-yellow shadow-pop-sm" : "bg-yellow-light"}`}
+                className={`h-[54px] rounded-[20px] border-3 border-ink text-lg font-black ${ratio === r ? `bg-yellow ${CHOICE_DOWN}` : `bg-yellow-light ${CHOICE_UP}`}`}
               >
                 やく {r} ばい
               </button>

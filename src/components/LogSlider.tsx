@@ -48,7 +48,7 @@ export function LogSlider({
   return (
     <div className="flex flex-col gap-3">
       <span className="text-center font-pop text-lg">{label}</span>
-      <label className="flex items-baseline justify-center gap-2 rounded-[30px] border-3 border-ink bg-yellow px-4 py-3 shadow-pop">
+      <label className="flex items-baseline justify-center gap-2 rounded-[30px] border-3 border-ink bg-yellow px-4 py-3">
         <input
           type="number"
           inputMode="decimal"
