@@ -1,4 +1,5 @@
 import type { Backend } from "@/lib/backend";
+import { DEMO_DELAY_MS, demoCustom, demoQuestions, isDemo } from "@/lib/demo";
 import { UserFacingError } from "@/lib/errors";
 import type { CustomResponse, QuestionsResponse } from "@/server/llm/generate";
 import type { CustomRequest, QuestionsRequest } from "@/server/llm/request";
@@ -34,10 +35,15 @@ async function post<T>(backend: Backend, path: string, body: unknown): Promise<T
   }
 }
 
+// デモ（/demo）では、AI を呼ばずに、用意した問いを、少し待ってから返す（待ちの画面の演出のため）
+const demoWait = <T>(value: T): Promise<T> => new Promise((resolve) => setTimeout(() => resolve(value), DEMO_DELAY_MS));
+
 export function requestQuestions(backend: Backend, input: QuestionsRequest): Promise<QuestionsResponse> {
+  if (isDemo()) return demoWait(demoQuestions());
   return post<QuestionsResponse>(backend, "/api/questions", input);
 }
 
 export function requestCustom(backend: Backend, input: CustomRequest): Promise<CustomResponse> {
+  if (isDemo()) return demoWait(demoCustom());
   return post<CustomResponse>(backend, "/api/questions/custom", input);
 }

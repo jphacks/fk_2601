@@ -5,6 +5,7 @@ import { Confetti } from "./Decor";
 import { CropCircle } from "./CropCircle";
 import { Icon } from "./Icons";
 import { Navigator } from "./Navigator";
+import { isDemo } from "@/lib/demo";
 import { TRIVIA } from "@/lib/trivia";
 import { Button } from "./ui";
 
@@ -52,11 +53,12 @@ function Progress({ done }: { done: boolean }) {
   useEffect(() => {
     if (done) return;
     const started = Date.now();
-    const timer = setInterval(() => setElapsed(Date.now() - started), 500);
+    const timer = setInterval(() => setElapsed(Date.now() - started), isDemo() ? 100 : 500);
     return () => clearInterval(timer);
   }, [done]);
 
-  const pct = done ? 100 : Math.round(8 + 82 * (1 - Math.exp(-elapsed / 20_000)));
+  // デモ（/demo）は待ちが1〜2秒なので、バーも早くのびるようにする
+  const pct = done ? 100 : Math.round(8 + 82 * (1 - Math.exp(-elapsed / (isDemo() ? 1_200 : 20_000))));
   return (
     <div className="relative flex flex-col gap-2 pt-[52px]">
       <div className="absolute -top-1.5 transition-[left] duration-500" style={{ left: `clamp(0px, calc(${pct}% - 34px), calc(100% - 62px))` }}>
