@@ -32,7 +32,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 ```
 .
 ├── AGENTS.md / CLAUDE.md / GEMINI.md   # この指示書（ルールは AGENTS.md に書く。他は @AGENTS.md を読み込むだけ）
-├── docs/                 # 仕様の正（Source of Truth）。下の「参照先」を参照。docs/design/ は見た目の見本（アプリのコードではない）
+├── docs/                 # 仕様の正（Source of Truth）。下の「参照先」を参照。docs/design/ は見た目の見本（アプリのコードではない）。docs/images/ は README に載せる画面の画像
 ├── firestore.rules       # Firestore のセキュリティルール（本人だけが読み書きできる）
 ├── public/navi/          # ナビの7つの表情とスタンプ（stamp-*）の画像（docs/design/assets/navi/ と同じもの）
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
