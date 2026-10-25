@@ -5,15 +5,28 @@ import { newId } from "./id";
 
 // ピッチ用のデモ版（/demo）。操作・見た目は本物と同じで、AI を呼ばずに、ペットボトルの問いを出す。
 // 何を撮っても「ペットボトル」と認識し、待ち時間は 1〜2 秒の演出だけにする。ログインは使わず、データは端末の中だけに置く。
+// デモの印は、/demo を開いたタブの中だけに置く（sessionStorage）。ほかのタブで https://fk2601.vercel.app/ を開くと、本物になる。
 
 const FLAG_KEY = "demo:on";
+
+/** 前の版では印を localStorage に置いていて、ふつうの URL もデモのままになっていた。残っていたら消す */
+function clearOldFlag(): void {
+  try {
+    window.sessionStorage.removeItem(FLAG_KEY);
+    clearOldFlag();
+  } catch {
+    // 何もしない
+  }
+}
 
 /** 待ちの画面の長さ（本物の「しらべている」演出を、短く見せるだけ） */
 export const DEMO_DELAY_MS = 1600;
 
 export function isDemo(): boolean {
   try {
-    return typeof window !== "undefined" && window.localStorage.getItem(FLAG_KEY) === "1";
+    if (typeof window === "undefined") return false;
+    clearOldFlag();
+    return window.sessionStorage.getItem(FLAG_KEY) === "1";
   } catch {
     return false;
   }
@@ -27,7 +40,7 @@ export function startDemo(): void {
     { id: newId(), nickname: "そら", grade: 5, title: null, firstMode: "choices", createdAt: Date.now() },
   );
   try {
-    window.localStorage.setItem(FLAG_KEY, "1");
+    window.sessionStorage.setItem(FLAG_KEY, "1");
   } catch {
     // 保存できなくても、画面は動かす
   }
