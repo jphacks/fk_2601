@@ -124,7 +124,7 @@ function StampContent() {
           </div>
           <span className="text-[15px] font-black leading-[1.6] text-ink-sub">みんなの はてなに のせると、この しょうごうが でるよ</span>
 
-          <span className="mt-auto font-pop text-lg">しょうごうを えらぶ</span>
+          <span className="mt-2 font-pop text-lg">しょうごうを えらぶ</span>
           <div role="radiogroup" aria-label="しょうごうを えらぶ" className="flex flex-col gap-3">
             <TitleRow name={FIRST_TITLE_LABEL} note="はじめて あそんだ ときに もらえる" selected={profile.title === null} onClick={() => void equip(null)} />
             {earned.map((subject) => (

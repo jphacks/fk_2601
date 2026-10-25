@@ -83,20 +83,28 @@ export function Sparkle({ color = "#FFC83D", size = 26, delay = 0 }: { color?: s
 const RAYS = Array.from({ length: 16 }, (_, i) => i * (360 / 16));
 
 /**
- * カードの後ろで光が回り、まわりで星が光る（ずかんに のこそう）。
- * 光と星は この わくの中だけに出す（上下の見出しや文字には重ならない）
+ * 画面ぜんたいの後ろで、黄色と白の光が ぐるっと回る（ずかんに のこそう）。
+ * 親（relative）の まわり 24px の ふちまで広げる。centerY は 光の中心の高さ（親の上からの %）
  */
-export function Spotlight({ children }: { children: React.ReactNode }) {
+export function Rays({ centerY = 40 }: { centerY?: number }) {
   return (
-    <div className="relative -mx-6 flex justify-center overflow-hidden py-6">
-      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 size-[560px] -translate-x-1/2 -translate-y-1/2">
+    <div aria-hidden="true" className="pointer-events-none absolute -inset-x-6 -bottom-[30px] -top-28 -z-20 overflow-hidden">
+      <div className="absolute left-1/2 size-[1600px] -translate-x-1/2 -translate-y-1/2" style={{ top: `${centerY}%` }}>
         <svg viewBox="-100 -100 200 200" className="animate-spin-slow size-full">
           {RAYS.map((deg) => (
             <path key={deg} d="M0 0L-7 -100H7z" fill="#FFE07A" fillOpacity="0.55" transform={`rotate(${deg})`} />
           ))}
-          <circle r="34" fill="#FFF6D6" />
+          <circle r="12" fill="#FFF6D6" />
         </svg>
       </div>
+    </div>
+  );
+}
+
+/** カードが はずんで出てきて、まわりで星が光る（ずかんに のこそう）。星は この わくの中だけに出す */
+export function Spotlight({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative -mx-6 flex justify-center py-4">
       <span className="absolute left-3 top-4">
         <Sparkle color="#FFC83D" size={28} />
       </span>
@@ -121,6 +129,9 @@ const PIECES: { color: string; round: boolean; dur: number; delay: number; x: nu
   { color: "#24C3A0", round: false, dur: 3.6, delay: 1.7, x: 2 },
   { color: "#4A5AE8", round: true, dur: 4.6, delay: 2.4, x: 8 },
   { color: "#8B5CF6", round: false, dur: 3.9, delay: 3.1, x: 5 },
+  { color: "#FF8A3D", round: true, dur: 3.4, delay: 1.2, x: 9 },
+  { color: "#FFC83D", round: false, dur: 4.3, delay: 2.0, x: 1 },
+  { color: "#FF6F9C", round: true, dur: 3.7, delay: 2.9, x: 6 },
 ];
 
 function ConfettiStrip({ side }: { side: "left" | "right" }) {
@@ -150,5 +161,37 @@ export function SideConfetti() {
       <ConfettiStrip side="left" />
       <ConfettiStrip side="right" />
     </div>
+  );
+}
+
+// 旗の色（くりかえす）
+const FLAG_COLORS = ["#FF6F9C", "#FFC83D", "#24C3A0", "#4A5AE8", "#8B5CF6", "#FF8A3D"];
+
+/** 画面の はばいっぱいに わたした 三角の旗（お祝いの飾り）。1行を まるごと使うので、文字には重ならない */
+export function Bunting() {
+  const flags = 13;
+  const step = 400 / flags;
+  return (
+    <svg aria-hidden="true" viewBox="0 0 400 44" preserveAspectRatio="none" className="-mx-6 -mb-2 block h-11 w-[calc(100%+48px)] shrink-0">
+      <path d="M-4 6Q200 26 404 6" fill="none" stroke="#22223A" strokeWidth="2.5" />
+      {Array.from({ length: flags }, (_, i) => {
+        const x = i * step + step / 2;
+        // ひも（M-4 6 Q200 26 404 6 の曲線）の たるみに合わせて、旗の上の高さを決める
+        const t = (x + 4) / 408;
+        const y = 6 + 40 * t * (1 - t);
+        return (
+          <path
+            key={i}
+            d={`M${x - 11} ${y}L${x + 11} ${y}L${x} ${y + 20}Z`}
+            fill={FLAG_COLORS[i % FLAG_COLORS.length]}
+            stroke="#22223A"
+            strokeWidth="2"
+            strokeLinejoin="round"
+            className="animate-flag"
+            style={{ transformOrigin: `${x}px ${y}px`, animationDelay: `${(i % 4) * 0.25}s` }}
+          />
+        );
+      })}
+    </svg>
   );
 }
