@@ -13,7 +13,7 @@ import { cropLasso, type Point } from "@/lib/image";
 
 function LassoContent() {
   const router = useRouter();
-  const { photo, startGeneration } = useQuiz();
+  const { photo, photoFrom, startGeneration } = useQuiz();
   const [points, setPoints] = useState<Point[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,8 +39,9 @@ function LassoContent() {
   }
 
   return (
-    // もどるは、来た画面へ（ホームの見本の絵・アルバムから来たときは ホーム、カメラから来たときは カメラ）
-    <Page title="ぐるっと つかまえよう！" onBack={() => router.back()}>
+    // もどるは、写真を手に入れた画面へ（ホームの見本の絵・アルバムなら ホーム、撮影の画面なら 撮影）。
+    // 履歴で1つ前にもどると、はてなの画面から「かこみなおす」で来たときに そちらへもどってしまうので、行き先を決めておく
+    <Page title="ぐるっと つかまえよう！" back={photoFrom}>
       <LassoPicker photo={photo} points={points} onChange={setPoints} />
       <Say mood={points ? "happy" : "think"} size={84}>
         {points ? (

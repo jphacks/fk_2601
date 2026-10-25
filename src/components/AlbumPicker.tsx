@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { useQuiz } from "@/components/QuizProvider";
 import { messageOf } from "@/lib/errors";
@@ -12,6 +12,8 @@ import { photoFromFile } from "@/lib/image";
  */
 export function AlbumPicker({ className = "", children }: { className?: string; children: ReactNode }) {
   const router = useRouter();
+  // 囲む画面の「もどる」で、選んだ画面（ホームか撮影）へ戻すため
+  const pathname = usePathname();
   const { setPhoto } = useQuiz();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function AlbumPicker({ className = "", children }: { className?: string; 
     setBusy(true);
     setError(null);
     try {
-      setPhoto(await photoFromFile(file));
+      setPhoto(await photoFromFile(file), pathname);
       router.push("/lasso");
     } catch (e) {
       setError(messageOf(e));
