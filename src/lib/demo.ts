@@ -12,8 +12,7 @@ const FLAG_KEY = "demo:on";
 /** 前の版では印を localStorage に置いていて、ふつうの URL もデモのままになっていた。残っていたら消す */
 function clearOldFlag(): void {
   try {
-    window.sessionStorage.removeItem(FLAG_KEY);
-    clearOldFlag();
+    window.localStorage.removeItem(FLAG_KEY);
   } catch {
     // 何もしない
   }
@@ -49,10 +48,11 @@ export function startDemo(): void {
 /** デモを終わって、本物の使いかたにもどす */
 export function exitDemo(): void {
   try {
-    window.localStorage.removeItem(FLAG_KEY);
+    window.sessionStorage.removeItem(FLAG_KEY);
   } catch {
     // 何もしない
   }
+  clearOldFlag();
 }
 
 const source = (title: string, assumption: string) => [{ kind: "data" as const, title, url: null, assumption }];
