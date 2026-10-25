@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useApp } from "@/components/AuthProvider";
 import { ConditionSliders } from "@/components/ConditionSliders";
 import { ExplanationSteps, Related, Sources } from "@/components/Explanation";
 import { Gate } from "@/components/Gate";
@@ -22,6 +23,7 @@ type Step = "shoutai" | "nazo" | "moshimo" | "get";
 
 function ResultContent() {
   const router = useRouter();
+  const { profile } = useApp();
   const { selected, guess, crop, saved } = useQuiz();
   // 保存したあとに もどってきたときは、保存した画面（はてなゲット！）から見せる
   const [step, setStep] = useState<Step>(() => (saved ? "get" : "shoutai"));
@@ -69,7 +71,7 @@ function ResultContent() {
   if (step === "shoutai") {
     return (
       <Page>
-        <ResultSummary question={selected} guess={guess} evaluation={evaluation} />
+        <ResultSummary question={selected} guess={guess} evaluation={evaluation} grade={profile?.grade} />
         <div className="mt-auto">
           <Button onClick={() => setStep("nazo")}>
             <Icon name="search" size={28} strokeWidth={2.8} />
@@ -119,7 +121,7 @@ function ResultContent() {
             {selected.whatIf ? <RubyText kana text={selected.whatIf} /> : "じょうけんを かえると、こたえは どうなるかな？"}
           </span>
         </Say>
-        <ConditionSliders question={selected} values={scope} onChange={setValues} />
+        <ConditionSliders question={selected} values={scope} onChange={setValues} grade={profile?.grade} />
         <div className="mt-auto">
           <Button onClick={() => setStep("get")}>ずかんに のこす！</Button>
         </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { computeAnswer, defaultScope } from "@/lib/calc";
-import { formatNumber } from "@/lib/format";
+import { formatNumber, numberLength, numberRuby } from "@/lib/format";
 import { refParts } from "@/lib/ref";
 import { kanaOf, unitKana, unitRuby } from "@/lib/ruby";
 import type { Question } from "@/server/llm/schema";
@@ -14,22 +14,30 @@ import { RubyText } from "./RubyText";
 const THUMB = 44;
 
 /** 数の大きさに合わせた字の大きさ（見本 18 は 80px） */
-function bigSize(text: string): number {
-  if (text.length <= 3) return 80;
-  if (text.length <= 5) return 64;
-  if (text.length <= 7) return 48;
-  return 36;
+function bigSize(value: number, grade?: number): number {
+  const length = numberLength(value, grade);
+  if (length <= 3) return 80;
+  if (length <= 5) return 64;
+  if (length <= 7) return 48;
+  if (length <= 10) return 36;
+  return 28;
 }
+
+/** 大きく出す数（万・億などは、習った漢字なら ふりがなを付け、まだなら ひらがなで書く） */
+const bigNumber = (value: number, grade?: number) => <RubyText text={numberRuby(value, grade)} />;
 
 /** 条件（変数）をスライダーで動かして、答えがどう変わるかを、数・ぼうグラフ・倍率で見せる（見本 18「もしも」） */
 export function ConditionSliders({
   question,
   values,
   onChange,
+  grade,
 }: {
   question: Question;
   values: Record<string, number>;
   onChange: (values: Record<string, number>) => void;
+  /** 万・億などを漢字で書くか ひらがなで書くかを決める学年 */
+  grade?: number;
 }) {
   const [bumped, setBumped] = useState(0);
   const lastRatio = useRef(1);
@@ -69,7 +77,7 @@ export function ConditionSliders({
                 {kanaOf(v.label)}
               </label>
               <span className="shrink-0 font-pop text-[26px] leading-[1.4]">
-                {formatNumber(now)}
+                <RubyText text={numberRuby(now, grade)} />
                 <span className="text-lg">{unitKana(v.unit)}</span>
               </span>
             </div>
@@ -118,8 +126,8 @@ export function ConditionSliders({
           <>
             <span className="text-[20px] font-black leading-[1.75]">こたえは</span>
             <div key={bumped} className="animate-bump flex items-baseline gap-1 text-navi">
-              <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(shown) }}>
-                <CountUp value={current} duration={400} format={formatNumber} />
+              <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(current, grade) }}>
+                <CountUp value={current} duration={400} format={(n) => bigNumber(n, grade)} />
               </span>
               <span className="font-pop text-[30px] leading-[1.6]">
                 <RubyText text={unitRuby(unit)} />
@@ -143,21 +151,22 @@ export function ConditionSliders({
       </div>
 
       {current !== null && original !== null && (
-        <div role="img" aria-label={`さっきは ${formatNumber(onLine(original))}${unit}、いまは ${shown}${unit}`} className="flex flex-col gap-2">
-          <div className="grid grid-cols-[56px_minmax(0,1fr)_72px] items-center gap-2">
-            <span className="text-[15px] font-black text-ink-sub">さっき</span>
-            <span className="block h-[22px] overflow-hidden rounded-[11px] bg-cloud">
-              <span className="block h-full bg-[#C9CFFF] transition-[width] duration-300" style={{ width: `${pct(original)}%` }} />
-            </span>
-            <span className="text-right font-pop text-[15px] text-ink-sub">{formatNumber(onLine(original))}</span>
-          </div>
-          <div className="grid grid-cols-[56px_minmax(0,1fr)_72px] items-center gap-2">
-            <span className="text-[15px] font-black">いま</span>
-            <span className="block h-[22px] overflow-hidden rounded-[11px] bg-cloud">
-              <span className="block h-full bg-navi transition-[width] duration-300" style={{ width: `${pct(current)}%` }} />
-            </span>
-            <span className="text-right font-pop text-[15px] text-navi-dark">{shown}</span>
-          </div>
+        <div
+          role="img"
+          aria-label={`さっきは ${formatNumber(onLine(original))}${unit}、いまは ${shown}${unit}`}
+          className="grid grid-cols-[56px_minmax(0,1fr)_minmax(72px,auto)] items-center gap-2"
+        >
+          {/* 数の列は、長い数（「1おく2350まん」など）に合わせて広がる。2つのぼうの長さは そろえたまま */}
+          <span className="text-[15px] font-black text-ink-sub">さっき</span>
+          <span className="block h-[22px] overflow-hidden rounded-[11px] bg-cloud">
+            <span className="block h-full bg-[#C9CFFF] transition-[width] duration-300" style={{ width: `${pct(original)}%` }} />
+          </span>
+          <span className="whitespace-nowrap text-right font-pop text-[15px] text-ink-sub">{formatNumber(onLine(original))}</span>
+          <span className="text-[15px] font-black">いま</span>
+          <span className="block h-[22px] overflow-hidden rounded-[11px] bg-cloud">
+            <span className="block h-full bg-navi transition-[width] duration-300" style={{ width: `${pct(current)}%` }} />
+          </span>
+          <span className="whitespace-nowrap text-right font-pop text-[15px] text-navi-dark">{shown}</span>
         </div>
       )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatNumber, isApprox } from "@/lib/format";
+import { formatNumber, isApprox, numberLength, numberRuby } from "@/lib/format";
 import { describeGuess, RATING_LABEL, type Evaluation, type Guess, type Rating } from "@/lib/rating";
 import { refParts } from "@/lib/ref";
 import { unitRuby } from "@/lib/ruby";
@@ -17,12 +17,12 @@ export function ratingText(rating: Rating, type: Question["type"]): string {
   return RATING_LABEL[rating];
 }
 
-/** 倍率を、ふりがなつきの書きかたにする（「約7倍」「約20分の1」）。22px以上の文字なので、漢字にはふりがなを付ける */
-export function ratioRuby(ratio: number): string {
+/** 倍率を、ふりがなつきの書きかたにする（「約7倍」「約20分の1」）。22px以上の文字なので、漢字にはふりがなを付ける。grade は万・億などの書き方に使う */
+export function ratioRuby(ratio: number, grade?: number): string {
   if (!Number.isFinite(ratio) || ratio <= 0) return "";
   const big = ratio >= 1;
   const v = big ? ratio : 1 / ratio;
-  const n = formatNumber(v >= 10 ? Math.round(v) : Math.round(v * 10) / 10);
+  const n = numberRuby(v >= 10 ? Math.round(v) : Math.round(v * 10) / 10, grade);
   return big ? `{約|やく}${n}{倍|ばい}` : `{約|やく}${n}{分|ぶん}の1`;
 }
 
@@ -34,12 +34,18 @@ const LOOK: Record<Rating, { mood: Mood; bubble: string; lines: [string, string]
 };
 
 /** こたえの数の大きさ（桁が多いときは小さくする。見本は 92px 以上） */
-function bigSize(text: string): number {
-  if (text.length <= 3) return 92;
-  if (text.length <= 5) return 72;
-  if (text.length <= 7) return 54;
-  return 40;
+function bigSize(value: number, grade?: number): number {
+  const length = numberLength(value, grade);
+  if (length <= 3) return 92;
+  if (length <= 5) return 72;
+  if (length <= 7) return 54;
+  if (length <= 10) return 40;
+  if (length <= 12) return 32;
+  return 28;
 }
+
+/** 大きく出す数（万・億などは、習った漢字なら ふりがなを付け、まだなら ひらがなで書く） */
+const bigNumber = (value: number, grade?: number) => <RubyText text={numberRuby(value, grade)} />;
 
 /** ナビの反応（下から飛び出して登場する）。ふきだしは押せないので地の色だけ。color には地と文字の色を渡す */
 function Bubble({ children, color, mood, react, size = 128 }: { children: React.ReactNode; color: string; mood: Mood; react: boolean; size?: number }) {
@@ -59,11 +65,14 @@ export function ResultSummary({
   question,
   guess,
   evaluation,
+  grade,
   animate = true,
 }: {
   question: Question;
   guess: Guess;
   evaluation: Evaluation;
+  /** 万・億などを漢字で書くか ひらがなで書くかを決める学年 */
+  grade?: number;
   animate?: boolean;
 }) {
   const { rating, type, guessValue, actual } = evaluation;
@@ -114,9 +123,8 @@ export function ResultSummary({
 
   const ref = type === "estimate" ? refParts(question, actual) : null;
   const ratio = actual / guessValue;
-  const shown = formatNumber(actual);
   const chipText =
-    rating === "pita" ? "ほぼ ぴったり！" : `よそうの ${ratioRuby(ratio)}${rating === "ohazure" ? "！" : ""}`;
+    rating === "pita" ? "ほぼ ぴったり！" : `よそうの ${ratioRuby(ratio, grade)}${rating === "ohazure" ? "！" : ""}`;
 
   return (
     <div className="relative flex flex-col gap-4">
@@ -130,8 +138,8 @@ export function ResultSummary({
       <section className={`relative flex flex-col items-start gap-1 rounded-[30px] px-5 pb-[18px] pt-3.5 ${look.card}`}>
         <span className="text-[15px] font-black text-ink-sub">はてなの しょうたい</span>
         <div className="flex items-baseline gap-1 text-navi">
-          <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(shown) }}>
-            {animate ? <CountUp value={actual} from={0} format={formatNumber} /> : shown}
+          <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(actual, grade) }}>
+            {animate ? <CountUp value={actual} from={0} format={(n) => bigNumber(n, grade)} /> : bigNumber(actual, grade)}
           </span>
           <span className="font-pop text-[32px] leading-[1.6]">
             <RubyText text={unitRuby(unit)} />

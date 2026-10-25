@@ -13,7 +13,7 @@ export function CountUp({
   value: number;
   from?: number;
   duration?: number;
-  format: (value: number) => string;
+  format: (value: number) => React.ReactNode;
 }) {
   const reduced = useReducedMotion();
   const start = from ?? value;
