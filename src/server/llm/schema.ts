@@ -20,7 +20,12 @@ export const SourceSchema = z.object({
 });
 
 export const QuestionSchema = z.object({
-  text: z.string().describe("問題文。答えの数やヒントを書かない。漢字には {漢字|よみ} の形でふりがなをつける"),
+  // text より先に書かせる（先に「そのもののふしぎ」を決めてから、問題文を作らせるため）
+  secret: z.string().describe("ねらった「写っているもの自身のふしぎ・ひみつ」を、ひとことで（例: マンホールのふたが まるいわけ）。表示には使わない"),
+  swappable: z
+    .boolean()
+    .describe("問題文の中のものの名前を、べつのものに入れかえても問いが成り立つなら true（true の問いは使われない）。表示には使わない"),
+  text: z.string().describe("問題文。みじかい1〜2文で、細かい条件や専門の数をならべない。答えの数やヒントを書かない。漢字には {漢字|よみ} の形でふりがなをつける"),
   type: z.enum(["estimate", "compare", "why"]),
   subject: SubjectSchema,
   topic: z.string().describe("単元（例: 場合の数・時間・光）。ふりがな記法は使わない"),
@@ -44,7 +49,7 @@ export const QuestionSchema = z.object({
   choices: z
     .array(z.object({ text: z.string(), correct: z.boolean() }))
     .nullable()
-    .describe("why のときだけ。理由の文章を3つ、正解は1つ"),
+    .describe("why のときだけ。理由・結果・どっち、の選択肢を2〜3つ、正解は1つ"),
   explanation: z.object({
     short: z.string().describe("まず見せる一言"),
     steps: z.array(z.string()).describe("タップで見る計算過程のステップ"),

@@ -12,7 +12,7 @@ type Entry = { label: string; questions: Question[] };
 // 読みやすさのため、学年つきの記法 {漢字|よみ|学年} で書いて、学年の部分をとってから使う
 const g = (s: string) => s.replace(/\{([^{}|]+)\|([^{}|]+)\|\d\}/g, "{$1|$2}");
 
-type Draft = Omit<Question, "sources" | "compare" | "choices" | "guessRange" | "llmAnswer" | "formula" | "variables" | "answerUnit" | "ref"> & {
+type Draft = Omit<Question, "sources" | "compare" | "choices" | "guessRange" | "llmAnswer" | "formula" | "variables" | "answerUnit" | "ref" | "secret" | "swappable"> & {
   answerUnit?: string;
   formula?: string;
   variables?: Question["variables"];
@@ -28,6 +28,8 @@ function build(d: Draft): Question {
   const { source, assume, ...rest } = d;
   return {
     ...rest,
+    secret: "",
+    swappable: false,
     text: g(d.text),
     topic: g(d.topic),
     target: g(d.target),

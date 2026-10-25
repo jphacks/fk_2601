@@ -5,6 +5,10 @@ import type { Question } from "./schema";
 
 // LLM の答え（llmAnswer）と、式で計算した値のずれの許容範囲（docs/03-technical.md 5.2）
 const ANSWER_TOLERANCE = 0.05;
+// 条件をならべすぎた問いを出さない（ふりがなをのぞいた問題文の長さと、数の個数。docs/03-technical.md 5.3）
+const MAX_TEXT_LENGTH = 140;
+const MAX_NUMBERS_IN_TEXT = 2;
+const MAX_NUMBER_IN_TEXT = 10000;
 const NAME_PATTERN = /^[a-z][A-Za-z0-9_]*$/;
 
 export type Validated = { ok: true; question: Question } | { ok: false; reason: string };
@@ -29,11 +33,17 @@ function sanitizeRef(ref: Question["ref"]): Question["ref"] {
   return { type: ref.type, label, value: ref.value, unit: clip(ref.unit, 10) };
 }
 
-/** LLM が出した問いを確かめ、使える形にそろえる。式の答えは LLM の値ではなく、math.js で計算した値を信じる */
-export function validateQuestion(input: Question): Validated {
+/**
+ * LLM が出した問いを確かめ、使える形にそろえる。式の答えは LLM の値ではなく、math.js で計算した値を信じる。
+ * lenient は、子どもが自分で書いた問いと、見本の問い（写真のものを入れかえられるか・長さ・数の個数では はじかない）
+ */
+export function validateQuestion(input: Question, options: { lenient?: boolean } = {}): Validated {
   const fail = (reason: string): Validated => ({ ok: false, reason });
   const q: Question = {
     ...input,
+    // 内部で使うだけの項目は、保存しない
+    secret: "",
+    swappable: false,
     // 見出しや分類に使う文字には、ふりがな記法を残さない
     topic: stripRuby(input.topic).trim(),
     target: stripRuby(input.target).trim(),
@@ -48,6 +58,16 @@ export function validateQuestion(input: Question): Validated {
   };
 
   if (q.text.trim().length === 0 || q.text.length > 400) return fail("問題文の長さが正しくありません");
+  if (!options.lenient) {
+    // 写っているものでなければ成り立たない、短くて、条件をならべすぎない問いだけを使う
+    if (input.swappable) return fail("写っているもの以外でも成り立つ問いです");
+    const plain = stripRuby(q.text);
+    if (plain.length > MAX_TEXT_LENGTH) return fail("問題文が長すぎます");
+    // 「1日」「1回」のような 1 は数えない。専門の大きな数（44100 など）を条件に書いた問いも出さない
+    const numbers = (plain.match(/\d+(?:\.\d+)?/g) ?? []).map(Number).filter((n) => n !== 1);
+    if (numbers.length > MAX_NUMBERS_IN_TEXT) return fail("問題文に数が多すぎます");
+    if (numbers.some((n) => n >= MAX_NUMBER_IN_TEXT)) return fail("問題文に大きな数が書いてあります");
+  }
   if (q.explanation.short.trim().length === 0) return fail("解説がありません");
   if (q.topic.length === 0 || q.target.length === 0) return fail("単元か対象がありません");
 

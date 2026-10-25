@@ -28,10 +28,10 @@ export type CustomResponse = {
 
 const isMock = () => process.env.LLM_MODE === "mock";
 
-function keepValid(questions: Question[]): Question[] {
+function keepValid(questions: Question[], lenient = false): Question[] {
   const valid: Question[] = [];
   for (const q of questions) {
-    const result = validateQuestion(q);
+    const result = validateQuestion(q, { lenient });
     if (result.ok) valid.push(result.question);
   }
   return valid;
@@ -43,7 +43,7 @@ export async function generateQuestions(input: QuestionsRequest): Promise<Questi
   // 見本の絵で AI がつながらないとき（fallback）は、AI を呼ばずに見本の問いを返す
   if (input.fallback && input.scene) {
     const { label, questions } = builtinQuestions(input.scene);
-    return { recognition: { label, canAsk: true }, questions: keepValid(questions), demo: true };
+    return { recognition: { label, canAsk: true }, questions: keepValid(questions, true), demo: true };
   }
 
   const output = isMock()
@@ -51,7 +51,8 @@ export async function generateQuestions(input: QuestionsRequest): Promise<Questi
     : await callStructured(QuestionsOutputSchema, SYSTEM_PROMPT, input.image, questionsUserText(input));
 
   if (!output.recognition.canAsk) return { recognition: output.recognition, questions: [] };
-  const questions = keepValid(output.questions);
+  // 見本の問い（モック）は、手で書いたものなので、問いの作りかたの検査はゆるくする
+  const questions = keepValid(output.questions, isMock());
   // 1つも出せないときはエラー表示にする（自動で作り直さない）
   if (questions.length === 0) throw new NoValidQuestionError();
   return { recognition: output.recognition, questions, ...("demo" in output ? { demo: true } : {}) };
@@ -65,7 +66,7 @@ export async function generateCustom(input: CustomRequest): Promise<CustomRespon
   if (!output.answerable || !output.question) {
     return { recognition: output.recognition, answerable: false, reason: output.reason, question: null };
   }
-  const result = validateQuestion(output.question);
+  const result = validateQuestion(output.question, { lenient: true });
   if (!result.ok) {
     return { recognition: output.recognition, answerable: false, reason: "うまく こたえを つくれなかったよ。ちがう はてなに してみてね", question: null };
   }
