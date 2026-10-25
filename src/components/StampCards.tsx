@@ -1,74 +1,56 @@
-import { STAMP_GOAL, SUBJECT_KANA, SUBJECTS, TITLE_LABEL } from "@/lib/constants";
+import Image from "next/image";
+import { STAMP_GOAL, SUBJECT_LABEL, SUBJECT_KANA, SUBJECTS, TITLE_LABEL } from "@/lib/constants";
 import type { Subject } from "@/server/llm/schema";
-import { Icon } from "./Icons";
 import { SUBJECT_STYLE } from "./QuestionCard";
 
-/**
- * 分類ごとのスタンプカード（見本 20）。目標の数を集めると称号がもらえる（称号は切り替えて使える）。
- * そろった分類には、星のスタンプと、称号をつかうボタンが出る
- */
-export function StampCards({
-  counts,
-  equipped,
-  onEquip,
-}: {
-  counts: Record<Subject, number>;
-  equipped?: Subject | null;
-  onEquip?: (title: Subject | null) => void;
-}) {
+// スタンプはナビの形（さんすう＝青／りか＝ミント／じょうほう＝むらさき）。まだのものは点線のナビに「？」（docs/design/README.md「ナビの出しかた」）
+const STAMP_FILE: Record<Subject, string> = { math: "stamp-blue", science: "stamp-mint", info: "stamp-purple" };
+
+/** スタンプ1つ。subject が null のときは、まだ もらっていない（点線） */
+export function Stamp({ subject, size = 54, react = false }: { subject: Subject | null; size?: number; react?: boolean }) {
   return (
-    <div className="flex flex-col gap-3">
+    <Image
+      src={`/navi/${subject ? STAMP_FILE[subject] : "stamp-empty"}.png`}
+      alt=""
+      width={size}
+      height={size}
+      className={`shrink-0 ${react ? "navi-react" : ""}`}
+      style={{ width: size, height: size }}
+    />
+  );
+}
+
+/**
+ * 分類ごとのスタンプカード（見本 21）。押せないので地の色だけ。
+ * 目標の数を集めると称号がもらえる（称号は「しょうごう」のタブで えらぶ）
+ */
+export function StampCards({ counts }: { counts: Record<Subject, number> }) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       {SUBJECTS.map((subject) => {
         const count = counts[subject];
+        const shown = Math.min(count, STAMP_GOAL);
         const earned = count >= STAMP_GOAL;
         const s = SUBJECT_STYLE[subject];
         return (
-          <section
-            key={subject}
-            className={`flex flex-col gap-2 rounded-[22px] border-2 border-ink/15 px-3.5 pb-3 pt-2.5 ${s.light}`}
-          >
+          <section key={subject} className={`flex flex-1 flex-col justify-center gap-2 rounded-card px-4 pb-3.5 pt-3 ${s.light}`}>
             <div className="flex items-center justify-between">
-              <h3 className={`font-pop text-xl font-normal ${s.dark}`}>{SUBJECT_KANA[subject]}</h3>
-              <span className={`font-pop text-base ${s.dark}`}>{earned ? `${STAMP_GOAL}/${STAMP_GOAL} コンプリート！` : `${count}/${STAMP_GOAL}`}</span>
+              <h2 className={`font-pop text-[22px] font-normal leading-[1.7] ${s.dark}`}>
+                <ruby>
+                  {SUBJECT_LABEL[subject]}
+                  <rt>{SUBJECT_KANA[subject]}</rt>
+                </ruby>
+              </h2>
+              <span className={`font-pop text-[17px] ${s.dark}`}>{earned ? `${STAMP_GOAL}/${STAMP_GOAL} コンプリート！` : `${shown}/${STAMP_GOAL}`}</span>
             </div>
-            <div className="grid grid-cols-5 justify-items-center" aria-label={`スタンプ ${Math.min(count, STAMP_GOAL)} / ${STAMP_GOAL}`}>
-              {Array.from({ length: STAMP_GOAL }, (_, i) => {
-                const last = earned && i === STAMP_GOAL - 1;
-                return (
-                  <span
-                    key={i}
-                    className={`flex size-11 items-center justify-center rounded-full ${
-                      i < count
-                        ? `border-3 border-ink ${last ? "bg-yellow" : s.solid}`
-                        : "border-[2.5px] border-dashed border-ink-muted bg-white"
-                    }`}
-                  >
-                    {last && <Icon name="star" size={22} fill="#FFFFFF" stroke="#22223A" strokeWidth={2} />}
-                  </span>
-                );
-              })}
+            <div role="img" aria-label={`スタンプ ${STAMP_GOAL}こちゅう ${shown}こ`} className="grid grid-cols-5 justify-items-center">
+              {Array.from({ length: STAMP_GOAL }, (_, i) => (
+                <Stamp key={i} subject={i < shown ? subject : null} />
+              ))}
             </div>
-            {earned ? (
-              <div className="flex items-center justify-between gap-2">
-                <span className={`text-sm font-black ${s.dark}`}>「{TITLE_LABEL[subject]}」を ゲット！</span>
-                {onEquip && (
-                  <button
-                    type="button"
-                    aria-pressed={equipped === subject}
-                    onClick={() => onEquip(equipped === subject ? null : subject)}
-                    className={`min-h-10 shrink-0 rounded-[14px] border-[2.5px] border-ink px-3.5 text-sm font-black shadow-pop-xs active:translate-y-[3px] active:shadow-none ${
-                      equipped === subject ? "bg-ink text-white" : "bg-white"
-                    }`}
-                  >
-                    {equipped === subject ? "つかっている" : "つかう"}
-                  </button>
-                )}
-              </div>
-            ) : (
-              <span className={`text-sm font-black ${s.dark}`}>
-                あと {STAMP_GOAL - count}こで「{TITLE_LABEL[subject]}」
-              </span>
-            )}
+            <span className={`text-[15px] font-black ${s.dark}`}>
+              {earned ? `「${TITLE_LABEL[subject]}」 ゲット！` : `あと ${STAMP_GOAL - shown}こで「${TITLE_LABEL[subject]}」`}
+            </span>
           </section>
         );
       })}

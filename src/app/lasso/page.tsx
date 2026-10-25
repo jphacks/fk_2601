@@ -40,7 +40,7 @@ function LassoContent() {
 
   return (
     // もどるは、来た画面へ（ホームの見本の絵・アルバムから来たときは ホーム、カメラから来たときは カメラ）
-    <Page title="ぐるっと つかまえよう！" onBack={() => router.back()}>
+    <Page title="ぐるっと かこもう！" onBack={() => router.back()}>
       <LassoPicker photo={photo} points={points} onChange={setPoints} />
       <Say mood={points ? "happy" : "think"} size={84}>
         {points ? (
@@ -75,10 +75,9 @@ function LassoContent() {
           とりなおす
         </LinkButton>
       </div>
-      <div className="mt-auto pt-1.5">
+      <div className="mt-auto">
         <Button onClick={confirm} disabled={!points || busy}>
-          <Icon name="lasso" size={30} strokeWidth={2.6} />
-          {busy ? "まってね…" : "つかまえる！"}
+          {busy ? "まってね…" : "OK！"}
         </Button>
       </div>
     </Page>

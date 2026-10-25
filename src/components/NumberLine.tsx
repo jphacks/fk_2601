@@ -52,11 +52,11 @@ export function NumberLine({
     <div
       role="img"
       aria-label={`きみの よそう ${formatNumber(guess)}${unit}、こたえ ${formatNumber(actual)}${unit}`}
-      className="relative mt-1 h-[112px]"
+      className="relative h-[112px]"
     >
       <span className="absolute left-1 top-1 font-pop text-[13px] text-ink-sub">0</span>
       <span className="absolute right-1 top-1 font-pop text-[13px] text-ink-sub">{formatNumber(max)}</span>
-      <div className="absolute inset-x-0 top-7 h-[46px] rounded-[18px] border-3 border-ink bg-cloud" />
+      <div className="absolute inset-x-0 top-7 h-[46px] rounded-[18px] bg-cloud" />
       <div className="absolute inset-x-3.5 top-[50px] h-0 border-t-3 border-dashed border-white" />
       <div className="absolute top-[31px] h-10 bg-zure" style={{ left: `${left}%`, width: `${width}%`, transition: move }} />
       <span

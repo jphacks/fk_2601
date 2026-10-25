@@ -4,21 +4,18 @@ import Link from "next/link";
 import { AlbumPicker } from "@/components/AlbumPicker";
 import { useArchive } from "@/components/ArchiveProvider";
 import { useApp } from "@/components/AuthProvider";
-import { Meter } from "@/components/Decor";
 import { Gate } from "@/components/Gate";
 import { Icon } from "@/components/Icons";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
-import { SafetyNotice } from "@/components/SafetyNotice";
 import { SceneSamples } from "@/components/SceneSamples";
-import { stampCounts } from "@/lib/collection";
-import { STAMP_GOAL, TITLE_LABEL } from "@/lib/constants";
+import { CAPTURE_WITH_PROMISE, titleLabel } from "@/lib/constants";
 import { missionDone, todaysMission } from "@/lib/missions";
 
 /** まちの絵（見本 04）。いえ・き・しんごうに「はてな」がかくれている */
 function TownArt() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 336 230" className="absolute left-0 top-0 h-[230px] w-full">
+    <svg aria-hidden="true" viewBox="0 0 336 230" className="absolute bottom-0 left-0 h-[230px] w-[336px]">
       <circle cx="296" cy="40" r="20" fill="#FFC83D" stroke="#22223A" strokeWidth="3" />
       <path d="M178 96a14 14 0 0 1 26-6 12 12 0 0 1 20 10h-46z" fill="#FFFFFF" stroke="#22223A" strokeWidth="3" strokeLinejoin="round" />
       <rect x="-4" y="186" width="344" height="50" fill="#9BE3C8" stroke="#22223A" strokeWidth="3" />
@@ -45,72 +42,49 @@ function HomeContent() {
   const { archives } = useArchive();
   if (!profile) return null;
 
-  const counts = stampCounts(archives);
   const done = missionDone(archives);
-  const meters = [
-    { label: "さんすう", value: counts.math, bg: "bg-navi-light", text: "text-navi-dark", bar: "#4A5AE8" },
-    { label: "りか", value: counts.science, bg: "bg-mint-light", text: "text-mint-dark", bar: "#24C3A0" },
-    { label: "じょうほう", value: counts.info, bg: "bg-purple-light", text: "text-purple-dark", bar: "#8B5CF6" },
-  ];
 
   return (
     <>
-      {/* 画面ぜんたいに出すので、動きのついた Page の外に置く（transform の中では fixed が効かない） */}
-      <SafetyNotice once />
       <Page tab="home">
         <section
           role="img"
           aria-label="まちの え。いえ、き、しんごうに はてなが かくれている"
-          className="relative h-[236px] shrink-0 overflow-hidden rounded-[32px] border-3 border-ink bg-navi-light"
+          className="relative min-h-[236px] flex-1 overflow-hidden rounded-[32px] bg-navi-light"
         >
           <TownArt />
           <div className="absolute left-[18px] top-4 flex flex-col items-start gap-1.5">
             <span className="font-pop text-[21px]">こんにちは、{profile.nickname}！</span>
-            {profile.title && (
-              <span className="rounded-xl border-[2.5px] border-ink bg-purple px-3 py-[3px] text-sm font-black text-white">{TITLE_LABEL[profile.title]}</span>
-            )}
+            <span className="rounded-xl bg-purple px-3 py-[3px] text-sm font-black text-white">{titleLabel(profile.title)}</span>
           </div>
           <div className="absolute bottom-9 right-0.5">
             <Navigator mood="happy" size={124} />
           </div>
         </section>
 
-        <Link
-          href="/mission"
-          className="flex items-center gap-3 rounded-card border-3 border-ink bg-yellow px-4 py-3 shadow-pop-md active:translate-y-1 active:shadow-none"
-        >
-          <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full border-3 border-ink bg-white">
+        {/* 今日のお題（押せないので地の色だけ） */}
+        <div className="flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-3">
+          <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-white">
             <Icon name="star" size={26} fill="#FFC83D" stroke="#22223A" strokeWidth={2} />
           </span>
           <span className="flex min-w-0 grow flex-col">
             <span className="text-sm font-black">きょうの おだい{done ? "（クリア！）" : ""}</span>
-            <span className="font-pop text-[17px] leading-snug">{todaysMission()}</span>
+            <span className="font-pop text-[19px] leading-snug">{todaysMission()}</span>
           </span>
-        </Link>
+        </div>
 
         <Link
-          href="/capture"
-          className="mt-1 flex h-[92px] shrink-0 items-center justify-center gap-3 rounded-[30px] border-3 border-ink bg-navi font-pop text-[25px] text-white shadow-[0_7px_0_var(--color-ink)] active:translate-y-[7px] active:shadow-none"
+          href={CAPTURE_WITH_PROMISE}
+          className="flex h-[92px] shrink-0 items-center justify-center gap-3 rounded-[30px] border-3 border-ink bg-navi font-pop text-[25px] text-white shadow-[0_7px_0_var(--color-ink)] active:translate-y-[7px] active:shadow-none"
         >
           <Icon name="camera" size={42} strokeWidth={2.2} />
           はてなを さがす！
         </Link>
 
-        <AlbumPicker className="mt-1 flex h-14 shrink-0 items-center justify-center gap-2 rounded-[22px] border-3 border-ink bg-white text-[19px] font-black text-ink shadow-pop-sm active:translate-y-1 active:shadow-none">
+        <AlbumPicker className="flex h-14 shrink-0 items-center justify-center gap-2 rounded-[22px] border-3 border-ink bg-white text-[19px] font-black text-ink shadow-pop-sm active:translate-y-1 active:shadow-none">
           <Icon name="album" size={24} strokeWidth={2.2} />
           アルバムから えらぶ
         </AlbumPicker>
-
-        <div className="mt-1.5 grid grid-cols-3 gap-2">
-          {meters.map((m) => (
-            <Link key={m.label} href="/archive" className={`flex flex-col gap-1 rounded-2xl px-2.5 py-2 ${m.bg}`}>
-              <span className={`text-[13px] font-black ${m.text}`}>
-                {m.label} {Math.min(m.value, STAMP_GOAL)}/{STAMP_GOAL}
-              </span>
-              <Meter value={Math.min(m.value, STAMP_GOAL)} max={STAMP_GOAL} color={m.bar} />
-            </Link>
-          ))}
-        </div>
 
         <SceneSamples />
       </Page>

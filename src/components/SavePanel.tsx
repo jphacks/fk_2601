@@ -8,10 +8,12 @@ import { messageOf } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
 import { useArchive } from "./ArchiveProvider";
-import { Confetti, Hanko } from "./Decor";
-import { Icon, Medal } from "./Icons";
+import { Confetti, Hanko, SideConfetti, Sparkle, Spotlight } from "./Decor";
+import { Medal } from "./Icons";
+import { Navigator } from "./Navigator";
 import { SUBJECT_STYLE, TYPE_LABEL } from "./QuestionCard";
 import { useQuiz } from "./QuizProvider";
+import { Stamp } from "./StampCards";
 import { Button } from "./ui";
 import { kanaOf, stripRuby } from "@/lib/ruby";
 
@@ -21,18 +23,18 @@ export function CollectCard({ question, image, summary, rating }: { question: Qu
   // 「なぜ？」型は、ピタリ・はずれ ではなく、せいかい・ざんねん
   const label = question.type === "why" ? (rating === "pita" ? "せいかい" : "ざんねん") : undefined;
   return (
-    <div className={`w-[300px] max-w-full -rotate-3 self-center rounded-[28px] border-2 border-ink/15 p-2 ${s.solid}`}>
-      <div className="relative overflow-hidden rounded-[20px] border-3 border-ink bg-white">
-        <div className="flex h-28 items-center justify-center border-b-3 border-ink bg-photo">
+    <div className={`w-[300px] max-w-full -rotate-3 self-center rounded-[28px] p-2 ${s.solid}`}>
+      <div className="relative overflow-hidden rounded-[20px] bg-white">
+        <div className="flex h-28 items-center justify-center bg-photo">
           {/* eslint-disable-next-line @next/next/no-img-element -- 囲んだ部分の切り抜き（data URL） */}
           <img src={image} alt={stripRuby(question.target)} className="size-full object-contain" />
         </div>
         <div className="flex flex-col gap-1.5 px-3.5 pb-3.5 pt-2.5">
-          <span className={`self-start rounded-[10px] border-2 border-ink px-2.5 py-0.5 text-[13px] font-black ${s.light} ${s.dark}`}>
-            {SUBJECT_KANA[question.subject]} ・ {TYPE_LABEL[question.type]}
+          <span className={`self-start rounded-[10px] px-2.5 py-0.5 text-[13px] font-black ${s.light} ${s.dark}`}>
+            {SUBJECT_KANA[question.subject]} ・ {kanaOf(question.topic) || TYPE_LABEL[question.type]}
           </span>
           {/* 小さい文字なので、ひらがなで出す */}
-          <span className="text-[17px] font-black leading-[1.45]">{kanaOf(question.text)}</span>
+          <span className="text-[18px] font-black leading-[1.45]">{kanaOf(question.text)}</span>
           <span className="font-pop text-[15px]">{summary}</span>
         </div>
         <div className="absolute right-1.5 top-[70px]">
@@ -91,12 +93,21 @@ export function SavePanel({
 
   if (!saved) {
     return (
-      <div className="relative flex flex-1 flex-col gap-3.5">
-        <Confetti />
-        <h2 className="text-center font-pop text-[26px] font-normal">ずかんに のこそう！</h2>
-        <CollectCard question={question} image={image} summary={summary} rating={rating} />
+      <div className="relative flex flex-1 flex-col gap-4">
+        <SideConfetti />
+        <div className="flex items-center justify-center gap-2">
+          <Sparkle color="#FF6F9C" size={22} />
+          {/* 1行に おさまるよう、画面の はばに合わせて 文字を小さくする */}
+          <h2 className="whitespace-nowrap font-pop text-[clamp(20px,7vw,28px)] font-normal leading-tight text-yellow [-webkit-text-stroke:2px_var(--color-ink)]">
+            ずかんに のこそう！
+          </h2>
+          <Sparkle color="#24C3A0" size={22} delay={0.6} />
+        </div>
+        <Spotlight>
+          <CollectCard question={question} image={image} summary={summary} rating={rating} />
+        </Spotlight>
 
-        <label className="mt-2 flex cursor-pointer items-start gap-3 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm active:translate-y-1 active:shadow-none">
+        <label className="flex cursor-pointer items-start gap-3 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm active:translate-y-1 active:shadow-none">
           <input type="checkbox" checked={publish} onChange={(e) => setPublish(e.target.checked)} className="mt-1 size-6 shrink-0 accent-[var(--color-pink)]" />
           <span className="text-[19px] font-black leading-[1.6]">
             みんなにも みせる
@@ -109,7 +120,7 @@ export function SavePanel({
             {error}
           </p>
         )}
-        <div className="mt-auto pt-2">
+        <div className="mt-auto">
           <Button onClick={save} disabled={busy}>
             {busy ? "のこしているよ…" : "ずかんに のこす！"}
           </Button>
@@ -119,32 +130,31 @@ export function SavePanel({
   }
 
   return (
-    <div className="relative flex flex-1 flex-col gap-3.5">
+    <div className="relative flex flex-1 flex-col gap-4">
       <Confetti />
-      <h2 className="mt-1 text-center font-pop text-[34px] font-normal leading-tight text-yellow [-webkit-text-stroke:2px_var(--color-ink)]">はてなゲット！</h2>
+      <div className="flex items-center justify-center gap-1.5">
+        <Navigator mood="happy" size={70} react />
+        <h2 className="font-pop text-[34px] font-normal leading-tight text-yellow [-webkit-text-stroke:2px_var(--color-ink)]">はてなゲット！</h2>
+      </div>
       <CollectCard question={question} image={image} summary={summary} rating={rating} />
 
-      <section className={`mt-2 flex flex-col gap-2.5 rounded-card border-2 border-ink/15 px-4 py-3 ${s.light}`}>
+      <section className={`mt-auto flex flex-col gap-2.5 rounded-card px-4 py-3 ${s.light}`}>
         <div className={`flex items-center justify-between font-pop text-[17px] ${s.dark}`}>
           <span>{SUBJECT_KANA[question.subject]} スタンプ</span>
           <span>{earned ? `${STAMP_GOAL}/${STAMP_GOAL} そろった！` : `${shownStamps}/${STAMP_GOAL}`}</span>
         </div>
-        <div className="grid grid-cols-5 justify-items-center gap-2" aria-label={`スタンプ ${shownStamps} / ${STAMP_GOAL}`}>
+        <div className="grid grid-cols-5 items-center justify-items-center gap-2" role="img" aria-label={`スタンプ ${STAMP_GOAL}こちゅう ${shownStamps}こ`}>
           {Array.from({ length: STAMP_GOAL }, (_, i) => {
-            // いま もらったスタンプを光らせる（もう そろっているときは、どれも ふつうに出す）
+            // いま もらったスタンプを、黄色い丸で目立たせる（もう そろっているときは、どれも ふつうに出す）
             const isNew = count <= STAMP_GOAL && i === shownStamps - 1;
-            return (
-              <span
-                key={i}
-                className={`flex size-[46px] items-center justify-center rounded-full border-3 ${
-                  i < shownStamps
-                    ? `border-ink ${isNew ? "animate-bump bg-yellow shadow-[0_0_0_5px_#fff,0_0_0_8px_var(--color-ink)]" : s.solid}`
-                    : "border-dashed border-ink-muted bg-white"
-                }`}
-              >
-                {isNew && <Icon name="star" size={24} fill="#FFFFFF" stroke="#22223A" strokeWidth={2} />}
-              </span>
-            );
+            if (isNew) {
+              return (
+                <span key={i} className="-my-[5px] flex size-[60px] items-center justify-center rounded-full border-3 border-ink bg-yellow">
+                  <Stamp subject={question.subject} size={46} react />
+                </span>
+              );
+            }
+            return <Stamp key={i} subject={i < shownStamps ? question.subject : null} size={50} />;
           })}
         </div>
         {!earned && (
@@ -155,7 +165,7 @@ export function SavePanel({
       </section>
 
       {earned && count === STAMP_GOAL && (
-        <div className="flex items-center gap-3 rounded-card border-2 border-ink/15 bg-purple px-4 py-3 text-white">
+        <div className="flex items-center gap-3 rounded-card bg-purple px-4 py-3 text-white">
           <Medal size={40} />
           <div className="flex flex-col">
             <span className="text-[15px] font-black">しょうごう ゲット！</span>
@@ -164,8 +174,7 @@ export function SavePanel({
         </div>
       )}
 
-      <div className="mt-auto flex gap-2.5 pt-2">
-        <button
+      <div className="mt-auto flex gap-2.5">        <button
           type="button"
           onClick={() => leave("/archive")}
           className="flex h-[68px] flex-1 items-center justify-center rounded-3xl border-3 border-ink bg-white text-lg font-black shadow-pop-md active:translate-y-[4px] active:shadow-none"

@@ -115,19 +115,21 @@ function ChooseContent() {
           {(generation.status === "loading" || generation.status === "idle") && <Loading message="はてなを さがしているよ" image={crop.dataUrl} />}
           {generation.status === "ready" && generation.data.questions.length > 0 && (
             <>
-              <Say mood="happy" size={78}>
-                どの はてなが{" "}
-                <ruby>
-                  気<rt>き</rt>
-                </ruby>
-                になる？
-              </Say>
+              <div className="mt-auto">
+                <Say mood="happy" size={78}>
+                  どの はてなが{" "}
+                  <ruby>
+                    気<rt>き</rt>
+                  </ruby>
+                  になる？
+                </Say>
+              </div>
               {generation.data.demo && (
-                <p className="rounded-2xl border-[2.5px] border-ink bg-yellow-light px-3 py-2 text-center text-sm font-black">
+                <p className="rounded-2xl bg-yellow-light px-3 py-2 text-center text-sm font-black">
                   みほんの はてなだよ（AIは つかっていないよ）
                 </p>
               )}
-              <ul className="mt-0.5 flex flex-col gap-3.5">
+              <ul className="flex flex-col gap-3">
                 {generation.data.questions.map((q, i) => (
                   <li key={i}>
                     <button
@@ -141,13 +143,13 @@ function ChooseContent() {
                       <SubjectIcon subject={q.subject} />
                       <span className="flex min-w-0 grow flex-col gap-0.5">
                         <Eyebrow question={q} />
-                        <QuestionText question={q} size={19} />
+                        <QuestionText question={q} size={21} />
                       </span>
                     </button>
                   </li>
                 ))}
               </ul>
-              <div className="mt-auto pt-2">
+              <div className="mt-auto">
                 <Button variant="sub" onClick={regenerate}>
                   <Icon name="dice" size={22} strokeWidth={2.4} />
                   ほかの はてなを だす
@@ -159,7 +161,7 @@ function ChooseContent() {
       )}
 
       {mode === "custom" && (
-        <form onSubmit={submitCustom} className="flex flex-1 flex-col gap-3.5">
+        <form onSubmit={submitCustom} className="flex flex-1 flex-col gap-4">
           <Say mood="think" size={86}>
             この しゃしんの なにが{" "}
             <ruby>
@@ -169,7 +171,7 @@ function ChooseContent() {
           </Say>
           <div className="flex flex-col gap-2">
             <label htmlFor="q" className="font-pop text-lg">
-              はてなを かいてみよう
+              はてなを かこう
             </label>
             <textarea
               id="q"
@@ -222,7 +224,7 @@ function ChooseContent() {
             </p>
           )}
           {!busy && (
-            <div className="mt-auto pt-2">
+            <div className="mt-auto">
               <Button type="submit" disabled={text.trim().length === 0} className="!text-[23px]">
                 この はてなで いく！
               </Button>

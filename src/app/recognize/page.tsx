@@ -11,20 +11,22 @@ import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
 import { useQuiz } from "@/components/QuizProvider";
 import { RubyText } from "@/components/RubyText";
-import { Button, ErrorNotice, LinkButton } from "@/components/ui";
+import { Button, ErrorNotice, LinkButton, Say } from "@/components/ui";
 
 /** 「ちがうよ」のあと：どうする？（見本 09） */
 function Denied() {
   return (
-    <div className="relative flex flex-1 flex-col items-center gap-4 pt-12">
+    <div className="relative flex flex-1 flex-col items-center gap-4">
       <Confetti tone="calm" />
-      <Navigator mood="sorry" size={180} />
+      <div className="mt-auto">
+        <Navigator mood="sorry" size={180} />
+      </div>
       <h2 className="text-center font-pop text-[30px] font-normal leading-normal">
         あれれ？
         <br />
         どうする？
       </h2>
-      <div className="mt-3.5 flex w-full flex-col gap-4">
+      <div className="mt-auto flex w-full flex-col gap-4">
         <LinkButton
           href="/capture"
           variant="plain"
@@ -54,6 +56,8 @@ function RecognizeContent() {
   const router = useRouter();
   const { crop, generation, regenerate } = useQuiz();
   const [denied, setDenied] = useState(false);
+  // 待ちの画面で「できた！ みてみる」を押したか（もどってきたときなど、はじめから できていれば待ちは出さない）
+  const [revealed, setRevealed] = useState(generation.status === "ready");
 
   useEffect(() => {
     if (!crop) router.replace("/capture");
@@ -69,7 +73,7 @@ function RecognizeContent() {
     );
   }
 
-  const loading = generation.status === "loading" || generation.status === "idle";
+  const waiting = generation.status === "loading" || generation.status === "idle" || (generation.status === "ready" && !revealed);
 
   return (
     <Page back="/lasso">
@@ -82,14 +86,16 @@ function RecognizeContent() {
         </>
       )}
 
-      {loading && <Loading image={crop.dataUrl} />}
+      {waiting && <Loading image={crop.dataUrl} done={generation.status === "ready"} onDone={() => setRevealed(true)} />}
 
-      {generation.status === "ready" && !generation.data.recognition.canAsk && (
+      {!waiting && generation.status === "ready" && !generation.data.recognition.canAsk && (
         <>
-          <div className="relative flex flex-1 flex-col items-center gap-4 pt-6">
+          <div className="relative flex flex-1 flex-col items-center gap-4">
             <Confetti tone="calm" />
-            <Navigator mood="sorry" size={160} />
-            <p className="rounded-card border-2 border-ink/15 bg-white px-4 py-3 text-center text-[19px] font-black leading-[1.75]">
+            <div className="mt-auto">
+              <Navigator mood="sorry" size={160} />
+            </div>
+            <p className="rounded-card bg-navi-light px-4 py-3 text-center text-[19px] font-black leading-[1.75]">
               この しゃしんからは、
               <br />
               はてなが つくれなかったよ。
@@ -108,21 +114,21 @@ function RecognizeContent() {
         </>
       )}
 
-      {generation.status === "ready" && generation.data.recognition.canAsk && (
+      {!waiting && generation.status === "ready" && generation.data.recognition.canAsk && (
         <div className="flex flex-1 flex-col items-center gap-4">
-          <CropCircle src={crop.dataUrl} alt="つかまえた ところ" />
-          <div className="mt-1.5 flex w-full items-center gap-3">
-            <Navigator mood="think" size={112} />
-            <div className="relative grow rounded-card border-3 border-ink bg-white px-[18px] py-3.5 font-pop text-[24px] leading-normal">
-              <span aria-hidden className="absolute -left-[11px] top-[calc(50%-9px)] size-4 rotate-45 border-b-3 border-l-3 border-ink bg-white" />
-              <span className="relative">
+          <div className="mt-auto">
+            <CropCircle src={crop.dataUrl} alt="つかまえた ところ" />
+          </div>
+          <div className="w-full">
+            <Say mood="think" size={112}>
+              <span className="font-pop text-[24px] font-normal leading-normal">
                 これは
                 <br />
                 <RubyText text={generation.data.recognition.label} /> だね？
               </span>
-            </div>
+            </Say>
           </div>
-          <div className="mt-auto flex w-full flex-col gap-3.5 pt-3">
+          <div className="mt-auto flex w-full flex-col gap-3.5">
             <Button variant="plain" className="h-[76px] rounded-[28px] border-3 border-ink bg-mint font-pop text-[26px] text-ink shadow-pop active:translate-y-[6px] active:shadow-none" onClick={() => router.push("/choose")}>
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22223A" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M5 12l5 5 9-10" />

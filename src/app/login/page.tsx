@@ -71,11 +71,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="animate-rise flex min-h-dvh flex-col gap-3.5 px-6 pb-8">
-      <div className={`relative -mx-6 flex items-center gap-3 rounded-b-[44px] border-b-3 border-ink px-6 pb-[22px] pt-7 ${look.hero}`}>
-        <svg aria-hidden="true" viewBox="0 0 390 190" className="absolute left-0 top-0 h-[190px] w-full">
-          <path d="M350 30l5 10 11 2-8 7 2 11-10-6-10 6 2-11-8-7 11-2z" fill="#FFC83D" stroke="#22223A" strokeWidth="2.5" strokeLinejoin="round" />
-          <circle cx="300" cy="150" r="7" fill="#FF6F9C" stroke="#22223A" strokeWidth="2.5" />
+    <main className="animate-rise flex min-h-dvh flex-col gap-4 p-6 pb-[30px]">
+      <div className={`relative flex items-center justify-center gap-3 overflow-hidden rounded-[32px] p-5 ${look.hero}`}>
+        <svg aria-hidden="true" viewBox="0 0 342 160" className="absolute left-0 top-0 h-[160px] w-[342px]">
+          <path d="M314 112l5 10 11 2-8 7 2 11-10-6-10 6 2-11-8-7 11-2z" fill="#FFC83D" stroke="#22223A" strokeWidth="2.5" strokeLinejoin="round" />
+          <circle cx="26" cy="26" r="7" fill="#FF6F9C" stroke="#22223A" strokeWidth="2.5" />
         </svg>
         <div className="relative">
           <Navigator mood={look.mood} size={112} />
@@ -106,7 +106,7 @@ export default function LoginPage() {
         ))}
       </div>
 
-      <form onSubmit={submit} className="flex flex-1 flex-col gap-3.5">
+      <form onSubmit={submit} className="flex flex-1 flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <FieldLabel htmlFor="uname">ログイン ID</FieldLabel>
           <input
@@ -185,7 +185,7 @@ export default function LoginPage() {
           </p>
         )}
 
-        <div className="mt-auto pt-2">
+        <div className="mt-auto">
           <Button type="submit" disabled={busy}>
             {busy ? look.busy : look.button}
           </Button>

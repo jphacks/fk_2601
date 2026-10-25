@@ -56,11 +56,11 @@ export function LinkButton({
 }
 
 /**
- * 押せるものと押せないものを、見た目で分ける（docs/02-spec.md 2.3）。
- * 押せるもの：太い線と、下にずれた影（押すと沈む）。押せないもの：影なし・細くうすい線（PANEL）。
- * 押せないカードの、まわりの線（背景の色は、それぞれの場所で足す）
+ * 押せるものと押せないものを、見た目で分ける（docs/02-spec.md 2.3・docs/design/README.md「形」）。
+ * 押せるもの：太い線と、下にずれた影（押すと沈む）。押せないもの：線も影もなし、うすい色の地だけ（PANEL）。
+ * 押せないカードの形（地の色は、それぞれの場所で足す。白い地の上に白いカードは置かない）
  */
-export const PANEL = "rounded-card border-2 border-ink/15";
+export const PANEL = "rounded-card";
 
 /**
  * 選ぶボタン（学年・予想の選択肢 など）。選ぶ前は ほかのボタンと同じく影つき（押せると分かる）、
@@ -69,18 +69,34 @@ export const PANEL = "rounded-card border-2 border-ink/15";
 export const CHOICE_UP = "shadow-pop-sm active:translate-y-1 active:shadow-none";
 export const CHOICE_DOWN = "translate-y-1 shadow-none";
 
-/** 白いカード（押せない。お知らせ・説明用） */
+/** うすい色のカード（押せない。お知らせ・説明用） */
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`${PANEL} bg-white p-5 ${className}`}>{children}</div>;
+  return <div className={`${PANEL} bg-cloud p-5 ${className}`}>{children}</div>;
 }
 
-/** ナビのふきだし（ナビ画像の右。しっぽは回転した四角）。押せないので影はつけない */
-export function Say({ mood = "happy", children, size = 88 }: { mood?: Mood; children: ReactNode; size?: number }) {
+/**
+ * ナビのふきだし（ナビ画像の右。しっぽは回転した四角）。押せないので、線も影もなく地の色だけ。
+ * 地は navi-light。ピタリのときだけ red-light（tone="red"）
+ */
+export function Say({
+  mood = "happy",
+  children,
+  size = 88,
+  tone = "navi",
+  react = false,
+}: {
+  mood?: Mood;
+  children: ReactNode;
+  size?: number;
+  tone?: "navi" | "red";
+  react?: boolean;
+}) {
+  const bg = tone === "red" ? "bg-red-light" : "bg-navi-light";
   return (
     <div className="flex items-center gap-3">
-      <Navigator mood={mood} size={size} />
-      <div className="relative grow rounded-card border-3 border-ink bg-white px-4 py-3 text-[19px] font-black leading-[1.75]">
-        <span aria-hidden className="absolute -left-[11px] top-[calc(50%-9px)] size-4 rotate-45 border-b-3 border-l-3 border-ink bg-white" />
+      <Navigator mood={mood} size={size} react={react} />
+      <div className={`relative grow rounded-card px-4 py-3 text-[21px] font-black leading-[1.7] ${bg}`}>
+        <span aria-hidden className={`absolute -left-2 top-[calc(50%-8px)] size-4 rotate-45 ${bg}`} />
         <div className="relative">{children}</div>
       </div>
     </div>
@@ -96,10 +112,10 @@ export function ErrorNotice({ children, onRetry }: { children: ReactNode; onRetr
   );
 }
 
-/** 小さな札（分類・「いくつ？」など）。色は分類の色をうすく敷く */
+/** 小さな札（分類・「いくつ？」など）。押せないので地の色だけ（分類の色をうすく敷く） */
 export function Tag({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <span className={`inline-block rounded-xl border-[2.5px] border-ink px-3 py-0.5 text-sm font-black ${className}`}>
+    <span className={`inline-block rounded-xl px-3 py-0.5 text-sm font-black ${className}`}>
       {children}
     </span>
   );

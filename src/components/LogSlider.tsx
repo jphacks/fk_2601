@@ -46,9 +46,10 @@ export function LogSlider({
   const ticks = tickValues(min, max);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="mt-auto flex flex-col gap-3">
       <span className="text-center font-pop text-lg">{label}</span>
-      <label className="flex items-baseline justify-center gap-2 rounded-[30px] border-3 border-ink bg-yellow px-4 py-3">
+      {/* 入力するものなので、線だけ（影なし） */}
+      <label className="flex items-baseline justify-center gap-2 rounded-[28px] border-3 border-ink bg-yellow-light px-4 py-3">
         <input
           type="number"
           inputMode="decimal"

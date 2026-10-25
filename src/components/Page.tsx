@@ -25,7 +25,7 @@ export function BackButton({ href, onBack }: { href?: string; onBack?: () => voi
 
 /**
  * 画面の枠。上に「もどる」とタイトル、下にタブ（tab を渡したときだけ）を出す。
- * 余白は 24px、画面のあいだは 14px（docs/design の見本と同じ）
+ * 余白は 24px（下のボタンだけ影のぶん +6px）、ブロックのあいだは 16px（docs/design/README.md「余白」）
  */
 export function Page({
   title,
@@ -33,6 +33,7 @@ export function Page({
   onBack,
   tab,
   icon,
+  bg = "bg-white",
   children,
 }: {
   title?: string;
@@ -41,11 +42,13 @@ export function Page({
   /** タイトルの前に置く小さな絵 */
   icon?: ReactNode;
   tab?: Tab;
+  /** 画面の地の色（ずかんだけ、えらんだ分類で うすく変える） */
+  bg?: string;
   children: ReactNode;
 }) {
   return (
-    <main className="flex min-h-dvh flex-col">
-      <div className={`animate-rise flex flex-1 flex-col gap-3.5 px-6 pt-6 ${tab ? "pb-5" : "pb-8"}`}>
+    <main className={`flex min-h-dvh flex-col transition-colors ${bg}`}>
+      <div className={`animate-rise flex flex-1 flex-col gap-4 px-6 pt-6 ${tab ? "pb-4" : "pb-[30px]"}`}>
         {(back || onBack || title) && (
           <header className="flex min-h-[52px] items-center gap-2.5">
             <BackButton href={back ?? undefined} onBack={onBack} />

@@ -6,7 +6,6 @@ import { ConditionSliders } from "@/components/ConditionSliders";
 import { ExplanationSteps, Related, Sources } from "@/components/Explanation";
 import { Gate } from "@/components/Gate";
 import { Icon } from "@/components/Icons";
-import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
 import { useQuiz } from "@/components/QuizProvider";
 import { ResultSummary } from "@/components/ResultSummary";
@@ -71,7 +70,7 @@ function ResultContent() {
     return (
       <Page>
         <ResultSummary question={selected} guess={guess} evaluation={evaluation} />
-        <div className="mt-auto pt-2">
+        <div className="mt-auto">
           <Button onClick={() => setStep("nazo")}>
             <Icon name="search" size={28} strokeWidth={2.8} />
             なぞときへ！
@@ -87,10 +86,10 @@ function ResultContent() {
         <Say mood="happy" size={88}>
           <RubyText kana text={selected.explanation.short} />
         </Say>
-        <ExplanationSteps question={selected} defaultOpen />
+        <ExplanationSteps question={selected} />
         <Related question={selected} />
         <Sources question={selected} />
-        <div className="mt-auto flex gap-2.5 pt-2">
+        <div className="mt-auto flex gap-2.5">
           <button
             type="button"
             onClick={() => setStep("get")}
@@ -104,7 +103,7 @@ function ResultContent() {
               onClick={() => setStep("moshimo")}
               className="flex h-[68px] flex-1 items-center justify-center rounded-3xl border-3 border-ink bg-pink font-pop text-[21px] shadow-pop-md active:translate-y-[4px] active:shadow-none"
             >
-              もしも…？
+              もっと！
             </button>
           )}
         </div>
@@ -114,18 +113,14 @@ function ResultContent() {
 
   if (step === "moshimo") {
     return (
-      <Page title="もしも…？" onBack={() => setStep("nazo")}>
-        <div className="flex items-center gap-3">
-          <Navigator mood="think" size={90} />
-          <div className="relative grow rounded-[22px] border-3 border-ink bg-white px-4 py-2.5 text-[19px] font-black leading-[1.75]">
-            <span aria-hidden className="absolute -left-[11px] top-[calc(50%-9px)] size-4 rotate-45 border-b-3 border-l-3 border-ink bg-white" />
-            <span className="relative">
-              {selected.whatIf ? <RubyText kana text={selected.whatIf} /> : "じょうけんを かえると、こたえは どうなるかな？"}
-            </span>
-          </div>
-        </div>
+      <Page title="もっとしりたい！" onBack={() => setStep("nazo")}>
+        <Say mood="think" size={90}>
+          <span className="text-[19px]">
+            {selected.whatIf ? <RubyText kana text={selected.whatIf} /> : "じょうけんを かえると、こたえは どうなるかな？"}
+          </span>
+        </Say>
         <ConditionSliders question={selected} values={scope} onChange={setValues} />
-        <div className="mt-auto pt-2">
+        <div className="mt-auto">
           <Button onClick={() => setStep("get")}>ずかんに のこす！</Button>
         </div>
       </Page>

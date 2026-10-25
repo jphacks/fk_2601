@@ -46,10 +46,10 @@ export function Chips({ question }: { question: Question }) {
   const s = SUBJECT_STYLE[question.subject];
   return (
     <div className="flex flex-wrap gap-2">
-      <span className={`rounded-xl border-[2.5px] border-ink px-3 py-0.5 text-sm font-black ${s.light} ${s.dark}`}>
+      <span className={`rounded-xl px-3 py-0.5 text-sm font-black ${s.light} ${s.dark}`}>
         {SUBJECT_KANA[question.subject]}
       </span>
-      <span className="rounded-xl border-[2.5px] border-ink bg-white px-3 py-0.5 text-sm font-black text-pink-dark">
+      <span className="rounded-xl bg-pink-light px-3 py-0.5 text-sm font-black text-pink-dark">
         {TYPE_LABEL[question.type]}
       </span>
     </div>

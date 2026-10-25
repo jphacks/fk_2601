@@ -34,7 +34,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 ├── AGENTS.md / CLAUDE.md / GEMINI.md   # この指示書（ルールは AGENTS.md に書く。他は @AGENTS.md を読み込むだけ）
 ├── docs/                 # 仕様の正（Source of Truth）。下の「参照先」を参照。docs/design/ は見た目の見本（アプリのコードではない）
 ├── firestore.rules       # Firestore のセキュリティルール（本人だけが読み書きできる）
-├── public/navi/          # ナビの7つの表情の画像（docs/design/assets/navi/ と同じもの）
+├── public/navi/          # ナビの7つの表情とスタンプ（stamp-*）の画像（docs/design/assets/navi/ と同じもの）
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
 └── src/
     ├── app/              # 画面（Next.js の App Router）と API（app/api/questions）
@@ -42,7 +42,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
     ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み）、scenes.ts（見本の絵）など
     └── server/           # サーバーだけで動く処理。llm/（prompts・schema・client・validate・mock・builtin（AI なしの見本の問い））と auth.ts（ID トークンの確認）
 ```
-- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（しょうたい → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。画面ごとの決まりは `docs/02-spec.md` 1章
+- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（しょうたい → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。画面ごとの決まりは `docs/02-spec.md` 1章
 
 ## セットアップ・コマンド
 | 用途 | コマンド |

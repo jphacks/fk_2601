@@ -7,7 +7,7 @@ import { binEdges, binValue, BIN_COUNT, usesChoices, type Guess } from "@/lib/ra
 import type { Question } from "@/server/llm/schema";
 import { LogSlider } from "./LogSlider";
 import { RubyText } from "./RubyText";
-import { Button, CHOICE_DOWN, CHOICE_UP } from "./ui";
+import { Button, CHOICE_DOWN, CHOICE_UP, Say } from "./ui";
 
 const RATIO_CHOICES = [1.5, 2, 3, 5, 10, 20, 50, 100];
 
@@ -42,14 +42,17 @@ function BinIcon({ index }: { index: number }) {
   );
 }
 
+/** 「せーの！」と、その上のナビのひとこと。のこった空白は、かたまりの切れ目に同じだけ分ける（docs/design/README.md「余白」） */
 function SeenoButton({ disabled, onClick, hint }: { disabled: boolean; onClick: () => void; hint?: React.ReactNode }) {
   return (
-    <div className="mt-auto flex flex-col gap-3.5 pt-2">
-      {hint}
-      <Button variant="seeno" disabled={disabled} onClick={onClick}>
-        せーの！
-      </Button>
-    </div>
+    <>
+      {hint && <div className="mt-auto">{hint}</div>}
+      <div className="mt-auto">
+        <Button variant="seeno" disabled={disabled} onClick={onClick}>
+          せーの！
+        </Button>
+      </div>
+    </>
   );
 }
 
@@ -80,7 +83,7 @@ function ReasonForm({ question, onSubmit, hint }: FormProps) {
   const [index, setIndex] = useState<number | null>(null);
   return (
     <>
-      <span className="text-center font-pop text-lg">どれだと おもう？</span>
+      <span className="mt-auto text-center font-pop text-lg">どれだと おもう？</span>
       <div role="radiogroup" aria-label="よそう" className="flex flex-col gap-2.5">
         {(question.choices ?? []).map((c, i) => (
           <button
@@ -113,7 +116,11 @@ function EstimateForm({ question, grade, onSubmit, hint }: FormProps & { grade: 
   if (usesChoices(grade)) {
     return (
       <>
-        <span className="mt-1.5 text-center font-pop text-lg">どれくらいだと おもう？</span>
+        <div className="mt-auto">
+          <Say mood="effort" size={66}>
+            <span className="font-pop text-[17px] font-normal leading-normal">どれくらいだと おもう？</span>
+          </Say>
+        </div>
         <div role="radiogroup" aria-label="よそう" className="flex flex-col gap-2.5">
           {Array.from({ length: BIN_COUNT }, (_, i) => (
             <button
@@ -133,8 +140,8 @@ function EstimateForm({ question, grade, onSubmit, hint }: FormProps & { grade: 
             </button>
           ))}
         </div>
+        {/* ナビのひとことは上の「どれくらいだと おもう？」で言うので、ここでは出さない（見本 13） */}
         <SeenoButton
-          hint={hint}
           disabled={index === null}
           onClick={() => index !== null && onSubmit({ kind: "bin", index, edges, value: binValue(edges, index) })}
         />
@@ -161,7 +168,7 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
   return (
     <>
       <div className="flex flex-col gap-2">
-        <span className="text-center font-pop text-lg">どっちが おおきい？</span>
+        <span className="mt-auto text-center font-pop text-lg">どっちが おおきい？</span>
         <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="どっちが おおきい？">
           {(["a", "b"] as const).map((s, i) => (
             <button
