@@ -57,13 +57,13 @@ export function ConditionSliders({
   const pct = (v: number) => Math.max(2, Math.min(100, (onLine(v) / top) * 100));
 
   return (
-    <div className="flex flex-col gap-3.5">
+    <>
       {question.variables.map((v) => {
         const now = values[v.name];
         const moved = now !== v.value;
         const frac = (v.value - v.min) / (v.max - v.min);
         return (
-          <div key={v.name} className="flex flex-col gap-1.5 rounded-[26px] border-2 border-ink/15 bg-yellow-light px-[18px] py-3.5">
+          <div key={v.name} className="mt-auto flex flex-col gap-1.5 rounded-[26px] bg-yellow-light px-[18px] py-3.5">
             <div className="flex items-center justify-between gap-2">
               <label htmlFor={`v-${v.name}`} className="font-pop text-[17px] leading-snug">
                 {kanaOf(v.label)}
@@ -104,7 +104,7 @@ export function ConditionSliders({
         );
       })}
 
-      <div aria-live="polite" className="flex flex-col items-center rounded-[26px] border-2 border-ink/15 bg-white px-[18px] pb-4 pt-3">
+      <div aria-live="polite" className="mt-auto flex flex-col items-center rounded-[26px] bg-navi-light px-[18px] pb-4 pt-3">
         {current === null ? (
           <p className="text-lg font-black">この じょうけんでは けいさん できないよ</p>
         ) : question.type === "compare" ? (
@@ -128,7 +128,7 @@ export function ConditionSliders({
           </>
         )}
         {changed && original !== null && current !== null && original > 0 && Math.abs(ratio - 1) > 1e-4 && (
-          <span className={`mt-1 rounded-[18px] border-[2.5px] border-ink px-4 py-0.5 font-pop text-lg ${ratio > 1 ? "bg-yellow" : "bg-navi-light text-navi-dark"}`}>
+          <span className={`mt-1 rounded-[18px] px-4 py-0.5 font-pop text-lg ${ratio > 1 ? "bg-yellow" : "bg-white text-navi-dark"}`}>
             {ratio > 1 ? "▲ " : "▼ "}
             もとの <RubyText kana text={ratioRuby(ratio)} />
           </span>
@@ -143,17 +143,17 @@ export function ConditionSliders({
       </div>
 
       {current !== null && original !== null && (
-        <div role="img" aria-label={`さっきは ${formatNumber(onLine(original))}${unit}、いまは ${shown}${unit}`} className="mt-1 flex flex-col gap-2">
+        <div role="img" aria-label={`さっきは ${formatNumber(onLine(original))}${unit}、いまは ${shown}${unit}`} className="flex flex-col gap-2">
           <div className="grid grid-cols-[56px_minmax(0,1fr)_72px] items-center gap-2">
             <span className="text-[15px] font-black text-ink-sub">さっき</span>
-            <span className="block h-[22px] overflow-hidden rounded-[11px] border-3 border-ink bg-cloud">
+            <span className="block h-[22px] overflow-hidden rounded-[11px] bg-cloud">
               <span className="block h-full bg-[#C9CFFF] transition-[width] duration-300" style={{ width: `${pct(original)}%` }} />
             </span>
             <span className="text-right font-pop text-[15px] text-ink-sub">{formatNumber(onLine(original))}</span>
           </div>
           <div className="grid grid-cols-[56px_minmax(0,1fr)_72px] items-center gap-2">
             <span className="text-[15px] font-black">いま</span>
-            <span className="block h-[22px] overflow-hidden rounded-[11px] border-3 border-ink bg-cloud">
+            <span className="block h-[22px] overflow-hidden rounded-[11px] bg-cloud">
               <span className="block h-full bg-navi transition-[width] duration-300" style={{ width: `${pct(current)}%` }} />
             </span>
             <span className="text-right font-pop text-[15px] text-navi-dark">{shown}</span>
@@ -167,6 +167,6 @@ export function ConditionSliders({
           スライダーを もとの ばしょに もどすと、さいしょの こたえに なるよ
         </p>
       )}
-    </div>
+    </>
   );
 }

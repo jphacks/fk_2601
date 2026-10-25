@@ -77,7 +77,7 @@ function DetailContent() {
         <p className="text-base font-black text-ink-sub">{formatDate(record.createdAt)} に つかまえたよ</p>
       </div>
 
-      <section className={`rounded-[26px] border-2 border-ink/15 px-5 py-3.5 ${style.light}`}>
+      <section className={`rounded-[26px] px-5 py-3.5 ${style.light}`}>
         <Eyebrow question={question} />
         <QuestionText question={question} size={22} />
         <QuestionHint question={question} />
@@ -85,16 +85,16 @@ function DetailContent() {
 
       {evaluation && <ResultSummary question={question} guess={record.guess} evaluation={evaluation} animate={false} />}
 
-      <div className="flex items-start gap-3 rounded-card border-2 border-ink/15 bg-white px-4 py-3">
+      <div className="flex items-start gap-3 rounded-card bg-navi-light px-4 py-3">
         <span className="text-[19px] font-black leading-[1.75]">
           <RubyText text={question.explanation.short} kana />
         </span>
       </div>
-      <ExplanationSteps question={question} />
+      <ExplanationSteps question={question} collapsible />
 
       {question.variables.length > 0 && question.type !== "why" && (
         <section className="flex flex-col gap-3">
-          <h2 className="font-pop text-xl font-normal">もしも…？</h2>
+          <h2 className="font-pop text-xl font-normal">もっと しりたい！</h2>
           <ConditionSliders question={question} values={values ?? defaultScope(question)} onChange={setValues} />
         </section>
       )}
@@ -103,7 +103,7 @@ function DetailContent() {
       <Sources question={question} />
 
       {related.length > 0 && (
-        <section className="flex flex-col gap-2 rounded-card border-2 border-ink/15 bg-white px-4 py-3">
+        <section className="flex flex-col gap-2 rounded-card bg-cloud px-4 py-3">
           <h2 className="font-pop text-base font-normal">にている はてな</h2>
           <ul className="flex flex-col gap-1.5">
             {related.map((a) => (
@@ -117,7 +117,7 @@ function DetailContent() {
         </section>
       )}
 
-      <div className="mt-2 flex flex-col gap-3">
+      <div className="mt-auto flex flex-col gap-3">
         {error && (
           <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
             {error}

@@ -92,7 +92,7 @@ function ProfileForm() {
             {error}
           </p>
         )}
-        <div className="mt-auto pt-2">
+        <div className="mt-auto">
           <Button type="submit" disabled={busy || nickname.trim().length === 0}>
             {busy ? "ちょっと まってね…" : "けってい！"}
           </Button>

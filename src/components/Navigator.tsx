@@ -15,10 +15,10 @@ const FACE: Record<Mood, { file: string; label: string }> = {
   hazure: { file: "wow", label: "びっくり・青" },
 };
 
-const HOP: Mood[] = ["pitari", "hazure", "surprise"];
-
-/** ナビキャラ。ふわふわ浮き、おどろいたときははねる */
-export function Navigator({ mood = "happy", size = 88 }: { mood?: Mood; size?: number }) {
+/**
+ * ナビキャラ。ふだんは ぷにぷに動く。react を付けると、下から飛び出して登場する（答え合わせ・ゲットの画面。docs/design/README.md「ナビの出しかた」）
+ */
+export function Navigator({ mood = "happy", size = 88, react = false }: { mood?: Mood; size?: number; react?: boolean }) {
   const face = FACE[mood];
   return (
     <Image
@@ -27,7 +27,7 @@ export function Navigator({ mood = "happy", size = 88 }: { mood?: Mood; size?: n
       width={size}
       height={size}
       priority={size >= 100}
-      className={`shrink-0 ${HOP.includes(mood) ? "animate-hop" : "animate-float"}`}
+      className={`shrink-0 ${react ? "navi-react" : "navi"}`}
       style={{ width: size, height: size }}
     />
   );

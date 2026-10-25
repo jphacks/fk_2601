@@ -22,6 +22,10 @@ export const SUBJECT_KANA: Record<Subject, string> = {
 
 export const SUBJECTS: Subject[] = ["math", "science", "info"];
 
+// 「はてなを さがす！」から撮影へ行くときの URL。撮影の画面は、カメラを起動する前に「でかける まえの やくそく」を出す
+// （とりなおし・「もっと さがす！」から来たときは出さない）
+export const CAPTURE_WITH_PROMISE = "/capture?yakusoku=1";
+
 // 称号を得るのに必要な個数。未決（docs/02-spec.md 16章）なので仮の値
 export const STAMP_GOAL = 5;
 
@@ -31,6 +35,14 @@ export const TITLE_LABEL: Record<Subject, string> = {
   science: "りか マスター",
   info: "エンジニア レベル",
 };
+
+// はじめから持っている称号（仮。docs/design/README.md「見本の決まりごと」）。称号をえらんでいない（title が null）ときに出す
+export const FIRST_TITLE_LABEL = "はてなハンター";
+
+/** いま つけている称号の名前 */
+export function titleLabel(title: Subject | null | undefined): string {
+  return title ? TITLE_LABEL[title] : FIRST_TITLE_LABEL;
+}
 
 // 切り抜き画像：長辺のピクセル数と JPEG の品質（Firestore の1件 1MiB に収めるため）
 export const CROP_MAX_EDGE = 1024;

@@ -41,7 +41,7 @@ function LassoContent() {
   return (
     // もどるは、写真を手に入れた画面へ（ホームの見本の絵・アルバムなら ホーム、撮影の画面なら 撮影）。
     // 履歴で1つ前にもどると、はてなの画面から「かこみなおす」で来たときに そちらへもどってしまうので、行き先を決めておく
-    <Page title="ぐるっと つかまえよう！" back={photoFrom}>
+    <Page title="ぐるっと かこもう！" back={photoFrom}>
       <LassoPicker photo={photo} points={points} onChange={setPoints} />
       <Say mood={points ? "happy" : "think"} size={84}>
         {points ? (
@@ -76,10 +76,9 @@ function LassoContent() {
           とりなおす
         </LinkButton>
       </div>
-      <div className="mt-auto pt-1.5">
+      <div className="mt-auto">
         <Button onClick={confirm} disabled={!points || busy}>
-          <Icon name="lasso" size={30} strokeWidth={2.6} />
-          {busy ? "まってね…" : "つかまえる！"}
+          {busy ? "まってね…" : "OK！"}
         </Button>
       </div>
     </Page>

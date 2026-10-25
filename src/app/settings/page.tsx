@@ -8,7 +8,7 @@ import { Gate } from "@/components/Gate";
 import { Icon, Medal } from "@/components/Icons";
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui";
-import { TITLE_LABEL } from "@/lib/constants";
+import { titleLabel } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import type { FirstMode } from "@/lib/types";
 
@@ -36,7 +36,7 @@ function SettingsContent() {
     <Page tab="settings">
       <h1 className="flex h-[46px] items-center font-pop text-[26px] font-normal">せってい</h1>
 
-      <section className="flex flex-col gap-2.5 rounded-card border-2 border-ink/15 bg-white px-4 py-3.5">
+      <section className="flex flex-col gap-2.5 rounded-card bg-cloud px-4 py-3.5">
         <div className="flex items-center justify-between">
           <span className="text-[17px] font-black text-ink-sub">ニックネーム</span>
           <Link href="/profile" className="flex items-center gap-1 font-pop text-xl">
@@ -64,16 +64,12 @@ function SettingsContent() {
       </fieldset>
 
       <Link
-        href="/archive"
+        href="/stamp?view=titles"
         className="flex h-[62px] items-center gap-2.5 rounded-[22px] border-3 border-ink bg-white px-4 shadow-pop-sm active:translate-y-1 active:shadow-none"
       >
         <Medal size={28} />
         <span className="text-[17px] font-black">しょうごう</span>
-        {profile.title ? (
-          <span className="ml-auto rounded-xl border-2 border-ink bg-purple px-2.5 py-0.5 text-sm font-black text-white">{TITLE_LABEL[profile.title]}</span>
-        ) : (
-          <span className="ml-auto text-sm font-bold text-ink-muted">まだ ないよ</span>
-        )}
+        <span className="ml-auto rounded-xl bg-purple px-2.5 py-0.5 text-sm font-black text-white">{titleLabel(profile.title)}</span>
         <Icon name="next" size={20} strokeWidth={3} />
       </Link>
 
