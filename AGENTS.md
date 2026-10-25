@@ -42,7 +42,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
     ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み）、scenes.ts（見本の絵）など
     └── server/           # サーバーだけで動く処理。llm/（prompts・schema・client・validate・mock・builtin（AI なしの見本の問い））と auth.ts（ID トークンの確認）
 ```
-- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（しょうたい → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。画面ごとの決まりは `docs/02-spec.md` 1章
+- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。画面ごとの決まりは `docs/02-spec.md` 1章
 
 ## セットアップ・コマンド
 | 用途 | コマンド |

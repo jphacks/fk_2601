@@ -1,7 +1,7 @@
 import type { Subject } from "@/server/llm/schema";
 
 // アプリ名（docs/04-mvp.md）。変えるときはここだけ書き換える
-export const APP_NAME = "かこってはてな";
+export const APP_NAME = "かこってはてな!?";
 export const NAVIGATOR_NAME = "ナビ";
 
 export const GRADES = [1, 2, 3, 4, 5, 6] as const;
