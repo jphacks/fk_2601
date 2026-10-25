@@ -80,10 +80,10 @@ export function NumberLine({
         </div>
       ) : (
         <>
-          <div className="absolute top-[82px] w-[120px] -translate-x-1/2 text-center font-pop text-base" style={{ left: `clamp(60px, ${gx}%, calc(100% - 60px))` }}>
+          <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base" style={{ left: `clamp(75px, ${gx}%, calc(100% - 75px))` }}>
             きみ {formatNumber(guess)}
           </div>
-          <div className="absolute top-[82px] w-[120px] -translate-x-1/2 text-center font-pop text-base text-navi-dark" style={{ left: `clamp(60px, ${ax}%, calc(100% - 60px))` }}>
+          <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base text-navi-dark" style={{ left: `clamp(75px, ${ax}%, calc(100% - 75px))` }}>
             こたえ {formatNumber(actual)}
           </div>
         </>

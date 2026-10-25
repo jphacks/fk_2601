@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useArchive } from "@/components/ArchiveProvider";
+import { useApp } from "@/components/AuthProvider";
 import { ConditionSliders } from "@/components/ConditionSliders";
 import { CropCircle } from "@/components/CropCircle";
 import { ExplanationSteps, Related, Sources } from "@/components/Explanation";
@@ -23,6 +24,7 @@ import { Loading } from "@/components/Loading";
 function DetailContent() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+  const { profile } = useApp();
   const { status, archives, remove, unpublish } = useArchive();
   const record = archives.find((a) => a.id === id);
   const [values, setValues] = useState<Record<string, number> | null>(null);
@@ -83,7 +85,7 @@ function DetailContent() {
         <QuestionHint question={question} />
       </section>
 
-      {evaluation && <ResultSummary question={question} guess={record.guess} evaluation={evaluation} animate={false} />}
+      {evaluation && <ResultSummary question={question} guess={record.guess} evaluation={evaluation} grade={profile?.grade} animate={false} />}
 
       <div className="flex items-start gap-3 rounded-card bg-navi-light px-4 py-3">
         <span className="text-[19px] font-black leading-[1.75]">
@@ -95,7 +97,7 @@ function DetailContent() {
       {question.variables.length > 0 && question.type !== "why" && (
         <section className="flex flex-col gap-3">
           <h2 className="font-pop text-xl font-normal">もっと しりたい！</h2>
-          <ConditionSliders question={question} values={values ?? defaultScope(question)} onChange={setValues} />
+          <ConditionSliders question={question} values={values ?? defaultScope(question)} onChange={setValues} grade={profile?.grade} />
         </section>
       )}
 
