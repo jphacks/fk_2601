@@ -29,7 +29,7 @@ export function SceneSamples() {
             key={key}
             type="button"
             onClick={() => {
-              setPhoto(scenePhoto(key), key);
+              setPhoto(scenePhoto(key), "/", key);
               router.push("/lasso");
             }}
             className={`rounded-[20px] border-3 border-ink p-1.5 text-center shadow-pop-xs active:translate-y-[3px] active:shadow-none ${COLOR[key]}`}
