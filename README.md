@@ -51,6 +51,25 @@ AI を使って、子どもの「問い」や探究学習を支える取り組�
 7. **もしも**：条件（数・大きさなど）をスライダーで変えて、答えがどう変わるかを、その場で確かめられます。
 8. **ずかんに のこす**：写真（切り抜き）・問い・予想・結果を「はてなずかん」に保存します。分類（さんすう・りか・じょうほう）ごとにスタンプが集まり、集めると称号がもらえます。「みんなにも みせる」を選ぶと、切り抜き画像・問い・称号を、名前を出さずに公開できます。
 
+アプリの画面は次のとおりです（デモ版で、ペットボトルの絵を囲んだ例です。スマートフォンの画面サイズで撮りました）。
+
+<table>
+<tr>
+<td align="center" width="20%"><img src="docs/images/01-home.png" width="150" alt="ホーム"><br><sub>ホーム</sub></td>
+<td align="center" width="20%"><img src="docs/images/02-lasso.png" width="150" alt="② 囲む"><br><sub>② 囲む</sub></td>
+<td align="center" width="20%"><img src="docs/images/03-loading.png" width="150" alt="待ち（まめちしき）"><br><sub>待ち（まめちしき）</sub></td>
+<td align="center" width="20%"><img src="docs/images/04-choose.png" width="150" alt="③ はてなを選ぶ"><br><sub>③ はてなを選ぶ</sub></td>
+<td align="center" width="20%"><img src="docs/images/05-predict.png" width="150" alt="④ せーの！（予想）"><br><sub>④ せーの！（予想）</sub></td>
+</tr>
+<tr>
+<td align="center" width="20%"><img src="docs/images/06-result.png" width="150" alt="⑤ こたえあわせ"><br><sub>⑤ こたえあわせ</sub></td>
+<td align="center" width="20%"><img src="docs/images/07-nazotoki.png" width="150" alt="⑥ なぞとき"><br><sub>⑥ なぞとき</sub></td>
+<td align="center" width="20%"><img src="docs/images/08-moshimo.png" width="150" alt="⑦ もしも"><br><sub>⑦ もしも</sub></td>
+<td align="center" width="20%"><img src="docs/images/09-stamp.png" width="150" alt="⑧ ずかんに のこす・スタンプ"><br><sub>⑧ ずかんに のこす・スタンプ</sub></td>
+<td align="center" width="20%"><img src="docs/images/10-archive.png" width="150" alt="はてなずかん"><br><sub>はてなずかん</sub></td>
+</tr>
+</table>
+
 **たとえば、ガチャガチャの前でこう動きます**（見本の絵にある問いです）。
 
 1. 子どもが、ガチャガチャの機械を指で囲む。
