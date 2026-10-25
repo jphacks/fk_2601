@@ -46,9 +46,9 @@ function toAuthUser(user: User): AuthUser {
 
 function friendly(error: unknown): never {
   const code = (error as { code?: string }).code ?? "";
-  if (code === "auth/email-already-in-use") throw new UserFacingError("そのなまえは もう つかわれているよ");
+  if (code === "auth/email-already-in-use") throw new UserFacingError("その ログイン ID は もう つかわれているよ。ちがう ID に してね");
   if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
-    throw new UserFacingError("なまえか パスワードが ちがうよ");
+    throw new UserFacingError("ログイン ID か パスワードが ちがうよ");
   }
   if (code === "auth/weak-password") throw new UserFacingError("パスワードは 6もじ いじょうに してね");
   if (code === "auth/network-request-failed") throw new UserFacingError("ネットに つながらないよ。つながってから もういちど ためしてね");

@@ -10,12 +10,12 @@ export function normalizeUsername(input: string): string {
 
 export function validateUsername(input: string): string {
   const name = normalizeUsername(input);
-  if (name.length === 0) throw new UserFacingError("なまえを いれてね");
+  if (name.length === 0) throw new UserFacingError("ログイン ID を いれてね");
   if (!ALLOWED.test(name)) {
-    throw new UserFacingError("なまえには、ひらがな・カタカナ・えいご・すうじだけ つかえるよ");
+    throw new UserFacingError("ログイン ID には、えいご・すうじ・ひらがな・カタカナだけ つかえるよ（くうはくや きごうは つかえないよ）");
   }
   if (new TextEncoder().encode(name).length > USERNAME_MAX_BYTES) {
-    throw new UserFacingError("なまえが ながすぎるよ（ひらがなは 10もじ、えいごと すうじは 32もじまで）");
+    throw new UserFacingError("ログイン ID が ながすぎるよ（ひらがなは 10もじ、えいごと すうじは 32もじまで）");
   }
   return name;
 }

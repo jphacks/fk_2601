@@ -56,7 +56,7 @@ export const localBackend: Backend = {
     const username = validateUsername(rawUsername);
     validatePassword(password);
     const users = readJson<Record<string, AuthUser>>(KEY_USERS, {});
-    if (users[username]) throw new UserFacingError("そのなまえは もう つかわれているよ");
+    if (users[username]) throw new UserFacingError("その ログイン ID は もう つかわれているよ。ちがう ID に してね");
     const user: AuthUser = { uid: `local-${usernameToLocalId(username)}`, username };
     writeJson(KEY_USERS, { ...users, [username]: user });
     writeJson(KEY_SESSION, user);
@@ -68,7 +68,7 @@ export const localBackend: Backend = {
     const username = validateUsername(rawUsername);
     validatePassword(password);
     const user = readJson<Record<string, AuthUser>>(KEY_USERS, {})[username];
-    if (!user) throw new UserFacingError("なまえか パスワードが ちがうよ");
+    if (!user) throw new UserFacingError("ログイン ID か パスワードが ちがうよ");
     writeJson(KEY_SESSION, user);
     notify();
     return user;
