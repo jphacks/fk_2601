@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
 import { FieldLabel, INPUT_STYLE } from "@/components/Fields";
 import { Icon } from "@/components/Icons";
+import { Loading } from "@/components/Loading";
 import { Navigator, type Mood } from "@/components/Navigator";
+import { Page } from "@/components/Page";
 import { Button } from "@/components/ui";
 import { messageOf } from "@/lib/errors";
 
@@ -48,6 +50,16 @@ export default function LoginPage() {
     if (status === "in") router.replace("/");
   }, [status, router]);
 
+  // ログインすると、ユーザーごとの状態（QuizProvider）が作り直されて、この画面も まっさらに作り直される。
+  // そのまま入力らんを出すと、ホームへ行く前に 一瞬 ログイン画面に もどったように見えるので、待ちの表示にする
+  if (status === "in") {
+    return (
+      <Page>
+        <Loading message="じゅんびしているよ…" />
+      </Page>
+    );
+  }
+
   const look = MODE[mode];
   const signup = mode === "signup";
 
@@ -63,7 +75,8 @@ export default function LoginPage() {
     try {
       if (signup) await signUp(username, password);
       else await signIn(username, password);
-      router.replace("/");
+      // ホームへは、ログインの状態が「in」になってから上の useEffect で送る。
+      // ここで送ると、まだ「out」のままのホームが ログイン画面へ もどしてしまう
     } catch (e) {
       setError(messageOf(e));
       setBusy(false);
