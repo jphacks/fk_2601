@@ -18,7 +18,7 @@ import { formatNumber } from "@/lib/format";
 import { describeGuess, evaluate } from "@/lib/rating";
 import { unitKana } from "@/lib/ruby";
 
-// しょうたい → なぞとき → もしも → ずかんにのこす（見本 14〜19）
+// こたえあわせ → なぞとき → もしも → ずかんにのこす（見本 14〜19）
 type Step = "shoutai" | "nazo" | "moshimo" | "get";
 
 function ResultContent() {
@@ -51,7 +51,7 @@ function ResultContent() {
   if (!selected || !guess) return null;
   if (!evaluation) {
     return (
-      <Page title="しょうたい" back="/choose">
+      <Page title="こたえあわせ" back="/choose">
         <ErrorNotice>この はてなは こたえを だせなかったよ。ほかの はてなを えらんでね。</ErrorNotice>
         <Button onClick={() => router.push("/choose")}>はてなを えらびなおす</Button>
       </Page>

@@ -60,7 +60,7 @@ function Bubble({ children, color, mood, react, size = 128 }: { children: React.
   );
 }
 
-/** 答え合わせ（見本 14〜16「しょうたい」）。animate が false のとき（ずかんで見返すとき）は動かさない */
+/** 答え合わせ（見本 14〜16「こたえあわせ」）。animate が false のとき（ずかんで見返すとき）は動かさない */
 export function ResultSummary({
   question,
   guess,
@@ -136,7 +136,7 @@ export function ResultSummary({
       </Bubble>
 
       <section className={`relative flex flex-col items-start gap-1 rounded-[30px] px-5 pb-[18px] pt-3.5 ${look.card}`}>
-        <span className="text-[15px] font-black text-ink-sub">はてなの しょうたい</span>
+        <span className="text-[15px] font-black text-ink-sub">はてなの こたえあわせ</span>
         <div className="flex items-baseline gap-1 text-navi">
           <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(actual, grade) }}>
             {animate ? <CountUp value={actual} from={0} format={(n) => bigNumber(n, grade)} /> : bigNumber(actual, grade)}

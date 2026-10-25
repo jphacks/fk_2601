@@ -9,7 +9,7 @@
 | 版数 | v2.3 |
 | ステータス | ドラフト |
 
-- アプリ名：「かこってはてな」（`src/lib/constants.ts` の `APP_NAME`）。アイコンはナビの「おどろき」の表情（`src/app/icon.png`。`docs/design/assets/navi/navi-wow.png` と同じもの）
+- アプリ名：「かこってはてな!?」（`src/lib/constants.ts` の `APP_NAME`）。アイコンはナビの「おどろき」の表情（`src/app/icon.png`。`docs/design/assets/navi/navi-wow.png` と同じもの）
 
 ## 1. 目的・背景
 - 解決したい課題：小学生の理系科目への興味の向上
