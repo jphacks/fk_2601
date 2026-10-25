@@ -229,5 +229,10 @@ Firestore:
   - 【未決】Vercel の Settings → Git で GitHub とつなぎ、`develop`（または `main`）へのマージで自動公開するか
 - 本番の環境変数（Vercel の Settings → Environment Variables）：`ANTHROPIC_API_KEY`・`LLM_MODEL`・`LLM_EFFORT`・`FIREBASE_PROJECT_ID`・`NEXT_PUBLIC_FIREBASE_*`（4つ）。`NEXT_PUBLIC_BACKEND` と `LLM_MODE` は設定しない
 - Firebase の Authentication → 設定 → 承認済みドメインに、本番のドメイン（`fk2601.vercel.app`・`fk2601-csennkai.vercel.app`）を入れてある。ドメインを増やしたときは、ここにも足す
+- デモ版（ピッチ用）：`/demo` を開くと、本物と同じ画面・操作で、AI を呼ばずに動くデモが始まる
+  - 何を撮って囲んでも「ペットボトル」と認識し、1.6 秒ほど待ちの画面を見せたあと、用意した3つの問い（おもさ・こおる・バーコード）を出す。問いは `src/lib/demo.ts`
+  - ログインは使わない。5年生のプロフィール（ニックネーム「そら」）で、データはその端末の `localStorage` に置く（Firebase は使わない）。`/demo` を開くたびに、前のデータを消して、はじめからになる
+  - 自分で書いた問いは、デモでは使えない（ナビが「3つの はてなから えらんでね」と伝える）
+  - デモを終わるときは `/demo?exit=1` を開く（その端末は、本物の使いかたにもどる）。開いたままの端末で本物を試すと、デモのままになるので注意
 - 公開したあとの確認：本番の `/api/questions` にでたらめなトークンを送ると 401 が返る／Vercel の Logs にエラーが出ていない／ログインして見本の絵から問いが3つ出る
 

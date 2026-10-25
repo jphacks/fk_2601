@@ -29,6 +29,20 @@ export function writeJson(key: string, value: unknown): void {
   }
 }
 
+/** デモ用：このブラウザのローカル版のデータをぜんぶ消して、ログインずみのユーザーとプロフィールを1つ用意する */
+export function seedLocalUser(user: AuthUser, profile: Profile): void {
+  try {
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith("local:"))
+      .forEach((key) => localStorage.removeItem(key));
+  } catch {
+    // 消せなくても、続ける
+  }
+  writeJson(KEY_USERS, { [user.username]: user });
+  writeJson(KEY_SESSION, user);
+  writeJson(profilesKey(user.uid), [profile]);
+}
+
 const listeners = new Set<(user: AuthUser | null) => void>();
 
 function currentUser(): AuthUser | null {
