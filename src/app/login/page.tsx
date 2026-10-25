@@ -5,16 +5,41 @@ import { useEffect, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
 import { FieldLabel, INPUT_STYLE } from "@/components/Fields";
 import { Icon } from "@/components/Icons";
-import { Navigator } from "@/components/Navigator";
+import { Navigator, type Mood } from "@/components/Navigator";
 import { Button } from "@/components/ui";
 import { messageOf } from "@/lib/errors";
+
+type Mode = "signup" | "signin";
+
+// はじめて（ID を つくる）と、つづきから（ログイン）で、見出し・色・ボタンを変えて、ちがいが一目で分かるようにする
+const MODE: Record<Mode, { tab: string; title: string; lead: string; mood: Mood; hero: string; button: string; busy: string }> = {
+  signup: {
+    tab: "はじめて",
+    title: "はじめまして！",
+    lead: "ログイン ID と パスワードを きめよう",
+    mood: "happy",
+    hero: "bg-yellow-light",
+    button: "ID を つくる！",
+    busy: "つくっているよ…",
+  },
+  signin: {
+    tab: "つづきから",
+    title: "おかえり！",
+    lead: "まえに きめた ログイン ID と パスワードを いれてね",
+    mood: "think",
+    hero: "bg-navi-light",
+    button: "ログイン",
+    busy: "ちょっと まってね…",
+  },
+};
 
 export default function LoginPage() {
   const { status, backend, signIn, signUp } = useApp();
   const router = useRouter();
-  const [mode, setMode] = useState<"signin" | "signup">("signup");
+  const [mode, setMode] = useState<Mode>("signup");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,12 +48,20 @@ export default function LoginPage() {
     if (status === "in") router.replace("/");
   }, [status, router]);
 
+  const look = MODE[mode];
+  const signup = mode === "signup";
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    // パスワードを わすれると もどれないので、はじめてのときは2回入れて、打ちまちがいを ふせぐ
+    if (signup && password !== confirm) {
+      setError("パスワードが 1かいめと 2かいめで ちがうよ。もういちど いれてね");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      if (mode === "signup") await signUp(username, password);
+      if (signup) await signUp(username, password);
       else await signIn(username, password);
       router.replace("/");
     } catch (e) {
@@ -39,31 +72,22 @@ export default function LoginPage() {
 
   return (
     <main className="animate-rise flex min-h-dvh flex-col gap-3.5 px-6 pb-8">
-      <div className="relative -mx-6 flex items-center gap-3 rounded-b-[44px] border-b-3 border-ink bg-navi-light px-6 pb-[22px] pt-7">
+      <div className={`relative -mx-6 flex items-center gap-3 rounded-b-[44px] border-b-3 border-ink px-6 pb-[22px] pt-7 ${look.hero}`}>
         <svg aria-hidden="true" viewBox="0 0 390 190" className="absolute left-0 top-0 h-[190px] w-full">
           <path d="M350 30l5 10 11 2-8 7 2 11-10-6-10 6 2-11-8-7 11-2z" fill="#FFC83D" stroke="#22223A" strokeWidth="2.5" strokeLinejoin="round" />
           <circle cx="300" cy="150" r="7" fill="#FF6F9C" stroke="#22223A" strokeWidth="2.5" />
         </svg>
         <div className="relative">
-          <Navigator mood="happy" size={120} />
+          <Navigator mood={look.mood} size={112} />
         </div>
         <div className="relative flex flex-col gap-1">
-          <h1 className="font-pop text-[30px] font-normal leading-tight">ようこそ！</h1>
-          <span className="text-[17px] font-black leading-normal">
-            はてなハンターに
-            <br />
-            なろう！
-          </span>
+          <h1 className="font-pop text-[28px] font-normal leading-tight">{look.title}</h1>
+          <span className="text-[17px] font-black leading-normal">{look.lead}</span>
         </div>
       </div>
 
-      <div role="tablist" className="grid grid-cols-2 gap-1.5 rounded-[26px] border-3 border-ink bg-white p-[5px]">
-        {(
-          [
-            ["signup", "はじめて"],
-            ["signin", "つづきから"],
-          ] as const
-        ).map(([value, label]) => (
+      <div role="tablist" aria-label="はじめてか、つづきからか" className="grid grid-cols-2 gap-1.5 rounded-[26px] border-3 border-ink bg-white p-[5px]">
+        {(["signup", "signin"] as const).map((value) => (
           <button
             key={value}
             type="button"
@@ -72,30 +96,36 @@ export default function LoginPage() {
             onClick={() => {
               setMode(value);
               setError(null);
+              setConfirm("");
             }}
-            className={`h-[50px] rounded-[20px] text-lg ${mode === value ? "bg-navi font-pop text-white" : "font-black text-ink-sub"}`}
+            className={`flex h-[58px] flex-col items-center justify-center rounded-[20px] leading-tight ${mode === value ? "bg-navi text-white" : "text-ink-sub"}`}
           >
-            {label}
+            <span className={mode === value ? "font-pop text-lg" : "text-lg font-black"}>{MODE[value].tab}</span>
+            <span className="text-xs font-bold">{value === "signup" ? "ID を つくる" : "ID で ログイン"}</span>
           </button>
         ))}
       </div>
 
       <form onSubmit={submit} className="flex flex-1 flex-col gap-3.5">
         <div className="flex flex-col gap-1.5">
-          <FieldLabel htmlFor="uname" note="ひらがなで いいよ">
-            ログインの なまえ
-          </FieldLabel>
+          <FieldLabel htmlFor="uname">ログイン ID</FieldLabel>
           <input
             id="uname"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             autoComplete="username"
             autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             required
-            placeholder="れい：そらまめ"
+            placeholder={signup ? "れい：sora2026" : "まえに きめた ID"}
             className={INPUT_STYLE}
           />
-          {mode === "signup" && <span className="text-sm font-bold text-ink-sub">ひらがな・カタカナ・えいご・すうじが つかえるよ（ひらがな10もじまで）</span>}
+          <span className="text-sm font-bold leading-relaxed text-ink-sub">
+            {signup
+              ? "ログインに つかう じぶんだけの なまえ。ニックネーム（よばれる なまえ）とは べつだよ。えいご・すうじ・ひらがな・カタカナが つかえるよ（ひらがなは 10もじまで）"
+              : "はじめての ときに きめた ID だよ"}
+          </span>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -106,7 +136,7 @@ export default function LoginPage() {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              autoComplete={signup ? "new-password" : "current-password"}
               required
               className={INPUT_STYLE}
             />
@@ -118,13 +148,30 @@ export default function LoginPage() {
               {showPassword ? "かくす" : "みる"}
             </button>
           </div>
-          {mode === "signup" && <span className="text-sm font-bold text-ink-sub">6もじ いじょう</span>}
+          {signup && <span className="text-sm font-bold text-ink-sub">6もじ いじょう</span>}
         </div>
 
-        <div className="flex gap-2.5 rounded-[20px] bg-yellow-light px-4 py-3 text-base font-black leading-relaxed text-yellow-dark">
-          <Icon name="lock" size={26} strokeWidth={2.2} className="mt-0.5" />
-          <span>パスワードを わすれると、ずかんに もどれないよ。おうちの ひとと メモしてね</span>
-        </div>
+        {signup && (
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel htmlFor="pw2">パスワード（もういちど）</FieldLabel>
+            <input
+              id="pw2"
+              type={showPassword ? "text" : "password"}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              autoComplete="new-password"
+              required
+              className={INPUT_STYLE}
+            />
+          </div>
+        )}
+
+        {signup && (
+          <div className="flex gap-2.5 rounded-[20px] bg-yellow-light px-4 py-3 text-base font-black leading-relaxed text-yellow-dark">
+            <Icon name="lock" size={26} strokeWidth={2.2} className="mt-0.5" />
+            <span>ID と パスワードを わすれると、ずかんに もどれないよ。おうちの ひとと メモしてね</span>
+          </div>
+        )}
 
         {error && (
           <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
@@ -140,7 +187,7 @@ export default function LoginPage() {
 
         <div className="mt-auto pt-2">
           <Button type="submit" disabled={busy}>
-            {busy ? "ちょっと まってね…" : mode === "signup" ? "はじめる！" : "ログイン"}
+            {busy ? look.busy : look.button}
           </Button>
         </div>
       </form>

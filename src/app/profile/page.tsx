@@ -73,6 +73,7 @@ function ProfileForm() {
             placeholder="れい：そら"
             className={INPUT_STYLE}
           />
+          <span className="text-[15px] font-bold text-ink-sub">アプリで よばれる なまえだよ（ログイン ID とは べつ）</span>
           <span className="text-[15px] font-black text-pink-deep">ほんとうの なまえは いれないでね</span>
         </div>
 
