@@ -1,3 +1,5 @@
+import { isLearned } from "./kanji";
+
 /** LLM の出力のふりがな記法：{漢字|よみ}（出力が短くなる）。以前の <ruby> タグも読める */
 // うしろに学年がついた書きかた（{漢字|よみ|3}）がまざっても、学年の部分は読みとばす
 const MARKUP = /\{([^{}|]+)\|([^{}|]+)(?:\|\d+)?\}/g;
@@ -7,9 +9,10 @@ const HAN = /\p{Script=Han}/u;
 /**
  * LLM が出した文章を、画面に出せる HTML にする。
  * すべての記号を文字として扱い、ふりがなの記法（{漢字|よみ}）と <ruby>・<rt>・<rp> のタグだけを、ふりがなに変える
- * （それ以外のタグは文字のまま見える）
+ * （それ以外のタグは文字のまま見える）。
+ * grade を渡すと、その学年までに習っていない漢字がある言葉は、読み（ひらがな）で書く（docs/02-spec.md 2.1。src/lib/kanji.ts）
  */
-export function sanitizeRuby(text: string): string {
+export function sanitizeRuby(text: string, grade?: number | null): string {
   const escaped = text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -18,10 +21,13 @@ export function sanitizeRuby(text: string): string {
     .replace(/'/g, "&#39;");
   return escaped
     .replace(/&lt;(\/?)(ruby|rt|rp)&gt;/gi, (_, slash: string, tag: string) => `<${slash}${tag.toLowerCase()}>`)
-    .replace(MARKUP, (_, base: string, yomi: string) =>
+    .replace(MARKUP, (_, base: string, yomi: string) => {
       // 漢字のない部分（数字・ひらがななど）や、同じ読みのものには、ふりがなをつけない（AI がつけてしまうことがある）
-      HAN.test(base) && base !== yomi ? `<ruby>${base}<rt>${yomi}</rt></ruby>` : base,
-    );
+      if (!HAN.test(base) || base === yomi) return base;
+      // まだ習っていない漢字があれば、言葉ごと読みで書く（「本体」の「体」だけ ひらがな、のような まぜ書きにしない）
+      if (grade && !isLearned(base, grade)) return yomi;
+      return `<ruby>${base}<rt>${yomi}</rt></ruby>`;
+    });
 }
 
 /**
