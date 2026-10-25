@@ -1,7 +1,8 @@
 # かこってはてな!?
 
-[![IMAGE ALT TEXT HERE](https://jphacks.com/wp-content/uploads/2026/07/IMG_5316.png)](https://www.youtube.com/watch?v=piaNsc6ilBI)
+[![かこってはてな!? のデモ動画](https://jphacks.com/wp-content/uploads/2026/07/IMG_5316.png)](https://d.kuku.lu/hsyczcn3z)
 
+- **デモ動画**：https://d.kuku.lu/hsyczcn3z （画像をクリックしても開けます）
 - **アプリ URL**：https://fk2601.vercel.app
 - 「はじめて」でログイン ID とパスワードを決めると使えます。カメラが使えないときは、ホームの「見本の絵」から最後まで試せます。
 - **デモ版**：https://fk2601.vercel.app/demo （ログインなしで、すぐ試せます。AI は使わず、ペットボトルの問いが出ます。くわしくは「製品説明」に書きました）
