@@ -89,7 +89,7 @@ function RecognizeContent() {
           <div className="relative flex flex-1 flex-col items-center gap-4 pt-6">
             <Confetti tone="calm" />
             <Navigator mood="sorry" size={160} />
-            <p className="rounded-card border-3 border-ink bg-white px-4 py-3 text-center text-[19px] font-black leading-[1.75] shadow-pop-sm">
+            <p className="rounded-card border-2 border-ink/15 bg-white px-4 py-3 text-center text-[19px] font-black leading-[1.75]">
               この しゃしんからは、
               <br />
               はてなが つくれなかったよ。
@@ -113,7 +113,7 @@ function RecognizeContent() {
           <CropCircle src={crop.dataUrl} alt="つかまえた ところ" />
           <div className="mt-1.5 flex w-full items-center gap-3">
             <Navigator mood="think" size={112} />
-            <div className="relative grow rounded-card border-3 border-ink bg-white px-[18px] py-3.5 font-pop text-[24px] leading-normal shadow-pop-sm">
+            <div className="relative grow rounded-card border-3 border-ink bg-white px-[18px] py-3.5 font-pop text-[24px] leading-normal">
               <span aria-hidden className="absolute -left-[11px] top-[calc(50%-9px)] size-4 rotate-45 border-b-3 border-l-3 border-ink bg-white" />
               <span className="relative">
                 これは

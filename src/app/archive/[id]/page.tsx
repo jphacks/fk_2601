@@ -77,7 +77,7 @@ function DetailContent() {
         <p className="text-base font-black text-ink-sub">{formatDate(record.createdAt)} に つかまえたよ</p>
       </div>
 
-      <section className={`rounded-[26px] border-3 border-ink px-5 py-3.5 shadow-pop-md ${style.light}`}>
+      <section className={`rounded-[26px] border-2 border-ink/15 px-5 py-3.5 ${style.light}`}>
         <Eyebrow question={question} />
         <QuestionText question={question} size={22} />
         <QuestionHint question={question} />
@@ -85,7 +85,7 @@ function DetailContent() {
 
       {evaluation && <ResultSummary question={question} guess={record.guess} evaluation={evaluation} animate={false} />}
 
-      <div className="flex items-start gap-3 rounded-card border-3 border-ink bg-white px-4 py-3 shadow-pop-sm">
+      <div className="flex items-start gap-3 rounded-card border-2 border-ink/15 bg-white px-4 py-3">
         <span className="text-[19px] font-black leading-[1.75]">
           <RubyText text={question.explanation.short} kana />
         </span>
@@ -103,7 +103,7 @@ function DetailContent() {
       <Sources question={question} />
 
       {related.length > 0 && (
-        <section className="flex flex-col gap-2 rounded-card border-3 border-ink bg-white px-4 py-3">
+        <section className="flex flex-col gap-2 rounded-card border-2 border-ink/15 bg-white px-4 py-3">
           <h2 className="font-pop text-base font-normal">にている はてな</h2>
           <ul className="flex flex-col gap-1.5">
             {related.map((a) => (

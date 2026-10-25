@@ -13,7 +13,7 @@ function MissionContent() {
 
   return (
     <Page title="きょうの おだい" back="/">
-      <section className="flex flex-col items-center gap-2 rounded-[28px] border-3 border-ink bg-yellow px-5 py-6 text-center shadow-pop">
+      <section className="flex flex-col items-center gap-2 rounded-[28px] border-2 border-ink/15 bg-yellow px-5 py-6 text-center">
         <span className="flex size-[58px] items-center justify-center rounded-full border-3 border-ink bg-white">
           <Icon name="star" size={34} fill="#FFC83D" stroke="#22223A" strokeWidth={2} />
         </span>

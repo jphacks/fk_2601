@@ -25,7 +25,7 @@ export function StampCards({
         return (
           <section
             key={subject}
-            className={`flex flex-col gap-2 rounded-[22px] border-3 border-ink px-3.5 pb-3 pt-2.5 ${s.light} ${earned ? "shadow-pop-sm" : ""}`}
+            className={`flex flex-col gap-2 rounded-[22px] border-2 border-ink/15 px-3.5 pb-3 pt-2.5 ${s.light}`}
           >
             <div className="flex items-center justify-between">
               <h3 className={`font-pop text-xl font-normal ${s.dark}`}>{SUBJECT_KANA[subject]}</h3>

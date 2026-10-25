@@ -55,17 +55,31 @@ export function LinkButton({
   );
 }
 
-/** 白いカード。太い線と、下にずれた影 */
+/**
+ * 押せるものと押せないものを、見た目で分ける（docs/02-spec.md 2.3）。
+ * 押せるもの：太い線と、下にずれた影（押すと沈む）。押せないもの：影なし・細くうすい線（PANEL）。
+ * 押せないカードの、まわりの線（背景の色は、それぞれの場所で足す）
+ */
+export const PANEL = "rounded-card border-2 border-ink/15";
+
+/**
+ * 選ぶボタン（学年・予想の選択肢 など）。選ぶ前は ほかのボタンと同じく影つき（押せると分かる）、
+ * 選んだら「押しこまれた」形（影なし・少し下がる）にする。色は それぞれの場所で足す
+ */
+export const CHOICE_UP = "shadow-pop-sm active:translate-y-1 active:shadow-none";
+export const CHOICE_DOWN = "translate-y-1 shadow-none";
+
+/** 白いカード（押せない。お知らせ・説明用） */
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-card border-3 border-ink bg-white p-5 shadow-pop-md ${className}`}>{children}</div>;
+  return <div className={`${PANEL} bg-white p-5 ${className}`}>{children}</div>;
 }
 
-/** ナビのふきだし（ナビ画像の右。しっぽは回転した四角） */
+/** ナビのふきだし（ナビ画像の右。しっぽは回転した四角）。押せないので影はつけない */
 export function Say({ mood = "happy", children, size = 88 }: { mood?: Mood; children: ReactNode; size?: number }) {
   return (
     <div className="flex items-center gap-3">
       <Navigator mood={mood} size={size} />
-      <div className="relative grow rounded-card border-3 border-ink bg-white px-4 py-3 text-[19px] font-black leading-[1.75] shadow-pop-sm">
+      <div className="relative grow rounded-card border-3 border-ink bg-white px-4 py-3 text-[19px] font-black leading-[1.75]">
         <span aria-hidden className="absolute -left-[11px] top-[calc(50%-9px)] size-4 rotate-45 border-b-3 border-l-3 border-ink bg-white" />
         <div className="relative">{children}</div>
       </div>

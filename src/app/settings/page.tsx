@@ -36,7 +36,7 @@ function SettingsContent() {
     <Page tab="settings">
       <h1 className="flex h-[46px] items-center font-pop text-[26px] font-normal">せってい</h1>
 
-      <section className="flex flex-col gap-2.5 rounded-card border-3 border-ink bg-white px-4 py-3.5 shadow-pop-md">
+      <section className="flex flex-col gap-2.5 rounded-card border-2 border-ink/15 bg-white px-4 py-3.5">
         <div className="flex items-center justify-between">
           <span className="text-[17px] font-black text-ink-sub">ニックネーム</span>
           <Link href="/profile" className="flex items-center gap-1 font-pop text-xl">

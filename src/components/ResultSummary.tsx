@@ -45,7 +45,7 @@ function Bubble({ children, color, mood, size = 128 }: { children: React.ReactNo
   return (
     <div className="flex items-center gap-2.5">
       <Navigator mood={mood} size={size} />
-      <div className={`relative grow rounded-card border-3 border-ink bg-white px-4 py-3 font-pop text-[24px] leading-[1.45] shadow-pop-sm ${color}`}>
+      <div className={`relative grow rounded-card border-3 border-ink bg-white px-4 py-3 font-pop text-[24px] leading-[1.45] ${color}`}>
         <span aria-hidden className="absolute -left-[11px] top-[calc(50%-9px)] size-4 rotate-45 border-b-3 border-l-3 border-ink bg-white" />
         <span className="relative">{children}</span>
       </div>
@@ -95,8 +95,8 @@ export function ResultSummary({
             {question.choices.map((c, i) => (
               <li
                 key={i}
-                className={`rounded-[22px] border-3 border-ink px-4 py-3 text-[19px] font-black leading-[1.7] ${
-                  c.correct ? "bg-mint-light shadow-pop-sm" : i === guess.index ? "bg-pink-light" : "bg-white text-ink-sub"
+                className={`rounded-[22px] border-2 border-ink/15 px-4 py-3 text-[19px] font-black leading-[1.7] ${
+                  c.correct ? "bg-mint-light" : i === guess.index ? "bg-pink-light" : "bg-white text-ink-sub"
                 }`}
               >
                 <span className="mb-0.5 block text-sm font-black">{c.correct ? "◎ せいかい" : i === guess.index ? "× きみの よそう" : ""}</span>
@@ -126,7 +126,7 @@ export function ResultSummary({
         {look.lines[1]}
       </Bubble>
 
-      <section className="relative flex flex-col items-start gap-1 rounded-[30px] border-3 border-ink bg-white px-5 pb-[18px] pt-3.5 shadow-pop">
+      <section className="relative flex flex-col items-start gap-1 rounded-[30px] border-2 border-ink/15 bg-white px-5 pb-[18px] pt-3.5">
         <span className="text-[15px] font-black text-ink-sub">はてなの しょうたい</span>
         <div className="flex items-baseline gap-1 text-navi">
           <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(shown) }}>
@@ -145,7 +145,7 @@ export function ResultSummary({
       </section>
 
       {type === "compare" && question.compare && (
-        <p className="rounded-card border-3 border-ink bg-pink-light px-4 py-2.5 text-[19px] font-black leading-[1.7] shadow-pop-sm">
+        <p className="rounded-card border-2 border-ink/15 bg-pink-light px-4 py-2.5 text-[19px] font-black leading-[1.7]">
           {evaluation.correct === false ? "おおきいのは、きみが えらんだ ほうでは なかったよ。" : "おおきい ほうを あてたね！"}
           <br />
           <RubyText kana text={question.compare[evaluation.bigger ?? "a"]} /> が おおきいよ
@@ -155,7 +155,7 @@ export function ResultSummary({
       <NumberLine guess={guessValue} actual={actual} unit={unit} intro={animate} />
 
       {ref && (
-        <div className="flex items-center gap-3.5 rounded-card border-3 border-ink bg-mint-light px-[18px] py-3 shadow-pop-sm">
+        <div className="flex items-center gap-3.5 rounded-card border-2 border-ink/15 bg-mint-light px-[18px] py-3">
           <Icon name="bulb" size={34} fill="#FFC83D" stroke="#22223A" strokeWidth={1.8} />
           <span className="text-[19px] font-black leading-[1.7]">
             <RubyText kana text={ref.label} /> {isApprox(ref.value) ? "やく " : ""}

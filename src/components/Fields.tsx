@@ -1,4 +1,5 @@
 import { GRADES } from "@/lib/constants";
+import { CHOICE_DOWN, CHOICE_UP } from "./ui";
 
 // 学年ごとの色（見本 03・22）。えらぶと、こい色になる
 const GRADE_STYLE: Record<number, { off: string; on: string }> = {
@@ -27,7 +28,7 @@ export function GradePicker({ value, onChange, size = "lg" }: { value: number | 
             onClick={() => onChange(g)}
             className={`flex flex-col items-center justify-center border-3 border-ink text-ink ${
               large ? "h-[92px] gap-0.5 rounded-card" : "h-[50px] rounded-2xl"
-            } ${on ? `${style.on} ${large ? "-translate-y-[3px] shadow-pop-md" : "shadow-pop-sm"}` : style.off}`}
+            } ${on ? `${style.on} ${CHOICE_DOWN}` : `${style.off} ${CHOICE_UP}`}`}
           >
             <span className={`font-pop leading-[1.1] ${large ? "text-[34px]" : "text-xl"}`}>{g}</span>
             {large && <span className="text-sm font-black">ねんせい</span>}
@@ -60,7 +61,7 @@ export function RadioRow({ selected, onClick, children }: { selected: boolean; o
       aria-checked={selected}
       onClick={onClick}
       className={`flex min-h-[60px] items-center gap-3 rounded-[20px] border-3 border-ink px-4 py-2 text-left text-lg ${
-        selected ? "bg-navi-light font-black shadow-pop-sm" : "bg-white font-bold"
+        selected ? `bg-navi-light font-black ${CHOICE_DOWN}` : `bg-white font-bold ${CHOICE_UP}`
       }`}
     >
       <span

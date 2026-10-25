@@ -41,7 +41,7 @@ export function SafetyNotice({ once = false }: { once?: boolean }) {
           でかける まえの やくそく
         </h2>
 
-        <div className="flex items-center gap-3.5 rounded-card border-3 border-ink bg-pink-light px-4 py-3.5 shadow-pop-md">
+        <div className="flex items-center gap-3.5 rounded-card border-2 border-ink/15 bg-pink-light px-4 py-3.5">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-full border-3 border-ink bg-pink font-pop text-xl">1</span>
           <span className="grow text-[23px] font-black leading-[1.7]">
             <ruby>
@@ -63,7 +63,7 @@ export function SafetyNotice({ once = false }: { once?: boolean }) {
             <line x1="4" y1="4" x2="20" y2="20" strokeWidth="2.6" />
           </svg>
         </div>
-        <div className="flex items-center gap-3.5 rounded-card border-3 border-ink bg-mint-light px-4 py-3.5 shadow-pop-md">
+        <div className="flex items-center gap-3.5 rounded-card border-2 border-ink/15 bg-mint-light px-4 py-3.5">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-full border-3 border-ink bg-mint font-pop text-xl">2</span>
           <span className="grow text-[23px] font-black leading-[1.7]">
             まわりに

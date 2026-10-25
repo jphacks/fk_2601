@@ -21,7 +21,7 @@ export function CollectCard({ question, image, summary, rating }: { question: Qu
   // 「なぜ？」型は、ピタリ・はずれ ではなく、せいかい・ざんねん
   const label = question.type === "why" ? (rating === "pita" ? "せいかい" : "ざんねん") : undefined;
   return (
-    <div className={`w-[300px] max-w-full -rotate-3 self-center rounded-[28px] border-3 border-ink p-2 shadow-pop ${s.solid}`}>
+    <div className={`w-[300px] max-w-full -rotate-3 self-center rounded-[28px] border-2 border-ink/15 p-2 ${s.solid}`}>
       <div className="relative overflow-hidden rounded-[20px] border-3 border-ink bg-white">
         <div className="flex h-28 items-center justify-center border-b-3 border-ink bg-photo">
           {/* eslint-disable-next-line @next/next/no-img-element -- 囲んだ部分の切り抜き（data URL） */}
@@ -96,7 +96,7 @@ export function SavePanel({
         <h2 className="text-center font-pop text-[26px] font-normal">ずかんに のこそう！</h2>
         <CollectCard question={question} image={image} summary={summary} rating={rating} />
 
-        <label className="mt-2 flex items-start gap-3 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm">
+        <label className="mt-2 flex cursor-pointer items-start gap-3 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm active:translate-y-1 active:shadow-none">
           <input type="checkbox" checked={publish} onChange={(e) => setPublish(e.target.checked)} className="mt-1 size-6 shrink-0 accent-[var(--color-pink)]" />
           <span className="text-[19px] font-black leading-[1.6]">
             みんなにも みせる
@@ -124,7 +124,7 @@ export function SavePanel({
       <h2 className="mt-1 text-center font-pop text-[34px] font-normal leading-tight text-yellow [-webkit-text-stroke:2px_var(--color-ink)]">はてなゲット！</h2>
       <CollectCard question={question} image={image} summary={summary} rating={rating} />
 
-      <section className={`mt-2 flex flex-col gap-2.5 rounded-card border-3 border-ink px-4 py-3 ${s.light}`}>
+      <section className={`mt-2 flex flex-col gap-2.5 rounded-card border-2 border-ink/15 px-4 py-3 ${s.light}`}>
         <div className={`flex items-center justify-between font-pop text-[17px] ${s.dark}`}>
           <span>{SUBJECT_KANA[question.subject]} スタンプ</span>
           <span>{earned ? `${STAMP_GOAL}/${STAMP_GOAL} そろった！` : `${shownStamps}/${STAMP_GOAL}`}</span>
@@ -155,7 +155,7 @@ export function SavePanel({
       </section>
 
       {earned && count === STAMP_GOAL && (
-        <div className="flex items-center gap-3 rounded-card border-3 border-ink bg-purple px-4 py-3 text-white shadow-pop-md">
+        <div className="flex items-center gap-3 rounded-card border-2 border-ink/15 bg-purple px-4 py-3 text-white">
           <Medal size={40} />
           <div className="flex flex-col">
             <span className="text-[15px] font-black">しょうごう ゲット！</span>

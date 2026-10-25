@@ -117,7 +117,7 @@ function ResultContent() {
       <Page title="もしも…？" onBack={() => setStep("nazo")}>
         <div className="flex items-center gap-3">
           <Navigator mood="think" size={90} />
-          <div className="relative grow rounded-[22px] border-3 border-ink bg-white px-4 py-2.5 text-[19px] font-black leading-[1.75] shadow-pop-sm">
+          <div className="relative grow rounded-[22px] border-3 border-ink bg-white px-4 py-2.5 text-[19px] font-black leading-[1.75]">
             <span aria-hidden className="absolute -left-[11px] top-[calc(50%-9px)] size-4 rotate-45 border-b-3 border-l-3 border-ink bg-white" />
             <span className="relative">
               {selected.whatIf ? <RubyText kana text={selected.whatIf} /> : "じょうけんを かえると、こたえは どうなるかな？"}

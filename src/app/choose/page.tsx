@@ -179,7 +179,7 @@ function ChooseContent() {
               rows={3}
               required
               placeholder="れい：このタイルは ぜんぶで なんまい あるのかな？"
-              className="h-[150px] resize-none rounded-card border-3 border-ink bg-white px-[18px] py-4 text-[21px] font-black leading-[1.6] text-ink shadow-pop-md outline-none focus:border-navi"
+              className="h-[150px] resize-none rounded-card border-3 border-ink bg-white px-[18px] py-4 text-[21px] font-black leading-[1.6] text-ink outline-none focus:border-navi"
             />
             <span className="text-right text-sm font-bold text-ink-sub">{text.length} / 100</span>
           </div>
