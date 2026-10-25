@@ -8,13 +8,13 @@ import { messageOf } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
 import { useArchive } from "./ArchiveProvider";
-import { Confetti, Hanko, SideConfetti, Sparkle, Spotlight } from "./Decor";
+import { Bunting, Confetti, Hanko, Rays, SideConfetti, Sparkle, Spotlight } from "./Decor";
 import { Medal } from "./Icons";
 import { Navigator } from "./Navigator";
 import { SUBJECT_STYLE, TYPE_LABEL } from "./QuestionCard";
 import { useQuiz } from "./QuizProvider";
 import { Stamp } from "./StampCards";
-import { Button } from "./ui";
+import { Button, Say } from "./ui";
 import { kanaOf, stripRuby } from "@/lib/ruby";
 
 /** ずかんのカード（見本 19）：つかまえた写真・はてな・きみのよそう→こたえ・はんこ */
@@ -94,7 +94,9 @@ export function SavePanel({
   if (!saved) {
     return (
       <div className="relative flex flex-1 flex-col gap-4">
+        <Rays />
         <SideConfetti />
+        <Bunting />
         <div className="flex items-center justify-center gap-2">
           <Sparkle color="#FF6F9C" size={22} />
           {/* 1行に おさまるよう、画面の はばに合わせて 文字を小さくする */}
@@ -114,6 +116,13 @@ export function SavePanel({
             <span className="block text-sm font-bold text-pink-dark">なまえは でないよ。かこんだ しゃしんと はてなだけ みえるよ。</span>
           </span>
         </label>
+
+        {/* ナビも いっしょに よろこぶ（のこった空白を うめる） */}
+        <div className="mt-auto">
+          <Say mood="happy" size={64} react>
+            <span className="whitespace-nowrap text-[clamp(15px,4.6vw,19px)]">いい はてなを みつけたね！</span>
+          </Say>
+        </div>
 
         {error && (
           <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">

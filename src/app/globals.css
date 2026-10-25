@@ -260,6 +260,19 @@ input[type="range"]::-moz-range-thumb {
   animation: confetti-fall 4s linear infinite;
 }
 
+@keyframes flag-swing {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+.animate-flag {
+  animation: flag-swing 1.8s ease-in-out infinite;
+}
+
 /* 条件を変えたときの、ふくらむ動き */
 @keyframes bump {
   0% {

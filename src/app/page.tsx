@@ -18,7 +18,6 @@ function TownArt() {
     <svg aria-hidden="true" viewBox="0 0 336 230" className="absolute bottom-0 left-0 h-[230px] w-[336px]">
       <circle cx="296" cy="40" r="20" fill="#FFC83D" stroke="#22223A" strokeWidth="3" />
       <path d="M178 96a14 14 0 0 1 26-6 12 12 0 0 1 20 10h-46z" fill="#FFFFFF" stroke="#22223A" strokeWidth="3" strokeLinejoin="round" />
-      <rect x="-4" y="186" width="344" height="50" fill="#9BE3C8" stroke="#22223A" strokeWidth="3" />
       <path d="M16 140L50 110L84 140Z" fill="#FF6F9C" stroke="#22223A" strokeWidth="3" strokeLinejoin="round" />
       <rect x="22" y="140" width="56" height="46" fill="#FFE8F0" stroke="#22223A" strokeWidth="3" />
       <rect x="42" y="158" width="16" height="28" fill="#FFC83D" stroke="#22223A" strokeWidth="3" />
@@ -52,6 +51,8 @@ function HomeContent() {
           aria-label="まちの え。いえ、き、しんごうに はてなが かくれている"
           className="relative min-h-[236px] flex-1 overflow-hidden rounded-[32px] bg-navi-light"
         >
+          {/* 地面は絵の はばに しばらず、わくの はしまで のばす（右はしの ナビの足もとにも 地面が あるように） */}
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-11 border-t-3 border-ink bg-[#9BE3C8]" />
           <TownArt />
           <div className="absolute left-[18px] top-4 flex flex-col items-start gap-1.5">
             <span className="font-pop text-[21px]">こんにちは、{profile.nickname}！</span>
