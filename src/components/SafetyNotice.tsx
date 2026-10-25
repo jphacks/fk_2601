@@ -1,6 +1,7 @@
 "use client";
 
 import { Navigator } from "./Navigator";
+import { RubyText } from "./RubyText";
 import { Button } from "./ui";
 
 /**
@@ -35,14 +36,7 @@ export function SafetyNotice({ onAgree }: { onAgree: () => void }) {
         <div className="flex items-center gap-3.5 rounded-card bg-pink-light px-4 py-3.5">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-pink font-pop text-xl">1</span>
           <span className="grow text-[23px] font-black leading-[1.7]">
-            <ruby>
-              人<rt>ひと</rt>
-            </ruby>
-            の
-            <ruby>
-              顔<rt>かお</rt>
-            </ruby>
-            は
+            <RubyText text="{人|ひと}の{顔|かお}は" />
             <br />
             とらないでね
           </span>

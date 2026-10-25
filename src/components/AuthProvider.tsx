@@ -29,6 +29,11 @@ export function useApp(): AppContext {
   return value;
 }
 
+/** いまのプロフィールの学年（ログイン前・プロフィールがないときは null）。漢字を学年に合わせるのに使う */
+export function useGrade(): number | null {
+  return useContext(Context)?.profile?.grade ?? null;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const backend = useMemo(() => getBackend(), []);
   const [status, setStatus] = useState<Status>("loading");
