@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>はてな</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F4F7F5}
+*{box-sizing:border-box}
+a{color:#1E4438}a:hover{color:#122C24}
+.shell{height:100vh;overflow:hidden}
+.panel{min-height:0;overflow:auto}
+@media (max-width: 1100px){.shell{height:auto;overflow:visible}.bento{grid-template-columns:1fr !important}.panel{overflow:visible}.clip{overflow:visible !important}}
+.card{background:#FFFFFF;border:1px solid #DCE3DF;border-radius:14px}
+.h1{margin:0;font-size:22px;font-weight:700;letter-spacing:0.02em;color:#16201B}
+.h2{margin:0;font-size:18px;font-weight:700;color:#16201B}
+.sub{margin:0;font-size:12px;line-height:1.7;color:#55615B}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:8px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;border:1px solid #1E4438}
+.btn-s{background:#FFFFFF;color:#1E4438}
+.btn-d{background:#A8321F;border-color:#A8321F;color:#FFFFFF}
+.ghost{border:0;background:transparent;font:inherit;font-size:12px;font-weight:700;color:#1E4438;cursor:pointer;padding:6px;min-height:34px}
+.seg{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border:0;border-radius:6px;font:inherit;font-size:13px;cursor:pointer}
+.field{height:36px;border:1px solid #C5CFCA;border-radius:8px;background:#FFFFFF;font:inherit;font-size:13px;color:#16201B;padding:0 10px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:4px;flex-shrink:0}
+.clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.count{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:10px;font-size:11px;font-weight:700}
+</style>
+</helmet>
+<div class="shell" style="display: flex; flex-direction: column; background: #F4F7F5; font-family: 'BIZ UDPGothic', system-ui, sans-serif; color: #16201B">
+  <dc-import name="Header" active="hatena" session="in" hint-size="100%,56px"></dc-import>
+
+  <main style="flex: 1; min-height: 0; width: 100%; max-width: 1400px; margin: 0 auto; padding: 16px 24px 20px; display: flex; flex-direction: column; gap: 14px">
+
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px">
+      <h1 class="h1">はてな</h1>
+      <div role="tablist" aria-label="表示するもの" style="display: flex; gap: 3px; padding: 3px; border-radius: 9px; background: #E6ECE9">
+        <button type="button" role="tab" class="seg" aria-selected="{{tabShared.sel}}" onClick="{{showShared}}" style="background: {{tabShared.bg}}; color: {{tabShared.fg}}; font-weight: {{tabShared.fw}}">
+          クラスに共有
+          <span class="count" style="background: #E3EEE8; color: #1E4438">{{sharedTotal}}</span>
+          <span class="count" style="background: #F5C33B; color: #16201B">新着 2</span>
+        </button>
+        <button type="button" role="tab" class="seg" aria-selected="{{tabRec.sel}}" onClick="{{showRecords}}" style="background: {{tabRec.bg}}; color: {{tabRec.fg}}; font-weight: {{tabRec.fw}}">
+          授業中の記録
+          <span class="count" style="background: #E3EEE8; color: #1E4438">124</span>
+        </button>
+      </div>
+      <p class="sub" style="flex: 1 1 420px; font-size: 12px; color: #2E3A35">{{lead}}</p>
+    </div>
+
+    <div class="bento" style="flex: 1; min-height: 0; display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 16px">
+
+      <aside class="card panel" aria-label="単元で選ぶ" style="padding: 14px; display: flex; flex-direction: column; gap: 10px">
+        <div role="group" aria-label="分野でしぼる" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px">
+          <sc-for list="{{fields}}" as="f" hint-placeholder-count="4">
+            <button type="button" aria-pressed="{{f.pressed}}" onClick="{{f.pick}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 32px; padding: 0 4px; border-radius: 8px; font: inherit; font-size: 12px; cursor: pointer; border: 1px solid {{f.border}}; background: {{f.bg}}; color: {{f.fg}}; font-weight: {{f.fw}}">{{f.label}}</button>
+          </sc-for>
+        </div>
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px">
+          <sc-for list="{{units}}" as="u" hint-placeholder-count="9">
+            <li>
+              <button type="button" onClick="{{u.pick}}" aria-current="{{u.cur}}" style="width: 100%; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 6px 10px; border: 0; border-radius: 8px; background: {{u.bg}}; font: inherit; font-size: 14px; font-weight: {{u.fw}}; color: #16201B; text-align: left; cursor: pointer">
+                <span class="dot" style="background: {{u.color}}"></span>
+                <span style="flex: 1; min-width: 0">{{u.name}}</span>
+                <span style="font-size: 12px; color: #55615B; font-variant-numeric: tabular-nums">{{u.total}}</span>
+              </button>
+            </li>
+          </sc-for>
+        </ul>
+        <sc-if value="{{hasRest}}" hint-placeholder-val="{{ false }}">
+          <p class="sub" style="padding: 0 10px">{{restNote}}</p>
+        </sc-if>
+      </aside>
+
+      <section class="card clip" aria-labelledby="h-unit" style="min-height: 0; display: flex; flex-direction: column; overflow: hidden">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 14px 18px; border-bottom: 1px solid #EDF1EF">
+          <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+            <h2 id="h-unit" class="h2">{{title}}</h2>
+            <span class="sub" style="font-size: 13px">{{titleSub}}</span>
+          </div>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #2E3A35">子ども
+            <select class="field"><option>全員</option><option>青木 空</option><option>井上 陽翔</option><option>上田 結衣</option></select>
+          </label>
+        </div>
+        <div class="panel" style="flex: 1; padding: 16px 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(224px, 1fr)); grid-auto-rows: max-content; gap: 14px; align-content: start">
+          <sc-for list="{{items}}" as="r" hint-placeholder-count="8">
+            <article style="border: 1px solid #E3E9E6; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; background: #FFFFFF">
+              <div style="position: relative">
+                <img src="{{r.img}}" alt="切り抜き画像" style="display: block; width: 100%; height: 104px; object-fit: cover">
+                <sc-if value="{{r.isNew}}" hint-placeholder-val="{{ false }}">
+                  <span class="count" style="position: absolute; top: 8px; left: 8px; background: #F5C33B; color: #16201B">新着</span>
+                </sc-if>
+              </div>
+              <div style="padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px; flex: 1">
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #2E3A35"><span class="dot" style="background: {{r.color}}"></span>{{r.unit}}</span>
+                <p class="clamp2" style="margin: 0; font-size: 13px; font-weight: 700; line-height: 1.55">{{r.q}}</p>
+                <span style="font-size: 11px; color: #55615B">{{r.who}} ・ {{r.at}}</span>
+                <sc-if value="{{r.showResult}}" hint-placeholder-val="{{ false }}">
+                  <span style="margin-top: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #2E3A35; padding-top: 6px; border-top: 1px solid #EDF1EF; font-variant-numeric: tabular-nums">
+                    <span style="color: #55615B">予想</span>{{r.guess}}<span aria-hidden="true" style="color: #55615B">→</span><strong>{{r.answer}}</strong>
+                  </span>
+                </sc-if>
+                <sc-if value="{{r.canAct}}" hint-placeholder-val="{{ false }}">
+                  <span style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 6px; padding-top: 4px">
+                    <a href="Projector.dc.html" style="display: inline-flex; align-items: center; gap: 5px; height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid #E2B32A; background: #FFF6D9; color: #4A3700; font-size: 12px; font-weight: 700; text-decoration: none">
+                      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
+                      教室に映す
+                    </a>
+                    <button type="button" class="ghost" onClick="{{r.askDelete}}" style="color: #A8321F">クラスから外す</button>
+                  </span>
+                </sc-if>
+              </div>
+            </article>
+          </sc-for>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <sc-if value="{{deleting}}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; background: rgba(14, 28, 22, 0.55); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 10">
+      <div role="dialog" aria-modal="true" aria-labelledby="h-del" style="width: 100%; max-width: 500px; background: #FFFFFF; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+        <h2 id="h-del" class="h2" style="font-size: 20px">この投稿をクラスから外しますか？</h2>
+        <div style="display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 10px; background: #F4F7F5">
+          <img src="{{delImg}}" alt="" style="width: 72px; height: 48px; border-radius: 6px; object-fit: cover; flex-shrink: 0">
+          <span style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+            <span style="font-size: 14px; font-weight: 700; line-height: 1.5">{{delQ}}</span>
+            <span style="font-size: 12px; color: #55615B">{{delWho}}</span>
+          </span>
+        </div>
+        <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.75; color: #2E3A35">
+          <li>クラスの子どもから見えなくなります</li>
+          <li>本人のずかんには残り、その はてなに「せんせいが クラスから はずしたよ」と出ます</li>
+          <li>友達の顔や名札が写っているときは、本人に声をかけて、ずかんからも消してもらってください</li>
+        </ul>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px">
+          <button type="button" class="btn btn-s" onClick="{{cancelDelete}}">やめる</button>
+          <button type="button" class="btn btn-d" onClick="{{doDelete}}">クラスから外す</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"initialTab":{"editor":"enum","options":["shared","records"],"default":"shared"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: null, field: 'all', unit: 'all', deleted: {}, deletingId: null };
+  }
+  renderVals() {
+    const s = this.state;
+    const C = { 算数: '#3B5BDB', 理科: '#0F8A6C', 情報: '#7B4FE0' };
+    const IMG = {
+      tiles: '/_blob/2b841d09f5ee61f4db4a2a5b69736e7b', leaf: '/_blob/3f17334b2ce6d930b5db314565e303aa',
+      signal: '/_blob/33428f469933a0d9373d0ecc7eacb535', barcode: '/_blob/87686c4c4731c0e9e30b4730cb876cfc',
+      pool: '/_blob/814622e87f58460d0542b41cbe680873', ball: '/_blob/3a2c43871373a9f7baa140f048bc6cbb',
+      cup: '/_blob/c48ecf9221cd5593b4f9612722aa13a3', vending: '/_blob/d660bff613465356eace577d3462dbbe',
+      qr: '/_blob/e0b68d5de0e8ba985289b5abfe079ffa', river: '/_blob/3f46a1067a0405ce1553e678c8eb61bb'
+    };
+    const tab = s.tab ?? (this.props.initialTab ?? 'shared');
+    const isShared = tab === 'shared';
+    const sharedRaw = [
+      ['s1', 'ゆいゆい', '上田 結衣', '情報', 'データの表し方', 'qr', 'このQRコードの白と黒、ならべ方は何通り？', '11/3 16:08', 1, true],
+      ['s2', 'れんこん', '岡本 蓮', '算数', '割合', 'vending', 'この自販機の飲み物、何％が お茶？', '11/2 17:30', 2, true],
+      ['s3', 'そらまめ', '青木 空', '算数', '面積', 'tiles', 'このろうかに、タイルは何まい しきつめてある？', '10/30 10:26', 3, false],
+      ['s4', 'やまとダッシュ', '佐藤 大和', '理科', '流れる水', 'river', 'この川の水は、1分で何リットル流れる？', '10/29 15:12', 4, false],
+      ['s5', 'みなとくん', '木村 湊', '算数', '体積', 'pool', 'このプールには、水が何リットル入る？', '10/28 13:52', 5, false],
+      ['s6', 'りっちゃん', '高橋 律', '情報', 'プログラミング', 'signal', 'この信号は、1日に何回 切りかわる？', '10/27 12:40', 6, false],
+      ['s7', 'さくらもち', '加藤 さくら', '理科', '植物のつくり', 'leaf', 'このイチョウの木に、葉っぱは何まい ついている？', '10/26 10:05', 7, false],
+      ['s8', 'めいめい', '小林 芽依', '理科', 'もののとけ方', 'cup', 'このコップの水に、さとうは何gまで とける？', '10/23 11:20', 8, false],
+      ['s9', 'ハルト', '井上 陽翔', '算数', '面積', 'ball', 'この ボールを しきつめると、校庭に何こ ならぶ？', '10/22 14:30', 9, false]
+    ];
+    const sharedTotals = { 'データの表し方': 2, '割合': 2, '面積': 4, '流れる水': 1, '体積': 2, 'プログラミング': 1, '植物のつくり': 1, 'もののとけ方': 1 };
+    const recRaw = [
+      ['r1', '青木 空', '算数', '面積', 'tiles', 'このろうかに、タイルは何まい しきつめてある？', '11/4 10:36', '200まい', '1,440まい', 2],
+      ['r2', '加藤 さくら', '理科', '植物のつくり', 'leaf', 'このイチョウの木に、葉っぱは何まい ついている？', '11/4 10:38', '1,000まい', '約20万まい', 1],
+      ['r3', '井上 陽翔', '情報', 'データの表し方', 'barcode', 'このバーコードで、何種類の商品を区別できる？', '11/4 10:31', '1万種類', '1兆種類', 3],
+      ['r4', '鈴木 心春', '算数', '速さ', 'signal', 'この信号が かわるまでに、何歩 歩ける？', '11/4 10:27', '10歩', '約45歩', 4],
+      ['r5', '木村 湊', '算数', '体積', 'pool', 'このプールには、水が何リットル入る？', '11/4 10:22', '5,000L', '360,000L', 5],
+      ['r6', '小林 芽依', '理科', 'もののとけ方', 'cup', 'このコップの水に、さとうは何gまで とける？', '11/4 10:15', '50g', '約400g', 6],
+      ['r7', '上田 結衣', '算数', '面積', 'ball', 'この ボールを しきつめると、校庭に何こ ならぶ？', '10/30 10:18', '500こ', '約1万こ', 7],
+      ['r8', '佐藤 大和', '理科', '流れる水', 'river', 'この川の水は、1分で何リットル流れる？', '10/29 15:10', '10L', '約3,000L', 8],
+      ['r9', '高橋 律', '情報', 'プログラミング', 'signal', 'この信号は、1日に何回 切りかわる？', '10/27 12:38', '100回', '1,440回', 9]
+    ];
+    const recTotals = { '面積': 17, '速さ': 14, '植物のつくり': 11, '体積': 12, 'データの表し方': 9, 'もののとけ方': 10, '流れる水': 8, 'プログラミング': 6 };
+
+    const all = isShared
+      ? sharedRaw.filter((r) => !s.deleted[r[0]]).map(([id, user, name, field, unit, img, q, at, order, isNew]) => ({
+          id, field, unit, q, at, order, isNew, img: IMG[img], color: C[field],
+          who: user + '（' + name + '）', showResult: false, canAct: true,
+          askDelete: () => this.setState({ deletingId: id })
+        }))
+      : recRaw.map(([id, name, field, unit, img, q, at, guess, answer, order]) => ({
+          id, field, unit, q, at, order, guess, answer, isNew: false, img: IMG[img], color: C[field],
+          who: name, showResult: true, canAct: false, askDelete: () => {}
+        }));
+    const totalsBase = isShared ? sharedTotals : recTotals;
+    const deletedIn = (unit) => isShared ? sharedRaw.filter((r) => r[4] === unit && s.deleted[r[0]]).length : 0;
+    const unitField = {};
+    all.forEach((r) => { unitField[r.unit] = r.field; });
+    if (isShared) sharedRaw.forEach((r) => { unitField[r[4]] = r[3]; });
+    const unitNames = Object.keys(totalsBase)
+      .filter((u) => s.field === 'all' || unitField[u] === s.field)
+      .sort((a, b) => totalsBase[b] - totalsBase[a]);
+    const fieldTotal = unitNames.reduce((n, u) => n + totalsBase[u] - deletedIn(u), 0) + (!isShared && s.field === 'all' ? 37 : 0);
+    const unit = (s.unit !== 'all' && unitNames.includes(s.unit)) ? s.unit : 'all';
+    const mkUnit = (key, name, total, color) => {
+      const on = unit === key;
+      return { name, total, color, bg: on ? '#E3EEE8' : 'transparent', fw: on ? '700' : '400', cur: on ? 'true' : undefined, pick: () => this.setState({ unit: key }) };
+    };
+    const units = [mkUnit('all', 'すべて（新しい順）', fieldTotal, '#1E4438')].concat(
+      unitNames.map((u) => mkUnit(u, u, totalsBase[u] - deletedIn(u), C[unitField[u]]))
+    );
+    const items = all
+      .filter((r) => (s.field === 'all' || r.field === s.field) && (unit === 'all' || r.unit === unit))
+      .sort((a, b) => a.order - b.order);
+    const shownTotal = unit === 'all' ? fieldTotal : totalsBase[unit] - deletedIn(unit);
+
+    const segOn = { sel: 'true', bg: '#FFFFFF', fg: '#16201B', fw: '700' };
+    const segOff = { sel: 'false', bg: 'transparent', fg: '#2E3A35', fw: '400' };
+    const fields = [['all', 'すべて'], ['算数', '算数'], ['理科', '理科'], ['情報', '情報']].map(([key, label]) => {
+      const on = s.field === key;
+      return {
+        label, pressed: on ? 'true' : 'false',
+        border: on ? '#1E4438' : '#DCE3DF', bg: on ? '#1E4438' : '#FFFFFF', fg: on ? '#FFFFFF' : '#2E3A35', fw: on ? '700' : '400',
+        pick: () => this.setState({ field: key, unit: 'all' })
+      };
+    });
+    const target = sharedRaw.find((r) => r[0] === s.deletingId);
+    return {
+      tabShared: isShared ? segOn : segOff,
+      tabRec: isShared ? segOff : segOn,
+      showShared: () => this.setState({ tab: 'shared', unit: 'all' }),
+      showRecords: () => this.setState({ tab: 'records', unit: 'all' }),
+      sharedTotal: 14 - Object.keys(s.deleted).length,
+      lead: isShared
+        ? '子どもが「クラスに みせる」を選んだ はてな。クラスの全員に見えています。教室に映せるのはここにある はてなだけです（共有するとき、子どもには「せんせいが きょうしつで みせることも あるよ」と伝えています）。'
+        : '授業時間中に保存された はてな。先生だけが見られ、子どもには見えません。授業時間の外に保存されたものは件数だけです。',
+      fields,
+      units,
+      hasRest: !isShared && s.field === 'all',
+      restNote: 'ほかに 7つの単元（37件）',
+      title: unit === 'all' ? 'すべて' : unit,
+      titleSub: (unit === 'all' ? '新しい順' : (unitField[unit] || '')) + ' ・ ' + shownTotal + '件' + (items.length < shownTotal ? '（' + items.length + '件を表示）' : ''),
+      items,
+      deleting: !!target,
+      delImg: target ? IMG[target[5]] : '',
+      delQ: target ? target[6] : '',
+      delWho: target ? target[1] + '（' + target[2] + '）・ ' + target[7] : '',
+      cancelDelete: () => this.setState({ deletingId: null }),
+      doDelete: () => this.setState({ deleted: { ...this.state.deleted, [this.state.deletingId]: true }, deletingId: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

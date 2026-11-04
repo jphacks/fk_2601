@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>きょう</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&amp;family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F4F7F5}
+*{box-sizing:border-box}
+a{color:#1E4438}a:hover{color:#122C24}
+.shell{height:100vh;overflow:hidden}
+.panel{min-height:0;overflow:auto}
+@media (max-width: 1100px){.shell{height:auto;overflow:visible}.bento{grid-template-columns:1fr !important}.panel{overflow:visible}}
+.card{background:#FFFFFF;border:1px solid #DCE3DF;border-radius:14px}
+.h1{margin:0;font-size:22px;font-weight:700;letter-spacing:0.02em;color:#16201B}
+.h2{margin:0;font-size:16px;font-weight:700;color:#16201B}
+.h3{margin:0;font-size:14px;font-weight:700;color:#16201B}
+.sub{margin:0;font-size:12px;line-height:1.7;color:#55615B}
+.eyebrow{margin:0;font-size:13px;color:#55615B;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;border:1px solid #1E4438}
+.btn-p{background:#1E4438;color:#FFFFFF}
+.btn-s{background:#FFFFFF;color:#1E4438}
+.ghost{border:0;background:transparent;font:inherit;font-size:13px;font-weight:700;color:#1E4438;cursor:pointer;padding:6px;min-height:36px}
+.tag{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:13px;font-size:12px;background:#F1F4F2;color:#2E3A35;white-space:nowrap}
+.num{font-size:30px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:#16201B}
+.unit{font-size:12px;font-weight:400;color:#55615B;margin-left:3px}
+.field{height:40px;border:1px solid #C5CFCA;border-radius:8px;background:#FFFFFF;font:inherit;font-size:14px;color:#16201B;padding:0 12px;width:100%}
+.dot{display:inline-block;width:8px;height:8px;border-radius:4px;flex-shrink:0}
+.icon{width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.one{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec{display:flex;flex-direction:column;gap:8px;padding:14px 0;border-top:1px solid #EDF1EF}
+.stat{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:10px;background:#F4F7F5}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+<div class="shell" style="display: flex; flex-direction: column; background: #F4F7F5; font-family: 'BIZ UDPGothic', system-ui, sans-serif; color: #16201B">
+  <dc-import name="Header" active="today" session="in" hint-size="100%,56px"></dc-import>
+
+  <main style="flex: 1; min-height: 0; width: 100%; max-width: 1400px; margin: 0 auto; padding: 16px 24px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px">
+      <h1 class="h1">きょうの 5年2組</h1>
+      <span class="eyebrow">2026年11月4日（水） 10:40</span>
+      <span class="sub" style="margin-left: auto; font-size: 13px">参加中 32人 ・ 担任 山田 花子 先生</span>
+    </div>
+
+    <div class="bento" style="flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px">
+
+      <div class="panel" style="display: flex; flex-direction: column; gap: 16px">
+
+        <section class="card" aria-labelledby="h-todo" style="padding: 16px 18px 4px; display: flex; flex-direction: column">
+          <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 12px">
+            <h2 id="h-todo" class="h2">やること</h2>
+            <sc-if value="{{hasTodo}}" hint-placeholder-val="{{ true }}">
+              <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px; background: #F5C33B; color: #16201B; font-size: 12px; font-weight: 700">{{todoCount}}</span>
+            </sc-if>
+            <sc-if value="{{noTodo}}" hint-placeholder-val="{{ false }}">
+              <span style="display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 12px; background: #E3EEE8; color: #1E4438; font-size: 12px; font-weight: 700">
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4.5 4.5L19 7"></path></svg>
+                ぜんぶ おわりました
+              </span>
+            </sc-if>
+          </div>
+
+          <div class="sec">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <span aria-hidden="true" class="icon" style="background: #FFF3CC; color: #6B4E00">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"></path><path d="M19 8v6"></path><path d="M16 11h6"></path></svg>
+              </span>
+              <h3 class="h3">参加の確認</h3>
+              <span class="sub" style="margin-left: auto">{{pendingTag}}</span>
+            </div>
+            <sc-if value="{{hasPending}}" hint-placeholder-val="{{ true }}">
+              <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+                <sc-for list="{{pending}}" as="p" hint-placeholder-count="3">
+                  <li style="display: flex; align-items: center; gap: 6px; padding: 6px 0">
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+                      <span class="one" style="font-size: 14px; font-weight: 700">{{p.name}}<span style="font-weight: 400; font-size: 12px; color: #55615B">（{{p.user}}）</span></span>
+                      <span class="one" style="font-size: 11px; color: #55615B">{{p.mail}}</span>
+                    </span>
+                    <button type="button" class="ghost" onClick="{{p.reject}}" aria-label="{{p.rejectLabel}}">ちがう</button>
+                    <button type="button" class="btn btn-p" onClick="{{p.approve}}" aria-label="{{p.approveLabel}}" style="height: 34px">確認</button>
+                  </li>
+                </sc-for>
+              </ul>
+            </sc-if>
+            <sc-if value="{{noPending}}" hint-placeholder-val="{{ false }}">
+              <p class="sub" style="font-size: 13px; color: #2E3A35">全員の確認がおわりました。これから保存される はてなが先生に見えます。</p>
+            </sc-if>
+          </div>
+
+          <div class="sec">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <span aria-hidden="true" class="icon" style="background: #FFF3CC; color: #6B4E00">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"></path><path d="M5 4h11l-2 4 2 4H5"></path></svg>
+              </span>
+              <h3 class="h3">あしたの ミッション</h3>
+              <span class="sub" style="margin-left: auto">11月5日（木）・ {{missionTag}}</span>
+            </div>
+            <sc-if value="{{missionOpen}}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; gap: 8px; align-items: center">
+                <label style="flex: 1; min-width: 0">
+                  <span class="sr">ミッションの文</span>
+                  <input class="field" type="text" value="{{text}}" onInput="{{onText}}" placeholder="うんどうじょうで まるい ものを さがそう">
+                </label>
+                <button type="button" class="btn btn-p" disabled="{{cannotSubmit}}" onClick="{{submitMission}}" style="height: 40px; opacity: {{submitOpacity}}">出す</button>
+              </div>
+              <sc-if value="{{hasKanji}}" hint-placeholder-val="{{ false }}">
+                <p role="status" style="margin: 0; padding: 8px 10px; border-radius: 8px; background: #FFF6D9; border: 1px solid #EBCB6E; font-size: 12px; line-height: 1.6; color: #5A4300">漢字が入っています（{{kanjiList}}）。ひらがなに直すと、どの学年でも読めます。このままでも出せます。</p>
+              </sc-if>
+              <span class="sub">出さない日は アプリのお題が出ます</span>
+            </sc-if>
+            <sc-if value="{{missionSet}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px; background: #FFF6D6; font-family: 'Zen Maru Gothic', sans-serif; color: #22223A">
+                <img src="/_blob/90ee2143e3f2f66e3da13ec83c1b3624" alt="" style="width: 40px; height: 40px; flex-shrink: 0">
+                <span style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                  <span style="align-self: flex-start; display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 10px; background: #FFC83D; font-family: 'Mochiy Pop One', sans-serif; font-size: 10px">きょうの おだい</span>
+                  <span style="font-size: 15px; font-weight: 700; line-height: 1.5">{{text}}</span>
+                </span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                <span class="sub">あしたの朝、子どものホームに出ます</span>
+                <button type="button" class="ghost" onClick="{{editMission}}">変える</button>
+              </div>
+            </sc-if>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="h-2w" style="padding: 16px 18px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
+            <h2 id="h-2w" class="h2">この2週間</h2>
+            <span class="sub">10/22〜11/4</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px">
+            <div class="stat">
+              <span class="sub">使った子ども</span>
+              <span><span class="num" style="font-size: 24px">29</span><span class="unit">/ 32人</span></span>
+            </div>
+            <div class="stat">
+              <span class="sub">保存した はてな</span>
+              <span><span class="num" style="font-size: 24px">188</span><span class="unit">件</span></span>
+            </div>
+            <div class="stat">
+              <span class="sub">ミッションのクリア</span>
+              <span><span class="num" style="font-size: 24px">21</span><span class="unit">人（平均）</span></span>
+            </div>
+            <div class="stat">
+              <span class="sub">分野（授業中）</span>
+              <div role="img" aria-label="算数46%、理科32%、情報22%" style="display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; margin-top: 4px">
+                <div style="flex: 57; background: #3B5BDB"></div>
+                <div style="flex: 40; background: #0F8A6C"></div>
+                <div style="flex: 27; background: #7B4FE0"></div>
+              </div>
+              <span style="font-size: 11px; color: #2E3A35; white-space: nowrap">46 ・ 32 ・ 22 %</span>
+            </div>
+          </div>
+          <div role="img" aria-label="日ごとの保存件数。授業のある平日は13〜22件、土日と祝日は授業の外の数件だけ" style="display: flex; flex-direction: column; gap: 4px">
+            <div style="height: 110px; display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 6px; align-items: end; border-bottom: 1px solid #DCE3DF">
+              <sc-for list="{{days}}" as="d" hint-placeholder-count="14">
+                <div style="display: flex; flex-direction: column">
+                  <div style="height: {{d.outH}}; background: #A9C4B8; border-radius: 2px 2px 0 0"></div>
+                  <div style="height: {{d.inH}}; background: #1E4438"></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 6px">
+              <sc-for list="{{days}}" as="d" hint-placeholder-count="14">
+                <span style="text-align: center; font-size: 10px; font-variant-numeric: tabular-nums; color: {{d.color}}; font-weight: {{d.weight}}">{{d.day}}</span>
+              </sc-for>
+            </div>
+          </div>
+          <span style="display: flex; gap: 14px; font-size: 11px; color: #2E3A35">
+            <span style="display: inline-flex; align-items: center; gap: 5px"><span aria-hidden="true" style="width: 9px; height: 9px; border-radius: 2px; background: #1E4438"></span>授業中 124</span>
+            <span style="display: inline-flex; align-items: center; gap: 5px"><span aria-hidden="true" style="width: 9px; height: 9px; border-radius: 2px; background: #A9C4B8"></span>授業の外 64</span>
+          </span>
+        </section>
+      </div>
+
+      <section class="card panel" aria-labelledby="h-live" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 16px">
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 8px">
+          <h2 id="h-live" class="h2">きょう 授業中に 集まった はてな</h2>
+          <a href="Hatena.dc.html" style="font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap">はてなで すべて見る →</a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+          <div class="stat">
+            <span class="sub">保存された はてな</span>
+            <span><span class="num">18</span><span class="unit">件</span></span>
+          </div>
+          <div class="stat">
+            <span class="sub">保存した子ども</span>
+            <span><span class="num">11</span><span class="unit">/ 32人</span></span>
+          </div>
+          <div class="stat">
+            <span class="sub">分野</span>
+            <div role="img" aria-label="算数9件、理科5件、情報4件" style="display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; margin-top: 4px">
+              <div style="flex: 9; background: #3B5BDB"></div>
+              <div style="flex: 5; background: #0F8A6C"></div>
+              <div style="flex: 4; background: #7B4FE0"></div>
+            </div>
+            <span style="display: flex; gap: 10px; font-size: 12px; color: #2E3A35; white-space: nowrap">
+              <span>算数 <strong>9</strong></span><span>理科 <strong>5</strong></span><span>情報 <strong>4</strong></span>
+            </span>
+          </div>
+        </div>
+
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; border-top: 1px solid #EDF1EF; padding-top: 12px">
+          <h3 class="h3" style="padding-bottom: 4px">いま届いた はてな</h3>
+          <ul class="panel" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; flex: 1">
+            <sc-for list="{{feed}}" as="f" hint-placeholder-count="6">
+              <li style="display: grid; grid-template-columns: 44px 84px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #F1F4F2">
+                <span style="font-size: 13px; color: #55615B; font-variant-numeric: tabular-nums">{{f.at}}</span>
+                <img src="{{f.img}}" alt="切り抜き画像" style="width: 84px; height: 56px; border-radius: 8px; object-fit: cover">
+                <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+                  <span class="one" style="font-size: 15px; font-weight: 700">{{f.q}}</span>
+                  <span style="font-size: 12px; color: #55615B">{{f.name}}</span>
+                </span>
+                <span class="tag"><span class="dot" style="background: {{f.color}}"></span>{{f.unit}}</span>
+              </li>
+            </sc-for>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { done: {}, missionSet: false, text: '' };
+  }
+  renderVals() {
+    const C = { 算数: '#3B5BDB', 理科: '#0F8A6C', 情報: '#7B4FE0' };
+    const IMG = {
+      tiles: '/_blob/2b841d09f5ee61f4db4a2a5b69736e7b', leaf: '/_blob/3f17334b2ce6d930b5db314565e303aa',
+      signal: '/_blob/33428f469933a0d9373d0ecc7eacb535', barcode: '/_blob/87686c4c4731c0e9e30b4730cb876cfc',
+      pool: '/_blob/814622e87f58460d0542b41cbe680873', cup: '/_blob/c48ecf9221cd5593b4f9612722aa13a3'
+    };
+    const s = this.state;
+    const pendingAll = [
+      { id: 'p1', name: '中村 陽菜', user: 'ひなた', mail: 'nakamura.hina@example.ed.jp' },
+      { id: 'p2', name: '山口 颯太', user: 'そうた', mail: 'yamaguchi.sota@example.ed.jp' },
+      { id: 'p3', name: '渡辺 碧', user: 'あおい', mail: 'watanabe.aoi@example.ed.jp' }
+    ];
+    const pending = pendingAll.filter((p) => !s.done[p.id]).map((p) => ({
+      ...p,
+      approveLabel: p.name + 'さんを確認する',
+      rejectLabel: p.name + 'さんはこのクラスではない',
+      approve: () => this.setState({ done: { ...this.state.done, [p.id]: 'ok' } }),
+      reject: () => this.setState({ done: { ...this.state.done, [p.id]: 'no' } })
+    }));
+    const text = s.text;
+    const kanji = Array.from(new Set(text.match(/[一-鿿㐀-䶿]/g) || []));
+    const cannotSubmit = text.trim() === '';
+    const todoCount = (pending.length > 0 ? 1 : 0) + (s.missionSet ? 0 : 1);
+    const raw = [
+      ['22', '木', 15, 5], ['23', '金', 13, 6], ['24', '土', 0, 7], ['25', '日', 0, 9],
+      ['26', '月', 14, 3], ['27', '火', 11, 4], ['28', '水', 16, 6], ['29', '木', 14, 5],
+      ['30', '金', 13, 4], ['31', '土', 0, 6], ['1', '日', 0, 5], ['2', '月', 10, 3],
+      ['3', '祝', 0, 1], ['4', '水', 18, 0]
+    ];
+    const px = 4.5;
+    const days = raw.map(([day, dow, i, o]) => ({
+      day, inH: (i * px) + 'px', outH: (o * px) + 'px',
+      color: (dow === '土' || dow === '日' || dow === '祝') ? '#7D8984' : '#2E3A35',
+      weight: day === '4' ? '700' : '400'
+    }));
+    return {
+      pending,
+      hasPending: pending.length > 0,
+      noPending: pending.length === 0,
+      pendingTag: pending.length > 0 ? pending.length + '人が待っています' : 'なし',
+      missionTag: s.missionSet ? '出しました' : 'まだ',
+      missionOpen: !s.missionSet,
+      missionSet: s.missionSet,
+      text,
+      onText: (e) => this.setState({ text: e.target.value }),
+      hasKanji: kanji.length > 0,
+      kanjiList: kanji.join('・'),
+      cannotSubmit,
+      submitOpacity: cannotSubmit ? '0.45' : '1',
+      submitMission: () => { if (this.state.text.trim() !== '') this.setState({ missionSet: true }); },
+      editMission: () => this.setState({ missionSet: false }),
+      todoCount,
+      hasTodo: todoCount > 0,
+      noTodo: todoCount === 0,
+      feed: [
+        { at: '10:38', name: '加藤 さくら', f: '理科', unit: '植物のつくり', q: 'このイチョウの木に、葉っぱは何まい ついている？', img: IMG.leaf },
+        { at: '10:36', name: '青木 空', f: '算数', unit: '面積', q: 'このろうかに、タイルは何まい しきつめてある？', img: IMG.tiles },
+        { at: '10:31', name: '井上 陽翔', f: '情報', unit: 'データの表し方', q: 'このバーコードで、何種類の商品を区別できる？', img: IMG.barcode },
+        { at: '10:27', name: '鈴木 心春', f: '算数', unit: '速さ', q: 'この信号が かわるまでに、何歩 歩ける？', img: IMG.signal },
+        { at: '10:22', name: '木村 湊', f: '算数', unit: '体積', q: 'このプールには、水が何リットル入る？', img: IMG.pool },
+        { at: '10:15', name: '小林 芽依', f: '理科', unit: 'もののとけ方', q: 'このコップの水に、さとうは何gまで とける？', img: IMG.cup }
+      ].map((x) => ({ ...x, color: C[x.f] })),
+      days
+    };
+  }
+}
+</script>
+</body>
+</html>

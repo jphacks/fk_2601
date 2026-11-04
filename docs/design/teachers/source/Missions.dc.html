@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ミッション</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&amp;family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F4F7F5}
+*{box-sizing:border-box}
+a{color:#1E4438}a:hover{color:#122C24}
+.shell{height:100vh;overflow:hidden}
+.panel{min-height:0;overflow:auto}
+@media (max-width: 1100px){.shell{height:auto;overflow:visible}.bento{grid-template-columns:1fr !important}.panel{overflow:visible}}
+.card{background:#FFFFFF;border:1px solid #DCE3DF;border-radius:14px}
+.h1{margin:0;font-size:22px;font-weight:700;letter-spacing:0.02em;color:#16201B}
+.h2{margin:0;font-size:16px;font-weight:700;color:#16201B}
+.sub{margin:0;font-size:12px;line-height:1.7;color:#55615B}
+.label{font-size:13px;font-weight:700;color:#16201B}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:8px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;border:1px solid #1E4438}
+.btn-p{background:#1E4438;color:#FFFFFF}
+.btn-s{background:#FFFFFF;color:#1E4438}
+.ghost{border:0;background:transparent;font:inherit;font-size:13px;font-weight:700;color:#1E4438;cursor:pointer;padding:6px;min-height:36px}
+.chip{display:inline-flex;align-items:center;min-height:30px;padding:3px 11px;border-radius:15px;font:inherit;font-size:12px;background:#EEF2F0;color:#2E3A35;border:0;cursor:pointer;text-align:left}
+.check{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border-radius:8px;font-size:13px;cursor:pointer}
+.pill{display:inline-flex;align-items:center;justify-content:center;height:22px;padding:0 9px;border-radius:11px;font-size:11px;font-weight:700;white-space:nowrap}
+.one{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+</helmet>
+<div class="shell" style="display: flex; flex-direction: column; background: #F4F7F5; font-family: 'BIZ UDPGothic', system-ui, sans-serif; color: #16201B">
+  <dc-import name="Header" active="mission" session="in" hint-size="100%,56px"></dc-import>
+
+  <main style="flex: 1; min-height: 0; width: 100%; max-width: 1400px; margin: 0 auto; padding: 16px 24px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px">
+      <h1 class="h1">ミッション</h1>
+      <p class="sub" style="flex: 1 1 360px; color: #2E3A35">先生が出した日は、子どものホームの「きょうの おだい」に先生の文が出ます。出さない日はアプリのお題です。</p>
+      <div style="display: flex; align-items: center; gap: 4px">
+        <button type="button" class="btn btn-s" aria-label="前の週" style="width: 36px; height: 36px; padding: 0; border-color: #C5CFCA">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <span style="min-width: 190px; text-align: center; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums">11月2日（月）〜 6日（金）</span>
+        <button type="button" class="btn btn-s" aria-label="次の週" style="width: 36px; height: 36px; padding: 0; border-color: #C5CFCA">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="bento" style="flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px">
+
+      <div class="panel" style="display: flex; flex-direction: column; gap: 16px">
+        <section class="card" aria-labelledby="h-week" style="padding: 14px 18px 8px; display: flex; flex-direction: column">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-bottom: 6px">
+            <h2 id="h-week" class="h2">今週</h2>
+            <span class="sub">出していない日を選ぶと、右で出せます</span>
+          </div>
+          <sc-for list="{{days}}" as="d" hint-placeholder-count="5">
+            <button type="button" onClick="{{d.pick}}" disabled="{{d.locked}}" aria-pressed="{{d.pressed}}" style="display: grid; grid-template-columns: 56px 64px minmax(0, 1fr) 140px; gap: 12px; align-items: center; min-height: 60px; margin: 0 -10px; padding: 8px 10px; border: 0; border-top: 1px solid #EDF1EF; border-radius: 10px; background: {{d.bg}}; box-shadow: {{d.ring}}; font: inherit; color: #16201B; text-align: left; cursor: {{d.cursor}}">
+              <span style="display: flex; align-items: baseline; gap: 4px; font-variant-numeric: tabular-nums">
+                <strong style="font-size: 17px">{{d.date}}</strong>
+                <span style="font-size: 12px; color: #55615B">{{d.dow}}</span>
+              </span>
+              <span class="pill" style="background: {{d.pillBg}}; color: {{d.pillFg}}">{{d.pill}}</span>
+              <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                <span style="font-size: 14px; line-height: 1.5; color: {{d.textColor}}">{{d.text}}</span>
+                <sc-if value="{{d.showClasses}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; color: #55615B">{{d.classes}}</span></sc-if>
+              </span>
+              <span>
+                <sc-if value="{{d.hasBar}}" hint-placeholder-val="{{ false }}">
+                  <span style="display: flex; flex-direction: column; gap: 5px">
+                    <span style="display: flex; justify-content: space-between; font-size: 11px; color: #2E3A35; font-variant-numeric: tabular-nums"><span>{{d.barLabel}}</span><strong>{{d.n}} / 32人</strong></span>
+                    <span style="height: 6px; border-radius: 3px; background: #E6ECE9; overflow: hidden"><span style="display: block; height: 100%; width: {{d.w}}; background: #1E4438"></span></span>
+                  </span>
+                </sc-if>
+                <sc-if value="{{d.hasAction}}" hint-placeholder-val="{{ false }}">
+                  <span style="display: block; text-align: right; font-size: 13px; font-weight: 700; color: #1E4438">{{d.action}}</span>
+                </sc-if>
+              </span>
+            </button>
+          </sc-for>
+          <p class="sub" style="padding: 8px 0 6px; border-top: 1px solid #EDF1EF">土日は、クラスの設定で授業の日に足した日だけ出せます。</p>
+        </section>
+
+        <section class="card" aria-labelledby="h-past" style="padding: 14px 18px 8px; display: flex; flex-direction: column">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-bottom: 6px">
+            <h2 id="h-past" class="h2">これまで</h2>
+            <span class="sub">クリア＝その日に ずかんへ保存した人数（お題に合っているかは見ません）</span>
+          </div>
+          <sc-for list="{{past}}" as="p" hint-placeholder-count="4">
+            <div style="display: grid; grid-template-columns: 84px minmax(0, 1fr) 140px; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid #EDF1EF">
+              <span style="font-size: 13px; color: #2E3A35; font-variant-numeric: tabular-nums">{{p.date}}</span>
+              <span class="one" style="font-size: 13px">{{p.text}}</span>
+              <span style="display: flex; align-items: center; gap: 8px">
+                <span style="flex: 1; height: 6px; border-radius: 3px; background: #E6ECE9; overflow: hidden"><span style="display: block; height: 100%; width: {{p.w}}; background: #1E4438"></span></span>
+                <strong style="font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap">{{p.n}}人</strong>
+              </span>
+            </div>
+          </sc-for>
+        </section>
+      </div>
+
+      <section class="card panel" aria-labelledby="h-edit" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <h2 id="h-edit" class="h2" style="font-size: 18px">{{selLabel}}の ミッション</h2>
+          <p class="sub">{{selNote}}</p>
+        </div>
+
+        <label style="display: flex; flex-direction: column; gap: 6px">
+          <span style="display: flex; justify-content: space-between; align-items: baseline">
+            <span class="label">ミッションの文</span>
+            <span style="font-size: 11px; color: {{countColor}}; font-variant-numeric: tabular-nums">{{len}} / 30字</span>
+          </span>
+          <textarea value="{{text}}" onInput="{{onText}}" rows="2" placeholder="うんどうじょうで まるい ものを さがそう" style="border: 1px solid {{areaBorder}}; border-radius: 10px; font: inherit; font-size: 16px; line-height: 1.7; padding: 10px 12px; resize: none; color: #16201B"></textarea>
+          <span class="sub">ひらがなとカタカナで、ことばの間に空白を入れてください。</span>
+        </label>
+
+        <sc-if value="{{hasKanji}}" hint-placeholder-val="{{ false }}">
+          <p role="status" style="margin: 0; padding: 8px 12px; border-radius: 8px; background: #FFF6D9; border: 1px solid #EBCB6E; font-size: 12px; line-height: 1.6; color: #5A4300">漢字が入っています（{{kanjiList}}）。ひらがなに直すと、どの学年でも読めます。このままでも出せます。</p>
+        </sc-if>
+
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          
+          
+        </div>
+
+        <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+          <legend class="label" style="padding: 0; margin-bottom: 6px">出すクラス</legend>
+          <label class="check" style="border: 1px solid {{c2.border}}; background: {{c2.bg}}">
+            <input type="checkbox" checked="{{c2.on}}" onChange="{{c2.toggle}}" style="width: 18px; height: 18px; accent-color: #1E4438">
+            5年2組<span style="font-size: 11px; color: #55615B">担任</span>
+          </label>
+          <label class="check" style="border: 1px solid {{c1.border}}; background: {{c1.bg}}">
+            <input type="checkbox" checked="{{c1.on}}" onChange="{{c1.toggle}}" style="width: 18px; height: 18px; accent-color: #1E4438">
+            5年1組<span style="font-size: 11px; color: #55615B">学年の先生</span>
+          </label>
+        </fieldset>
+
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span class="label">子どもの ホームでの 見え方</span>
+          <div style="border-radius: 18px; background: #FFF6D6; padding: 14px 16px; display: flex; gap: 12px; align-items: center; font-family: 'Zen Maru Gothic', sans-serif; color: #22223A">
+            <img src="/_blob/90ee2143e3f2f66e3da13ec83c1b3624" alt="" style="width: 56px; height: 56px; flex-shrink: 0">
+            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+              <span style="align-self: flex-start; display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: 11px; background: #FFC83D; font-family: 'Mochiy Pop One', sans-serif; font-size: 11px">きょうの おだい</span>
+              <span style="font-size: 18px; font-weight: 700; line-height: 1.55; word-break: keep-all; overflow-wrap: anywhere">{{previewText}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-top: 14px; border-top: 1px solid #EDF1EF">
+          <sc-if value="{{canClear}}" hint-placeholder-val="{{ false }}">
+            <button type="button" class="ghost" onClick="{{clearDay}}" style="color: #A8321F">この日は出さない</button>
+          </sc-if>
+          <sc-if value="{{savedMsg}}" hint-placeholder-val="{{ false }}">
+            <span role="status" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #1E4438">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4.5 4.5L19 7"></path></svg>
+              出しました
+            </span>
+          </sc-if>
+          <button type="button" class="btn btn-p" disabled="{{cannotSubmit}}" onClick="{{submit}}" style="margin-left: auto; opacity: {{submitOpacity}}">{{submitLabel}}</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selected: 'd5',
+      plans: { d4: 'きょうしつで ながい ものを さがそう', d5: '', d6: 'かいだんで かずを かぞえよう' },
+      text: '', c1: true, c2: true, saved: false
+    };
+  }
+  renderVals() {
+    const s = this.state;
+    const plans = s.plans;
+    const label = { d5: '11月5日（木）', d6: '11月6日（金）' };
+    const pct = (n) => Math.round(n / 32 * 100) + '%';
+    const base = {
+      pick: () => {}, locked: true, pressed: 'false', cursor: 'default', bg: 'transparent', ring: 'none',
+      textColor: '#16201B', hasBar: false, hasAction: false, action: '', showClasses: false, classes: '', n: 0, w: '0%', barLabel: ''
+    };
+    const future = (id, date, dow) => {
+      const on = s.selected === id;
+      const has = !!plans[id];
+      return {
+        ...base, id, date, dow, locked: false, cursor: 'pointer',
+        pick: () => this.setState({ selected: id, text: plans[id] || '', saved: false }),
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#F3F8F5' : 'transparent',
+        ring: on ? 'inset 0 0 0 2px #1E4438' : 'none',
+        pill: on ? '編集中' : (has ? '予定' : 'まだ'),
+        pillBg: on ? '#1E4438' : (has ? '#FFF3CC' : '#EEF2F0'),
+        pillFg: on ? '#FFFFFF' : (has ? '#5A4300' : '#2E3A35'),
+        text: has ? plans[id] : 'アプリのお題が出ます',
+        textColor: has ? '#16201B' : '#55615B',
+        showClasses: has, classes: '5年1組・5年2組',
+        hasAction: !on, action: has ? '変える' : '＋ 出す'
+      };
+    };
+    const days = [
+      { ...base, date: '11/2', dow: '月', pill: 'おわり', pillBg: '#EEF2F0', pillFg: '#2E3A35', text: 'きゅうしょくで かずを かぞえよう', hasBar: true, barLabel: 'クリア', n: 22, w: pct(22) },
+      { ...base, date: '11/3', dow: '火', pill: '祝日', pillBg: '#EEF2F0', pillFg: '#2E3A35', text: '文化の日（授業時間の外・アプリのお題）', textColor: '#55615B' },
+      { ...base, date: '11/4', dow: '水', pill: 'きょう', pillBg: '#E3EEE8', pillFg: '#1E4438', text: plans.d4, hasBar: true, barLabel: '10:40 時点', n: 9, w: pct(9) },
+      future('d5', '11/5', '木'),
+      future('d6', '11/6', '金')
+    ];
+    const text = s.text;
+    const len = Array.from(text).length;
+    const over = len > 30;
+    const kanji = Array.from(new Set(text.match(/[一-鿿㐀-䶿]/g) || []));
+    const mk = (key) => ({
+      on: !!s[key], border: s[key] ? '#1E4438' : '#C5CFCA', bg: s[key] ? '#F3F8F5' : '#FFFFFF',
+      toggle: () => this.setState({ [key]: !s[key], saved: false })
+    });
+    const classCount = (s.c1 ? 1 : 0) + (s.c2 ? 1 : 0);
+    const cannotSubmit = text.trim() === '' || over || classCount === 0;
+    const hadPlan = !!plans[s.selected];
+    return {
+      days,
+      selLabel: label[s.selected],
+      selNote: hadPlan ? '出してあります。変えると、その日の朝に子どものホームに出る文が変わります。' : 'まだ出していません。出さなければ、アプリのお題が出ます。',
+      text,
+      onText: (e) => this.setState({ text: e.target.value, saved: false }),
+      len,
+      countColor: over ? '#A8321F' : '#55615B',
+      areaBorder: over ? '#A8321F' : '#C5CFCA',
+      hasKanji: kanji.length > 0,
+      kanjiList: kanji.join('・'),
+      templates: [
+        'うんどうじょうで まるい ものを さがそう',
+        'きょうしつで さんかくの ものを さがそう',
+        'そとで うごく ものを さがそう',
+        'かいだんで かずを かぞえよう',
+        'がっこうで おもい ものを さがそう'
+      ].map((t) => ({ label: t, use: () => this.setState({ text: t, saved: false }) })),
+      c1: mk('c1'), c2: mk('c2'),
+      previewText: text.trim() === '' ? 'うんどうじょうで まるい ものを さがそう' : text,
+      canClear: hadPlan && !s.saved,
+      clearDay: () => this.setState({ plans: { ...plans, [s.selected]: '' }, text: '', saved: false }),
+      savedMsg: s.saved,
+      cannotSubmit,
+      submitOpacity: cannotSubmit ? '0.45' : '1',
+      submitLabel: classCount > 1 ? classCount + 'クラスに出す' : 'ミッションを出す',
+      submit: () => { if (!cannotSubmit) this.setState({ plans: { ...plans, [s.selected]: text }, saved: true }); },
+      past: [
+        ['10/30（金）', 'うんどうじょうで まるい ものを さがそう', 24],
+        ['10/28（水）', 'としょしつで しかくい ものを さがそう', 20],
+        ['10/23（金）', 'がっこうの みずを つかう ばしょを さがそう', 18],
+        ['10/21（水）', 'そとで うごく ものを さがそう', 19]
+      ].map(([date, t, n]) => ({ date, text: t, n, w: pct(n) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

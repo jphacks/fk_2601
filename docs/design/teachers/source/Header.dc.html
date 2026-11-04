@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ヘッダー</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<header style="width: 100%; box-sizing: border-box; background: #1E4438; color: #FFFFFF; font-family: 'BIZ UDPGothic', system-ui, sans-serif">
+  <div style="max-width: 1400px; margin: 0 auto; padding: 0 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; column-gap: 22px; min-height: 56px">
+
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; color: #FFFFFF; text-decoration: none; padding: 8px 0">
+      <img src="/_blob/90ee2143e3f2f66e3da13ec83c1b3624" alt="" style="width: 32px; height: 32px; border-radius: 9px; background: #FFFFFF; padding: 3px; box-sizing: border-box">
+      <span style="display: flex; flex-direction: column; gap: 1px; line-height: 1.2">
+        <span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 14px">かこってはてな!?</span>
+        <span style="font-size: 10px; color: #C9DCD3">先生用</span>
+      </span>
+    </a>
+
+    <button type="button" aria-label="クラスを切り替える（表示中：5年2組）" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); background: transparent; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">
+      5年2組
+      <span style="font-size: 11px; font-weight: 400; color: #C9DCD3">2026年度</span>
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+
+    <nav aria-label="メインメニュー" style="display: flex; flex-wrap: wrap; column-gap: 22px; flex: 1 1 auto; align-self: stretch">
+      <a href="Main.dc.html" aria-current="{{cur.today}}" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 2px; font-size: 14px; text-decoration: none; color: {{fg.today}}; font-weight: {{fw.today}}; box-shadow: inset 0 -3px 0 {{bar.today}}">きょう</a>
+      <a href="Hatena.dc.html" aria-current="{{cur.hatena}}" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 2px; font-size: 14px; text-decoration: none; color: {{fg.hatena}}; font-weight: {{fw.hatena}}; box-shadow: inset 0 -3px 0 {{bar.hatena}}">はてな</a>
+      <a href="Missions.dc.html" aria-current="{{cur.mission}}" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 2px; font-size: 14px; text-decoration: none; color: {{fg.mission}}; font-weight: {{fw.mission}}; box-shadow: inset 0 -3px 0 {{bar.mission}}">ミッション</a>
+      <a href="Members.dc.html" aria-current="{{cur.members}}" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 2px; font-size: 14px; text-decoration: none; color: {{fg.members}}; font-weight: {{fw.members}}; box-shadow: inset 0 -3px 0 {{bar.members}}">メンバー</a>
+    </nav>
+
+    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 0">
+      <a href="Settings.dc.html" title="{{statusHint}}" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.28); background: {{statusBg}}; color: #FFFFFF; font-size: 13px; text-decoration: none; white-space: nowrap">
+        <span aria-hidden="true" style="width: 9px; height: 9px; border-radius: 5px; background: {{dot}}; box-shadow: 0 0 0 3px {{dotRing}}"></span>
+        <strong>{{statusLabel}}</strong>
+        <span style="color: #C9DCD3; font-variant-numeric: tabular-nums">{{statusSub}}</span>
+      </a>
+      <a href="Projector.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 8px; background: #F5C33B; color: #16201B; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
+        教室に映す
+      </a>
+      <a href="Settings.dc.html" aria-label="クラスの設定" aria-current="{{cur.settings}}" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); color: #FFFFFF; background: {{gearBg}}">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </a>
+      <span role="img" aria-label="山田 花子 先生" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 16px; background: #34604F; color: #FFFFFF; font-size: 13px; font-weight: 700">山</span>
+    </div>
+  </div>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["today","hatena","mission","members","settings"],"default":"today"},"session":{"editor":"enum","options":["in","out"],"default":"in"},"$preview":{"width":1440,"height":56}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'today';
+    const inClass = (this.props.session ?? 'in') === 'in';
+    const keys = ['today', 'hatena', 'mission', 'members', 'settings'];
+    const fg = {}, fw = {}, bar = {}, cur = {};
+    keys.forEach((k) => {
+      const on = k === active;
+      fg[k] = on ? '#FFFFFF' : '#C9DCD3';
+      fw[k] = on ? '700' : '400';
+      bar[k] = on ? '#F5C33B' : 'transparent';
+      cur[k] = on ? 'page' : undefined;
+    });
+    return {
+      fg, fw, bar, cur,
+      gearBg: active === 'settings' ? 'rgba(255,255,255,0.16)' : 'transparent',
+      statusLabel: inClass ? '授業時間中' : '授業時間の外',
+      statusSub: inClass ? '〜15:30 ・ 内容まで見えます' : '件数だけ数えます',
+      statusHint: inClass ? 'この時間に保存された はてなは、内容まで見られます' : 'いま保存されたものは件数だけ数えます',
+      statusBg: inClass ? 'rgba(76,211,138,0.14)' : 'rgba(255,255,255,0.06)',
+      dot: inClass ? '#4CD38A' : '#9AA7A1',
+      dotRing: inClass ? 'rgba(76,211,138,0.25)' : 'transparent'
+    };
+  }
+}
+</script>
+</body>
+</html>

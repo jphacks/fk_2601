@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>教室に映す</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Klee+One:wght@400;600&family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 1600px; height: 900px; overflow: hidden; background: {{t.bg}}; font-family: {{t.font}}; color: {{t.fg}}">
+
+  <div style="position: absolute; left: 64px; right: 64px; top: 40px; display: flex; align-items: center; justify-content: space-between; gap: 24px">
+    <div style="display: flex; align-items: center; gap: 18px">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 32px; background: {{t.avatarBg}}">
+        <img src="/_blob/90ee2143e3f2f66e3da13ec83c1b3624" alt="" style="width: 54px; height: 54px">
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 32px; font-weight: {{t.weight}}; letter-spacing: 0.04em; text-shadow: {{t.shadow}}">そらまめ さんが みつけた はてな</span>
+        <span style="font-family: 'BIZ UDPGothic', sans-serif; font-size: 16px; font-weight: {{t.infoWeight}}; color: {{t.sub}}">5年2組 ・ さんすう（めんせき） ・ 1 / 3</span>
+      </span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px; font-family: 'BIZ UDPGothic', sans-serif">
+      <div role="group" aria-label="映す先" style="display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 12px; border: {{t.ctlBorder}}">
+        <span style="padding: 0 8px; font-size: 13px; font-weight: 700; color: {{t.ctlFg}}">映す先</span>
+        <button type="button" aria-pressed="{{mMon.pressed}}" onClick="{{toMonitor}}" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border: 0; border-radius: 8px; background: {{mMon.bg}}; color: {{mMon.fg}}; font-family: 'BIZ UDPGothic', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
+          モニター
+        </button>
+        <button type="button" aria-pressed="{{mBoard.pressed}}" onClick="{{toBoard}}" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border: 0; border-radius: 8px; background: {{mBoard.bg}}; color: {{mBoard.fg}}; font-family: 'BIZ UDPGothic', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="1"/><path d="M5 20h14"/><path d="M15 20v-3"/></svg>
+          黒板
+        </button>
+      </div>
+      <div role="group" aria-label="先生の操作" style="display: flex; gap: 8px">
+        <button type="button" aria-label="まえの はてな" style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 10px; border: {{t.ctlBorder}}; background: transparent; color: {{t.ctlFg}}; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <button type="button" aria-label="つぎの はてな" style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 10px; border: {{t.ctlBorder}}; background: transparent; color: {{t.ctlFg}}; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <a href="Hatena.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 16px; border-radius: 10px; border: {{t.ctlBorder}}; color: {{t.ctlFg}}; font-size: 15px; font-weight: 700; text-decoration: none">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>
+          とじる
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{s1}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 112px; right: 112px; top: 168px; bottom: 176px; display: flex; align-items: center; gap: 80px">
+      <div style="position: relative; flex: 0 0 600px; transform: rotate(-2deg); background: #FFFFFF; padding: 14px 14px 20px; border-radius: 4px">
+        <img src="/_blob/2b841d09f5ee61f4db4a2a5b69736e7b" alt="そらまめさんが囲んだ、ろうかのタイル" style="display: block; width: 572px; height: 380px; object-fit: cover">
+        <span aria-hidden="true" style="position: absolute; top: -12px; left: 286px; width: 28px; height: 28px; border-radius: 14px; background: {{t.magnet}}"></span>
+      </div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 40px">
+        <p style="margin: 0; font-size: 64px; font-weight: {{t.weight}}; line-height: 1.85; letter-spacing: 0.04em; text-shadow: {{t.shadow}}">この ろうかに、<br>タイルは <ruby>何<rt style="font-size: 0.42em; letter-spacing: 0">なん</rt></ruby>まい<br>しきつめて ある？</p>
+        <div style="display: flex; align-items: center; gap: 20px">
+          <img src="/_blob/f1c242e7130af5fe4d7f28763705bbae" alt="" style="width: 120px; height: 120px">
+          <span style="font-size: 36px; font-weight: {{t.weight}}; color: {{t.accent}}; text-shadow: {{t.shadow}}">どのくらい だと おもう？</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 112px; right: 112px; top: 160px; bottom: 176px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 48px">
+      <p style="margin: 0; font-size: 46px; font-weight: {{t.weight}}; line-height: 1.8; letter-spacing: 0.04em; text-align: center; text-shadow: {{t.shadow}}">この ろうかに、タイルは <ruby>何<rt style="font-size: 0.42em; letter-spacing: 0">なん</rt></ruby>まい しきつめて ある？</p>
+      <div style="width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px">
+        <sc-for list="{{choices}}" as="c" hint-placeholder-count="3">
+          <div style="border: {{t.choiceBorder}}; border-radius: 32px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 24px">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 88px; height: 88px; border-radius: 44px; border: {{t.keyBorderW}} solid {{c.color}}; color: {{c.color}}; font-size: 48px; font-weight: {{t.weight}}">{{c.key}}</span>
+            <span style="font-size: 64px; font-weight: {{t.weight}}; font-variant-numeric: tabular-nums; text-shadow: {{t.shadow}}">{{c.v}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 44px; font-weight: {{t.weight}}; color: {{t.accent}}; text-shadow: {{t.shadow}}">せーの！で てを あげよう</p>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{s3}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 112px; right: 112px; top: 160px; bottom: 176px; display: flex; align-items: center; gap: 72px">
+      <div style="position: relative; flex: 0 0 440px; transform: rotate(2deg); background: #FFFFFF; padding: 12px 12px 18px; border-radius: 4px">
+        <img src="/_blob/2b841d09f5ee61f4db4a2a5b69736e7b" alt="ろうかのタイル" style="display: block; width: 416px; height: 277px; object-fit: cover">
+        <span aria-hidden="true" style="position: absolute; top: -12px; left: 206px; width: 28px; height: 28px; border-radius: 14px; background: {{t.magnet}}"></span>
+      </div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 22px">
+        <span style="font-size: 36px; font-weight: {{t.weight}}; color: {{t.sub}}; text-shadow: {{t.shadow}}">しょうたいは……</span>
+        <span style="font-size: 156px; font-weight: {{t.weight}}; color: {{t.accent}}; line-height: 1; font-variant-numeric: tabular-nums; text-shadow: {{t.shadow}}">1,440<span style="font-size: 64px; margin-left: 10px">まい</span></span>
+        <div aria-hidden="true" style="border-top: {{t.divider}}; margin: 8px 0"></div>
+        <p style="margin: 0; font-size: 46px; font-weight: {{t.weight}}; line-height: 1.7; font-variant-numeric: tabular-nums; text-shadow: {{t.shadow}}">たて 12まい × よこ 120まい</p>
+        <p style="margin: 0; font-size: 32px; font-weight: {{t.bodyWeight}}; line-height: 1.8; color: {{t.soft}}; text-shadow: {{t.shadow}}">ろうかは ながいから、よこに 120まいも ならんで いたんだね。</p>
+      </div>
+    </div>
+    <img src="/_blob/90ee2143e3f2f66e3da13ec83c1b3624" alt="" style="position: absolute; right: 72px; bottom: 150px; width: 150px; height: 150px">
+  </sc-if>
+
+  <div style="position: absolute; left: 64px; right: 64px; bottom: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px">
+    <ol aria-label="すすみぐあい" style="list-style: none; margin: 0; padding: 0; display: flex; gap: 12px">
+      <sc-for list="{{steps}}" as="st" hint-placeholder-count="3">
+        <li>
+          <button type="button" onClick="{{st.go}}" aria-current="{{st.cur}}" style="display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 20px 0 10px; border-radius: 26px; border: {{st.border}}; background: {{st.bg}}; color: {{st.fg}}; font-family: {{t.font}}; font-size: 24px; font-weight: {{t.weight}}; cursor: pointer">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 17px; background: {{st.numBg}}; color: {{st.numFg}}; font-size: 20px">{{st.n}}</span>
+            {{st.label}}
+          </button>
+        </li>
+      </sc-for>
+    </ol>
+    <div style="display: flex; gap: 10px">
+      <button type="button" onClick="{{back}}" disabled="{{cannotBack}}" style="display: inline-flex; align-items: center; justify-content: center; height: 56px; padding: 0 20px; border-radius: 12px; border: {{t.ctlBorder}}; background: transparent; color: {{t.ctlFg}}; font-family: 'BIZ UDPGothic', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; opacity: {{backOpacity}}">もどる</button>
+      <button type="button" onClick="{{next}}" style="display: inline-flex; align-items: center; gap: 10px; height: 56px; padding: 0 28px; border-radius: 12px; border: 0; background: {{t.accent}}; color: {{t.btnFg}}; font-family: 'BIZ UDPGothic', sans-serif; font-size: 18px; font-weight: 700; cursor: pointer">
+        {{nextLabel}}
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <sc-if value="{{showTray}}" hint-placeholder-val="{{ true }}">
+    <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 36px; background: #5C432D; border-top: 6px solid #4A3524">
+      <span style="position: absolute; right: 220px; top: 6px; width: 60px; height: 12px; border-radius: 4px; background: #F4F1E8; transform: rotate(-4deg)"></span>
+      <span style="position: absolute; right: 140px; top: 8px; width: 52px; height: 12px; border-radius: 4px; background: #F5D774; transform: rotate(3deg)"></span>
+      <span style="position: absolute; right: 72px; top: 6px; width: 44px; height: 12px; border-radius: 4px; background: #F2A7B8; transform: rotate(-2deg)"></span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"surface":{"editor":"enum","options":["monitor","board"],"default":"monitor"},"startStep":{"editor":"enum","options":["1","2","3"],"default":"1"},"$preview":{"width":1600,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: null, mode: null };
+  }
+  renderVals() {
+    const step = this.state.step ?? Number(this.props.startStep ?? '1');
+    const mode = this.state.mode ?? (this.props.surface ?? 'monitor');
+    const board = mode === 'board';
+    const t = board ? {
+      bg: '#000000', fg: '#FFFFFF', sub: '#FFFFFF', soft: '#FFFFFF', accent: '#FFE14D', magnet: '#FFE14D',
+      font: "'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif", weight: '900', bodyWeight: '700', infoWeight: '700',
+      shadow: 'none', choiceBorder: '6px solid #FFFFFF', keyBorderW: '6px', divider: '5px solid #FFFFFF',
+      ctlBorder: '2px solid #FFFFFF', ctlFg: '#FFFFFF', onFg: '#000000', btnFg: '#000000', avatarBg: '#FFFFFF'
+    } : {
+      bg: '#1F4237', fg: '#F4F1E8', sub: '#BFD3C9', soft: '#DCE7E1', accent: '#F5D774', magnet: '#F5C33B',
+      font: "'Klee One', 'BIZ UDPGothic', sans-serif", weight: '600', bodyWeight: '400', infoWeight: '400',
+      shadow: '0 0 1px rgba(255,255,255,0.35)', choiceBorder: '4px dashed rgba(244,241,232,0.7)', keyBorderW: '4px', divider: '3px dashed rgba(244,241,232,0.45)',
+      ctlBorder: '1px solid rgba(244,241,232,0.38)', ctlFg: '#E4ECE7', onFg: '#1F4237', btnFg: '#16201B', avatarBg: '#F4F1E8'
+    };
+    const labels = ['はてな', 'よそう', 'しょうたい'];
+    const steps = labels.map((label, i) => {
+      const n = i + 1;
+      const on = n === step;
+      return {
+        n, label,
+        cur: on ? 'step' : undefined,
+        border: on ? ('2px solid ' + t.accent) : (board ? '3px solid #FFFFFF' : '2px solid rgba(244,241,232,0.35)'),
+        bg: on ? t.accent : 'transparent',
+        fg: on ? t.onFg : (board ? '#FFFFFF' : '#DCE7E1'),
+        numBg: on ? (board ? '#000000' : '#1F4237') : (board ? '#FFFFFF' : 'rgba(244,241,232,0.16)'),
+        numFg: on ? t.accent : (board ? '#000000' : '#F4F1E8'),
+        go: () => this.setState({ step: n })
+      };
+    });
+    const segOn = { pressed: 'true', bg: t.accent, fg: t.btnFg };
+    const segOff = { pressed: 'false', bg: 'transparent', fg: t.ctlFg };
+    return {
+      t,
+      s1: step === 1, s2: step === 2, s3: step === 3,
+      steps,
+      showTray: !board,
+      mMon: board ? segOff : segOn,
+      mBoard: board ? segOn : segOff,
+      toMonitor: () => this.setState({ mode: 'monitor' }),
+      toBoard: () => this.setState({ mode: 'board' }),
+      choices: board
+        ? [{ key: 'ア', v: '150まい', color: '#FFFFFF' }, { key: 'イ', v: '1,500まい', color: '#FFFFFF' }, { key: 'ウ', v: '15,000まい', color: '#FFFFFF' }]
+        : [{ key: 'ア', v: '150まい', color: '#F4F1E8' }, { key: 'イ', v: '1,500まい', color: '#F5D774' }, { key: 'ウ', v: '15,000まい', color: '#F2A7B8' }],
+      next: () => this.setState({ step: step >= 3 ? 1 : step + 1 }),
+      back: () => this.setState({ step: Math.max(1, step - 1) }),
+      cannotBack: step === 1,
+      backOpacity: step === 1 ? '0.4' : '1',
+      nextLabel: step === 1 ? 'みんなで よそう' : (step === 2 ? 'しょうたいを 見せる' : 'つぎの はてなへ')
+    };
+  }
+}
+</script>
+</body>
+</html>

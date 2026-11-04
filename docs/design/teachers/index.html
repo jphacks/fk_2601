@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>先生用 管理画面のデザイン見本（黒板案）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { margin: 0; background: var(--color-t-ground); font-family: var(--font-t-body); color: var(--color-t-text); }
+  header { padding: 32px 24px 8px; max-width: 1400px; margin: 0 auto; }
+  h1 { margin: 0; font-size: 26px; }
+  header p { margin: 8px 0 0; line-height: 1.8; color: var(--color-t-text-sub); font-size: 14px; }
+  main { max-width: 1400px; margin: 0 auto; padding: 0 24px 64px; }
+  h2 { margin: 36px 0 14px; font-size: 18px; }
+  .row { display: flex; flex-wrap: wrap; gap: 24px; }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .frame { width: 432px; height: 270px; overflow: hidden; border: 1px solid var(--color-t-line); border-radius: 10px; background: #FFFFFF; }
+  .frame iframe { width: 1440px; height: 900px; border: 0; transform: scale(0.3); transform-origin: 0 0; pointer-events: none; }
+  .frame.proj { height: 243px; }
+  .frame.proj iframe { width: 1600px; height: 900px; transform: scale(0.27); }
+  figcaption { display: flex; flex-direction: column; gap: 2px; max-width: 432px; }
+  figcaption a { font-weight: 700; color: var(--color-t-board); }
+  figcaption span { font-size: 13px; color: var(--color-t-text-sub); }
+</style>
+</head>
+<body>
+<header>
+  <h1>先生用 管理画面のデザイン見本（黒板案）</h1>
+  <p>アプリのコードではなく、見た目の見本です（06-school-expansion.md 5章）。画面の名前を押すと1画面だけ開けます。タブや「教室に映す」の進み方など、一部のボタンで画面を行き来できます。<br>色・文字・部品の決まりと、アプリへの取り込み方は README.md を見てください。名前・数・写真はすべて見本です。</p>
+</header>
+<main>
+  <h2>毎日ひらく画面</h2>
+  <div class="row">
+    <figure><div class="frame"><iframe src="screens/01-today.html" title="きょう" loading="lazy"></iframe></div><figcaption><a href="screens/01-today.html">01 きょう</a><span>やること・きょうの授業中のはてな・この2週間（5.1・5.3・5.5）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/02-today-outside-class.html" title="きょう（授業時間の外）" loading="lazy"></iframe></div><figcaption><a href="screens/02-today-outside-class.html">02 きょう（授業時間の外）</a><span>ヘッダーの表示が「件数だけ数えます」に変わる（5.2）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/03-hatena-shared.html" title="はてな：クラスに共有" loading="lazy"></iframe></div><figcaption><a href="screens/03-hatena-shared.html">03 はてな：クラスに共有</a><span>単元で選ぶ・教室に映す・クラスから外す（5.4・7.2）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/04-hatena-records.html" title="はてな：授業中の記録" loading="lazy"></iframe></div><figcaption><a href="screens/04-hatena-records.html">04 はてな：授業中の記録</a><span>先生だけが見る。予想と結果も出す（5.2）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/05-hatena-remove-dialog.html" title="はてな：クラスから外す" loading="lazy"></iframe></div><figcaption><a href="screens/05-hatena-remove-dialog.html">05 クラスから外す（確認）</a><span>本人のずかんには残る（5.4・7.2）</span></figcaption></figure>
+  </div>
+
+  <h2>教室に映す</h2>
+  <div class="row">
+    <figure><div class="frame proj"><iframe src="screens/06-projector-monitor-1.html" title="教室に映す（モニター）はてな" loading="lazy"></iframe></div><figcaption><a href="screens/06-projector-monitor-1.html">06 モニター：はてな</a><span>だれが見つけたか（ユーザー名）と問い</span></figcaption></figure>
+    <figure><div class="frame proj"><iframe src="screens/07-projector-monitor-2.html" title="教室に映す（モニター）よそう" loading="lazy"></iframe></div><figcaption><a href="screens/07-projector-monitor-2.html">07 モニター：よそう</a><span>ア・イ・ウで手を挙げる</span></figcaption></figure>
+    <figure><div class="frame proj"><iframe src="screens/08-projector-monitor-3.html" title="教室に映す（モニター）しょうたい" loading="lazy"></iframe></div><figcaption><a href="screens/08-projector-monitor-3.html">08 モニター：しょうたい</a><span>答えと式</span></figcaption></figure>
+    <figure><div class="frame proj"><iframe src="screens/09-projector-board-1.html" title="教室に映す（黒板に投影）はてな" loading="lazy"></iframe></div><figcaption><a href="screens/09-projector-board-1.html">09 黒板に投影：はてな</a><span>地は黒、文字は白と黄色だけ</span></figcaption></figure>
+    <figure><div class="frame proj"><iframe src="screens/10-projector-board-2.html" title="教室に映す（黒板に投影）よそう" loading="lazy"></iframe></div><figcaption><a href="screens/10-projector-board-2.html">10 黒板に投影：よそう</a><span>選択肢は色でなく文字と太い枠で分ける</span></figcaption></figure>
+    <figure><div class="frame proj"><iframe src="screens/11-projector-board-3.html" title="教室に映す（黒板に投影）しょうたい" loading="lazy"></iframe></div><figcaption><a href="screens/11-projector-board-3.html">11 黒板に投影：しょうたい</a><span>チョーク受けの絵は出さない</span></figcaption></figure>
+  </div>
+
+  <h2>準備と管理</h2>
+  <div class="row">
+    <figure><div class="frame"><iframe src="screens/12-missions.html" title="ミッション" loading="lazy"></iframe></div><figcaption><a href="screens/12-missions.html">12 ミッション</a><span>今週の予定・これまで・出す（5.3）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/13-members.html" title="メンバー" loading="lazy"></iframe></div><figcaption><a href="screens/13-members.html">13 メンバー</a><span>確認待ち・一覧（出席番号順）・個別（5.1・5.2・5.5）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/14-members-remove-dialog.html" title="メンバー：クラスから外す" loading="lazy"></iframe></div><figcaption><a href="screens/14-members-remove-dialog.html">14 クラスから外す（確認）</a><span>外したあとは見られない・ずかんは残る（5.1）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/15-settings-hours.html" title="クラスの設定：授業時間" loading="lazy"></iframe></div><figcaption><a href="screens/15-settings-hours.html">15 クラスの設定：授業時間</a><span>曜日ごとの時間帯・外す日・足す日・カレンダー（5.2）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/16-settings-join.html" title="クラスの設定：参加コードと先生" loading="lazy"></iframe></div><figcaption><a href="screens/16-settings-join.html">16 クラスの設定：参加コードと先生</a><span>参加コード・一緒に見る先生・クラスの情報（5.1・5.6）</span></figcaption></figure>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,68 @@
+/*
+ * 先生用 管理画面（黒板案）のデザイントークン（色・文字・角丸）
+ * 子どもの画面の ../tokens.css とは別のものです。名前がぶつからないよう、すべてに t- を付けています。
+ * アプリ（Next.js + Tailwind）では、同じ名前・同じ値を tailwind-theme.css の @theme で定義しています。
+ * 値を変えるときは、このファイルと tailwind-theme.css の両方を直してください。
+ * 見本の HTML（screens/）は、値をインラインスタイルに直接書いています（ここと同じ値）。
+ */
+:root {
+  /* 黒板の緑：ヘッダー・メインボタン・えらんでいるもの・グラフ（授業中） */
+  --color-t-board: #1E4438;
+  --color-t-board-dark: #122C24;
+  --color-t-board-tint: #E3EEE8;
+  --color-t-board-soft: #F3F8F5;
+  --color-t-board-line: #A9C4B8;
+  --color-t-on-board: #C9DCD3;
+
+  /* 黄色チョーク：やることの数・教室に映す・新着・いま開いている画面の下線 */
+  --color-t-chalk: #F5C33B;
+  --color-t-chalk-soft: #FFF6D9;
+  --color-t-chalk-line: #EBCB6E;
+  --color-t-chalk-text: #5A4300;
+  --color-t-pending: #FFF8E1;
+
+  /* 地と線 */
+  --color-t-ground: #F4F7F5;
+  --color-t-surface: #FFFFFF;
+  --color-t-line: #DCE3DF;
+  --color-t-line-soft: #EDF1EF;
+  --color-t-field-line: #C5CFCA;
+
+  /* 文字 */
+  --color-t-text: #16201B;
+  --color-t-text-2: #2E3A35;
+  --color-t-text-sub: #55615B;
+
+  /* 3分類（子どもの画面と同じ意味。白い地で読めるよう濃くしてある） */
+  --color-t-math: #3B5BDB;
+  --color-t-sci: #0F8A6C;
+  --color-t-info: #7B4FE0;
+
+  /* 消す・外す（ピタリの赤とは別。注意と削除だけに使う） */
+  --color-t-danger: #A8321F;
+  --color-t-danger-line: #DDB0A7;
+
+  /* 授業時間中の印 */
+  --color-t-live: #4CD38A;
+
+  /* 教室に映す：モニター */
+  --color-t-proj-board: #1F4237;
+  --color-t-proj-chalk: #F4F1E8;
+  --color-t-proj-yellow: #F5D774;
+  --color-t-proj-pink: #F2A7B8;
+  --color-t-proj-sub: #BFD3C9;
+
+  /* 教室に映す：黒板に投影（黒＝光を出さない。白と黄色だけ） */
+  --color-t-cast-bg: #000000;
+  --color-t-cast-fg: #FFFFFF;
+  --color-t-cast-yellow: #FFE14D;
+
+  /* 文字 */
+  --font-t-body: "BIZ UDPGothic", system-ui, sans-serif;
+  --font-t-chalk: "Klee One", "BIZ UDPGothic", sans-serif;
+  --font-t-cast: "Zen Maru Gothic", "BIZ UDPGothic", sans-serif;
+
+  /* 角丸 */
+  --radius-t-card: 14px;
+  --radius-t-btn: 8px;
+}
