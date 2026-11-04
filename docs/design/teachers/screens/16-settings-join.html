@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>クラスの設定：参加コードと先生｜先生用 管理画面（黒板案）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F4F7F5}
+*{box-sizing:border-box}
+a{color:#1E4438}a:hover{color:#122C24}
+.shell{height:100vh;overflow:hidden}
+.panel{min-height:0;overflow:auto}
+@media (max-width: 1100px){.shell{height:auto;overflow:visible}.bento{grid-template-columns:1fr !important}.panel{overflow:visible}}
+.card{background:#FFFFFF;border:1px solid #DCE3DF;border-radius:14px}
+.h1{margin:0;font-size:22px;font-weight:700;letter-spacing:0.02em;color:#16201B}
+.h2{margin:0;font-size:16px;font-weight:700;color:#16201B}
+.h3{margin:0;font-size:13px;font-weight:700;color:#16201B}
+.sub{margin:0;font-size:12px;line-height:1.7;color:#55615B}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;border:1px solid #1E4438}
+.btn-p{background:#1E4438;color:#FFFFFF}
+.btn-s{background:#FFFFFF;color:#1E4438}
+.ghost{border:0;background:transparent;font:inherit;font-size:12px;font-weight:700;color:#1E4438;cursor:pointer;padding:6px;min-height:32px}
+.seg{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border:0;border-radius:6px;font:inherit;font-size:13px;cursor:pointer}
+.field{height:34px;border:1px solid #C5CFCA;border-radius:8px;background:#FFFFFF;font:inherit;font-size:13px;color:#16201B;padding:0 8px}
+.th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#55615B;background:#F7F9F8;border-bottom:1px solid #DCE3DF;white-space:nowrap}
+.td{padding:10px;font-size:13px;border-bottom:1px solid #EDF1EF;vertical-align:middle}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #EDF1EF}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+<!-- 見本の画面です（アプリのコードではありません）。名前・数・写真はすべて見本です。 -->
+<div class="shell" style="display: flex; flex-direction: column; background: #F4F7F5; font-family: 'BIZ UDPGothic', system-ui, sans-serif; color: #16201B">
+
+<header style="width: 100%; box-sizing: border-box; background: #1E4438; color: #FFFFFF; font-family: 'BIZ UDPGothic', system-ui, sans-serif">
+  <div style="max-width: 1400px; margin: 0 auto; padding: 0 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; column-gap: 22px; min-height: 56px">
+
+    <a href="01-today.html" style="display: flex; align-items: center; gap: 10px; color: #FFFFFF; text-decoration: none; padding: 8px 0">
+      <img src="../../assets/navi/navi-smile.png" alt="" style="width: 32px; height: 32px; border-radius: 9px; background: #FFFFFF; padding: 3px; box-sizing: border-box">
+      <span style="display: flex; flex-direction: column; gap: 1px; line-height: 1.2">
+        <span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 14px">かこってはてな!?</span>
+        <span style="font-size: 10px; color: #C9DCD3">先生用</span>
+      </span>
+    </a>
+
+    <button type="button" aria-label="クラスを切り替える（表示中：5年2組）" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); background: transparent; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">
+      5年2組
+      <span style="font-size: 11px; font-weight: 400; color: #C9DCD3">2026年度</span>
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+    </button>
+
+    <nav aria-label="メインメニュー" style="display: flex; flex-wrap: wrap; column-gap: 22px; flex: 1 1 auto; align-self: stretch">
+      <a href="01-today.html" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 2px; font-size: 14px; text-decoration: none; color: #C9DCD3; font-weight: 400; box-shadow: inset 0 -3px 0 transparent">きょう</a>
+      <a href="03-hatena-shared.html" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 2px; font-size: 14px; text-decoration: none; color: #C9DCD3; font-weight: 400; box-shadow: inset 0 -3px 0 transparent">はてな</a>
+      <a href="12-missions.html" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 2px; font-size: 14px; text-decoration: none; color: #C9DCD3; font-weight: 400; box-shadow: inset 0 -3px 0 transparent">ミッション</a>
+      <a href="13-members.html" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 2px; font-size: 14px; text-decoration: none; color: #C9DCD3; font-weight: 400; box-shadow: inset 0 -3px 0 transparent">メンバー</a>
+    </nav>
+
+    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 0">
+      <a href="15-settings-hours.html" title="この時間に保存された はてなは、内容まで見られます" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.28); background: rgba(76,211,138,0.14); color: #FFFFFF; font-size: 13px; text-decoration: none; white-space: nowrap">
+        <span aria-hidden="true" style="width: 9px; height: 9px; border-radius: 5px; background: #4CD38A; box-shadow: 0 0 0 3px rgba(76,211,138,0.25)"></span>
+        <strong>授業時間中</strong>
+        <span style="color: #C9DCD3; font-variant-numeric: tabular-nums">〜15:30 ・ 内容まで見えます</span>
+      </a>
+      <a href="06-projector-monitor-1.html" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 8px; background: #F5C33B; color: #16201B; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="M8 20h8" /><path d="M12 16v4" /></svg>
+        教室に映す
+      </a>
+      <a href="15-settings-hours.html" aria-label="クラスの設定" aria-current="page" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); color: #FFFFFF; background: rgba(255,255,255,0.16)">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg>
+      </a>
+      <span role="img" aria-label="山田 花子 先生" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 16px; background: #34604F; color: #FFFFFF; font-size: 13px; font-weight: 700">山</span>
+    </div>
+  </div>
+</header>
+
+  <main style="flex: 1; min-height: 0; width: 100%; max-width: 1400px; margin: 0 auto; padding: 16px 24px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px">
+      <h1 class="h1">クラスの設定</h1>
+      <div role="tablist" aria-label="設定の種類" style="display: flex; gap: 3px; padding: 3px; border-radius: 9px; background: #E6ECE9">
+        <button type="button" role="tab" class="seg" aria-selected="false" onClick="() => this.setState({ tab: 'hours' })" style="background: transparent; color: #2E3A35; font-weight: 400">授業時間</button>
+        <button type="button" role="tab" class="seg" aria-selected="true" onClick="() => this.setState({ tab: 'join' })" style="background: #FFFFFF; color: #16201B; font-weight: 700">参加コードと先生</button>
+      </div>
+      <span class="sub" style="font-size: 13px">5年2組 ・ 2026年度</span>
+    </div>
+
+      <div class="bento" style="flex: 1; min-height: 0; display: none; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 16px">
+
+        <div class="panel" style="display: flex; flex-direction: column; gap: 14px">
+          <section class="card" aria-labelledby="h-week" style="padding: 14px 18px; display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <h2 id="h-week" class="h2">平日の時間帯</h2>
+              <p class="sub">この時間に保存された はてなだけ、内容（問い・予想・結果・切り抜き画像）が見られます。外の時間は件数だけです。</p>
+            </div>
+            <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) 248px; gap: 12px; align-items: end">
+              <span></span>
+              <div style="position: relative; height: 16px">
+                
+                  <span style="position: absolute; left: 0.00%; transform: translateX(-50%); font-size: 10px; color: #55615B; font-variant-numeric: tabular-nums">7:00</span>
+                
+                  <span style="position: absolute; left: 18.18%; transform: translateX(-50%); font-size: 10px; color: #55615B; font-variant-numeric: tabular-nums">9:00</span>
+                
+                  <span style="position: absolute; left: 36.36%; transform: translateX(-50%); font-size: 10px; color: #55615B; font-variant-numeric: tabular-nums">11:00</span>
+                
+                  <span style="position: absolute; left: 54.55%; transform: translateX(-50%); font-size: 10px; color: #55615B; font-variant-numeric: tabular-nums">13:00</span>
+                
+                  <span style="position: absolute; left: 72.73%; transform: translateX(-50%); font-size: 10px; color: #55615B; font-variant-numeric: tabular-nums">15:00</span>
+                
+                  <span style="position: absolute; left: 90.91%; transform: translateX(-50%); font-size: 10px; color: #55615B; font-variant-numeric: tabular-nums">17:00</span>
+                
+              </div>
+              <span style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px; color: #55615B"><span>はじまり</span><span>おわり</span></span>
+            </div>
+            
+              <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) 248px; gap: 12px; align-items: center; min-height: 40px">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700">
+                  <input type="checkbox" checked onChange="() => this.setState({ times: { ...this.state.times, [key]: { ...t, on: !t.on } } })" aria-label="月曜日を授業時間にする" style="width: 17px; height: 17px; accent-color: #1E4438">
+                  月
+                </label>
+                <div style="position: relative; height: 30px; border-radius: 7px; background: #F1F4F2">
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 0.00%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 18.18%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 36.36%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 54.55%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 72.73%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 90.91%; border-left: 1px dashed #D5DDD9"></span>
+
+                    <span style="position: absolute; top: 3px; bottom: 3px; left: 13.64%; width: 63.64%; border-radius: 5px; background: #1E4438; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums">08:30〜15:30</span>
+
+                </div>
+                <span style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px">
+                  <input class="field" type="time" value="08:30" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="月曜日のはじまり">
+                  <input class="field" type="time" value="15:30" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="月曜日のおわり">
+                </span>
+              </div>
+            
+              <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) 248px; gap: 12px; align-items: center; min-height: 40px">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700">
+                  <input type="checkbox" checked onChange="() => this.setState({ times: { ...this.state.times, [key]: { ...t, on: !t.on } } })" aria-label="火曜日を授業時間にする" style="width: 17px; height: 17px; accent-color: #1E4438">
+                  火
+                </label>
+                <div style="position: relative; height: 30px; border-radius: 7px; background: #F1F4F2">
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 0.00%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 18.18%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 36.36%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 54.55%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 72.73%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 90.91%; border-left: 1px dashed #D5DDD9"></span>
+
+                    <span style="position: absolute; top: 3px; bottom: 3px; left: 13.64%; width: 63.64%; border-radius: 5px; background: #1E4438; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums">08:30〜15:30</span>
+
+                </div>
+                <span style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px">
+                  <input class="field" type="time" value="08:30" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="火曜日のはじまり">
+                  <input class="field" type="time" value="15:30" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="火曜日のおわり">
+                </span>
+              </div>
+            
+              <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) 248px; gap: 12px; align-items: center; min-height: 40px">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700">
+                  <input type="checkbox" checked onChange="() => this.setState({ times: { ...this.state.times, [key]: { ...t, on: !t.on } } })" aria-label="水曜日を授業時間にする" style="width: 17px; height: 17px; accent-color: #1E4438">
+                  水
+                </label>
+                <div style="position: relative; height: 30px; border-radius: 7px; background: #F1F4F2">
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 0.00%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 18.18%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 36.36%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 54.55%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 72.73%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 90.91%; border-left: 1px dashed #D5DDD9"></span>
+
+                    <span style="position: absolute; top: 3px; bottom: 3px; left: 13.64%; width: 56.06%; border-radius: 5px; background: #1E4438; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums">08:30〜14:40</span>
+
+                </div>
+                <span style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px">
+                  <input class="field" type="time" value="08:30" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="水曜日のはじまり">
+                  <input class="field" type="time" value="14:40" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="水曜日のおわり">
+                </span>
+              </div>
+            
+              <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) 248px; gap: 12px; align-items: center; min-height: 40px">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700">
+                  <input type="checkbox" checked onChange="() => this.setState({ times: { ...this.state.times, [key]: { ...t, on: !t.on } } })" aria-label="木曜日を授業時間にする" style="width: 17px; height: 17px; accent-color: #1E4438">
+                  木
+                </label>
+                <div style="position: relative; height: 30px; border-radius: 7px; background: #F1F4F2">
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 0.00%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 18.18%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 36.36%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 54.55%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 72.73%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 90.91%; border-left: 1px dashed #D5DDD9"></span>
+
+                    <span style="position: absolute; top: 3px; bottom: 3px; left: 13.64%; width: 63.64%; border-radius: 5px; background: #1E4438; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums">08:30〜15:30</span>
+
+                </div>
+                <span style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px">
+                  <input class="field" type="time" value="08:30" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="木曜日のはじまり">
+                  <input class="field" type="time" value="15:30" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="木曜日のおわり">
+                </span>
+              </div>
+            
+              <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) 248px; gap: 12px; align-items: center; min-height: 40px">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700">
+                  <input type="checkbox" checked onChange="() => this.setState({ times: { ...this.state.times, [key]: { ...t, on: !t.on } } })" aria-label="金曜日を授業時間にする" style="width: 17px; height: 17px; accent-color: #1E4438">
+                  金
+                </label>
+                <div style="position: relative; height: 30px; border-radius: 7px; background: #F1F4F2">
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 0.00%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 18.18%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 36.36%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 54.55%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 72.73%; border-left: 1px dashed #D5DDD9"></span>
+                  
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 90.91%; border-left: 1px dashed #D5DDD9"></span>
+
+                    <span style="position: absolute; top: 3px; bottom: 3px; left: 13.64%; width: 63.64%; border-radius: 5px; background: #1E4438; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums">08:30〜15:30</span>
+
+                </div>
+                <span style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px">
+                  <input class="field" type="time" value="08:30" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="金曜日のはじまり">
+                  <input class="field" type="time" value="15:30" onChange="(e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } })" aria-label="金曜日のおわり">
+                </span>
+              </div>
+            
+          </section>
+
+          <section class="card" aria-label="外す日と足す日" style="padding: 14px 18px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+            <div style="display: flex; flex-direction: column">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-bottom: 4px">
+                <h2 class="h3">授業時間から外す日</h2>
+                <button type="button" class="ghost">＋ 足す</button>
+              </div>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 0">
+                <input type="checkbox" checked style="width: 17px; height: 17px; accent-color: #1E4438">
+                祝日は自動で外す
+              </label>
+              <div class="row">
+                <span style="display: flex; flex-direction: column; gap: 1px"><strong style="font-size: 13px">冬休み</strong><span style="font-size: 11px; color: #55615B; font-variant-numeric: tabular-nums">12/25（金）〜 1/7（木）</span></span>
+                <button type="button" class="ghost" style="color: #A8321F">削除</button>
+              </div>
+              <div class="row">
+                <span style="display: flex; flex-direction: column; gap: 1px"><strong style="font-size: 13px">春休み</strong><span style="font-size: 11px; color: #55615B; font-variant-numeric: tabular-nums">3/25（木）〜 4/5（月）</span></span>
+                <button type="button" class="ghost" style="color: #A8321F">削除</button>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-bottom: 4px">
+                <h2 class="h3">授業時間に足す日</h2>
+                <button type="button" class="ghost">＋ 足す</button>
+              </div>
+              <p class="sub" style="padding: 6px 0">土日の行事や、時間の外の社会科見学など</p>
+              <div class="row">
+                <span style="display: flex; flex-direction: column; gap: 1px"><strong style="font-size: 13px">学習発表会</strong><span style="font-size: 11px; color: #55615B; font-variant-numeric: tabular-nums">11/14（土） 8:30〜12:00</span></span>
+                <button type="button" class="ghost" style="color: #A8321F">削除</button>
+              </div>
+            </div>
+          </section>
+
+          <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px">
+            <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 2px">
+              <p class="sub">変えた時間は、これから保存されるものに使います。前に保存されたものの見え方は変わりません。</p>
+              <p class="sub">保存した時刻で分けるため、欠席の日などに授業時間中に家で保存したものも見えます（保護者向けの資料で説明しています）。</p>
+            </div>
+            <button type="button" class="btn btn-p" style="height: 40px">授業時間を保存</button>
+          </div>
+        </div>
+
+        <section class="card panel" aria-labelledby="h-cal" style="padding: 14px 18px; display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+            <h2 id="h-cal" class="h2">カレンダー</h2>
+            <span style="display: flex; align-items: center; gap: 4px">
+              <button type="button" class="btn btn-s" aria-label="10月" style="width: 32px; height: 32px; padding: 0; border-color: #C5CFCA">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+              </button>
+              <span style="min-width: 92px; text-align: center; font-size: 13px; font-weight: 700">2026年11月</span>
+              <button type="button" class="btn btn-s" aria-label="12月" style="width: 32px; height: 32px; padding: 0; border-color: #C5CFCA">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+              </button>
+            </span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: #2E3A35">
+            <span style="display: inline-flex; align-items: center; gap: 5px"><span aria-hidden="true" style="width: 16px; height: 5px; border-radius: 3px; background: #1E4438"></span>授業時間がある日</span>
+            <span style="display: inline-flex; align-items: center; gap: 5px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #ECEFED; border: 1px solid #D5DDD9"></span>外した日</span>
+            <span style="display: inline-flex; align-items: center; gap: 5px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #FFF6D9; border: 1px solid #E2B32A"></span>足した日</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+            
+              <span style="text-align: center; font-size: 11px; font-weight: 700; color: #55615B; padding: 2px 0">日</span>
+            
+              <span style="text-align: center; font-size: 11px; font-weight: 700; color: #2E3A35; padding: 2px 0">月</span>
+            
+              <span style="text-align: center; font-size: 11px; font-weight: 700; color: #2E3A35; padding: 2px 0">火</span>
+            
+              <span style="text-align: center; font-size: 11px; font-weight: 700; color: #2E3A35; padding: 2px 0">水</span>
+            
+              <span style="text-align: center; font-size: 11px; font-weight: 700; color: #2E3A35; padding: 2px 0">木</span>
+            
+              <span style="text-align: center; font-size: 11px; font-weight: 700; color: #2E3A35; padding: 2px 0">金</span>
+            
+              <span style="text-align: center; font-size: 11px; font-weight: 700; color: #55615B; padding: 2px 0">土</span>
+
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #F7F9F8; border: 1px solid #EDF1EF">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">1</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">2</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #ECEFED; border: 1px solid #D5DDD9">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">3</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B">文化の日</span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: 0 0 0 2px #1E4438">4</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B">きょう</span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">5</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">6</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #F7F9F8; border: 1px solid #EDF1EF">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">7</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #F7F9F8; border: 1px solid #EDF1EF">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">8</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">9</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">10</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">11</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">12</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">13</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFF6D9; border: 1px solid #E2B32A">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">14</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #5A4300">学習発表会 〜12:00</span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #F7F9F8; border: 1px solid #EDF1EF">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">15</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">16</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">17</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">18</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">19</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">20</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #F7F9F8; border: 1px solid #EDF1EF">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">21</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #F7F9F8; border: 1px solid #EDF1EF">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">22</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #ECEFED; border: 1px solid #D5DDD9">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">23</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B">勤労感謝の日</span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">24</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">25</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">26</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">27</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #F7F9F8; border: 1px solid #EDF1EF">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">28</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #F7F9F8; border: 1px solid #EDF1EF">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #55615B; box-shadow: none">29</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border: 1px solid #E3E9E6">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none">30</span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: #1E4438"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: transparent; border: 1px solid transparent">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none"></span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: transparent; border: 1px solid transparent">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none"></span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: transparent; border: 1px solid transparent">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none"></span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: transparent; border: 1px solid transparent">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none"></span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: transparent; border: 1px solid transparent">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: #16201B; box-shadow: none"></span>
+                <span style="font-size: 10px; line-height: 1.35; color: #55615B"></span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: transparent"></span>
+              </div>
+            
+          </div>
+        </section>
+      </div>
+
+      <div class="bento" style="flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px">
+        <div class="panel" style="display: flex; flex-direction: column; gap: 14px">
+          <section class="card" aria-labelledby="h-code" style="padding: 18px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <h2 id="h-code" class="h2">参加コード</h2>
+                <p class="sub">子どもが「せってい」でコードを入れ、先生が確認すると参加が完了します。</p>
+              </div>
+              <button type="button" role="switch" aria-checked="true" onClick="() => this.setState({ open: !this.state.open })" style="display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 700; color: #16201B; cursor: pointer; padding: 6px 0; white-space: nowrap">
+                受付中
+                <span aria-hidden="true" style="position: relative; display: inline-block; width: 44px; height: 26px; border-radius: 13px; background: #1E4438">
+                  <span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #FFFFFF"></span>
+                </span>
+              </button>
+            </div>
+            <div style="padding: 18px; border-radius: 12px; background: #E3EEE8; display: flex; flex-direction: column; align-items: center; gap: 14px">
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 40px; font-weight: 700; letter-spacing: 0.12em; color: #16201B">K7Q-4M2X</span>
+              <span style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px">
+                <button type="button" class="btn btn-s">コピー</button>
+                <button type="button" class="btn" style="background: #F5C33B; border-color: #F5C33B; color: #16201B">
+                  <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="M8 20h8" /><path d="M12 16v4" /></svg>
+                  教室に大きく映す
+                </button>
+              </span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px">
+              <p class="sub">クラスの全員が入ったら、受付を止めておくと安心です。</p>
+              <button type="button" class="ghost">コードを作り直す</button>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="h-class" style="padding: 18px; display: flex; flex-direction: column; gap: 10px">
+            <h2 id="h-class" class="h2">クラスの情報</h2>
+            <dl style="margin: 0; display: grid; grid-template-columns: 96px 1fr; gap: 8px 14px; font-size: 13px">
+              <dt style="color: #55615B">クラス名</dt><dd style="margin: 0">5年2組</dd>
+              <dt style="color: #55615B">学年</dt><dd style="margin: 0">5年</dd>
+              <dt style="color: #55615B">年度</dt><dd style="margin: 0">2026年度（4月1日〜3月31日）</dd>
+            </dl>
+            <p class="sub">クラスは年度ごとに作り直します。進級やクラス替えのときは、子どもが新しいコードで入り直します。</p>
+          </section>
+        </div>
+
+        <section class="card panel" aria-labelledby="h-teachers" style="padding: 18px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 id="h-teachers" class="h2">一緒に見る先生</h2>
+            <p class="sub">追加した先生も、確認・ミッション・設定の操作ができます。先生の追加と解除は担任だけができます。</p>
+          </div>
+          <table style="width: 100%; border-collapse: collapse">
+            <thead><tr><th class="th" scope="col">名前</th><th class="th" scope="col">役割</th><th class="th" scope="col"><span class="sr">操作</span></th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="td"><span style="display: flex; flex-direction: column; gap: 1px"><strong>山田 花子<span style="font-weight: 400; color: #55615B">（あなた）</span></strong><span style="font-size: 11px; color: #55615B">yamada.hanako@example.ed.jp</span></span></td>
+                <td class="td"><span style="display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 11px; background: #1E4438; color: #FFFFFF; font-size: 11px; font-weight: 700">担任</span></td>
+                <td class="td"></td>
+              </tr>
+              <tr>
+                <td class="td"><span style="display: flex; flex-direction: column; gap: 1px"><strong>田中 美咲</strong><span style="font-size: 11px; color: #55615B">tanaka.misaki@example.ed.jp</span></span></td>
+                <td class="td"><span style="display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 11px; background: #E3EEE8; color: #1E4438; font-size: 11px; font-weight: 700">副担任</span></td>
+                <td class="td" style="text-align: right; white-space: nowrap"><button type="button" class="ghost">担任を渡す</button><button type="button" class="ghost" style="color: #A8321F">外す</button></td>
+              </tr>
+              <tr>
+                <td class="td"><span style="display: flex; flex-direction: column; gap: 1px"><strong>佐々木 健</strong><span style="font-size: 11px; color: #55615B">sasaki.ken@example.ed.jp</span></span></td>
+                <td class="td"><span style="display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 11px; background: #E3EEE8; color: #1E4438; font-size: 11px; font-weight: 700">学年の先生</span></td>
+                <td class="td" style="text-align: right; white-space: nowrap"><button type="button" class="ghost">担任を渡す</button><button type="button" class="ghost" style="color: #A8321F">外す</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; padding: 14px; border-radius: 10px; background: #F4F7F5">
+            <label style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px">
+              <span class="h3">先生を追加する</span>
+              <input class="field" type="email" placeholder="学校のメールアドレス（@example.ed.jp）" style="height: 40px; width: 100%">
+            </label>
+            <button type="button" class="btn btn-p" style="height: 40px">追加する</button>
+            <p class="sub" style="flex-basis: 100%">同じ学校のアカウントだけ追加できます。子どもとしてクラスに参加中のアカウントは追加できません。</p>
+          </div>
+        </section>
+      </div>
+  </main>
+</div>
+</body>
+</html>

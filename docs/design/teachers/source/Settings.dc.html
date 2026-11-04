@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>クラスの設定</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F4F7F5}
+*{box-sizing:border-box}
+a{color:#1E4438}a:hover{color:#122C24}
+.shell{height:100vh;overflow:hidden}
+.panel{min-height:0;overflow:auto}
+@media (max-width: 1100px){.shell{height:auto;overflow:visible}.bento{grid-template-columns:1fr !important}.panel{overflow:visible}}
+.card{background:#FFFFFF;border:1px solid #DCE3DF;border-radius:14px}
+.h1{margin:0;font-size:22px;font-weight:700;letter-spacing:0.02em;color:#16201B}
+.h2{margin:0;font-size:16px;font-weight:700;color:#16201B}
+.h3{margin:0;font-size:13px;font-weight:700;color:#16201B}
+.sub{margin:0;font-size:12px;line-height:1.7;color:#55615B}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;border:1px solid #1E4438}
+.btn-p{background:#1E4438;color:#FFFFFF}
+.btn-s{background:#FFFFFF;color:#1E4438}
+.ghost{border:0;background:transparent;font:inherit;font-size:12px;font-weight:700;color:#1E4438;cursor:pointer;padding:6px;min-height:32px}
+.seg{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border:0;border-radius:6px;font:inherit;font-size:13px;cursor:pointer}
+.field{height:34px;border:1px solid #C5CFCA;border-radius:8px;background:#FFFFFF;font:inherit;font-size:13px;color:#16201B;padding:0 8px}
+.th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#55615B;background:#F7F9F8;border-bottom:1px solid #DCE3DF;white-space:nowrap}
+.td{padding:10px;font-size:13px;border-bottom:1px solid #EDF1EF;vertical-align:middle}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #EDF1EF}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+<div class="shell" style="display: flex; flex-direction: column; background: #F4F7F5; font-family: 'BIZ UDPGothic', system-ui, sans-serif; color: #16201B">
+  <dc-import name="Header" active="settings" session="in" hint-size="100%,56px"></dc-import>
+
+  <main style="flex: 1; min-height: 0; width: 100%; max-width: 1400px; margin: 0 auto; padding: 16px 24px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px">
+      <h1 class="h1">クラスの設定</h1>
+      <div role="tablist" aria-label="設定の種類" style="display: flex; gap: 3px; padding: 3px; border-radius: 9px; background: #E6ECE9">
+        <button type="button" role="tab" class="seg" aria-selected="{{tabA.sel}}" onClick="{{showHours}}" style="background: {{tabA.bg}}; color: {{tabA.fg}}; font-weight: {{tabA.fw}}">授業時間</button>
+        <button type="button" role="tab" class="seg" aria-selected="{{tabB.sel}}" onClick="{{showJoin}}" style="background: {{tabB.bg}}; color: {{tabB.fg}}; font-weight: {{tabB.fw}}">参加コードと先生</button>
+      </div>
+      <span class="sub" style="font-size: 13px">5年2組 ・ 2026年度</span>
+    </div>
+
+      <div class="bento" style="flex: 1; min-height: 0; display: {{hoursDisplay}}; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 16px">
+
+        <div class="panel" style="display: flex; flex-direction: column; gap: 14px">
+          <section class="card" aria-labelledby="h-week" style="padding: 14px 18px; display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <h2 id="h-week" class="h2">平日の時間帯</h2>
+              <p class="sub">この時間に保存された はてなだけ、内容（問い・予想・結果・切り抜き画像）が見られます。外の時間は件数だけです。</p>
+            </div>
+            <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) 248px; gap: 12px; align-items: end">
+              <span></span>
+              <div style="position: relative; height: 16px">
+                <sc-for list="{{ticks}}" as="t" hint-placeholder-count="6">
+                  <span style="position: absolute; left: {{t.left}}; transform: translateX(-50%); font-size: 10px; color: #55615B; font-variant-numeric: tabular-nums">{{t.label}}</span>
+                </sc-for>
+              </div>
+              <span style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px; color: #55615B"><span>はじまり</span><span>おわり</span></span>
+            </div>
+            <sc-for list="{{days}}" as="d" hint-placeholder-count="5">
+              <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) 248px; gap: 12px; align-items: center; min-height: 40px">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700">
+                  <input type="checkbox" checked="{{d.on}}" onChange="{{d.toggle}}" aria-label="{{d.toggleLabel}}" style="width: 17px; height: 17px; accent-color: #1E4438">
+                  {{d.name}}
+                </label>
+                <div style="position: relative; height: 30px; border-radius: 7px; background: #F1F4F2">
+                  <sc-for list="{{ticks}}" as="t" hint-placeholder-count="6">
+                    <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: {{t.left}}; border-left: 1px dashed #D5DDD9"></span>
+                  </sc-for>
+                  <sc-if value="{{d.on}}" hint-placeholder-val="{{ true }}">
+                    <span style="position: absolute; top: 3px; bottom: 3px; left: {{d.left}}; width: {{d.width}}; border-radius: 5px; background: #1E4438; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums">{{d.start}}〜{{d.end}}</span>
+                  </sc-if>
+                  <sc-if value="{{d.off}}" hint-placeholder-val="{{ false }}">
+                    <span style="position: absolute; inset: 0; display: flex; align-items: center; padding-left: 10px; font-size: 11px; color: #55615B">授業時間に入れない</span>
+                  </sc-if>
+                </div>
+                <span style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px">
+                  <input class="field" type="time" value="{{d.start}}" onChange="{{d.setStart}}" aria-label="{{d.startLabel}}" disabled="{{d.off}}">
+                  <input class="field" type="time" value="{{d.end}}" onChange="{{d.setEnd}}" aria-label="{{d.endLabel}}" disabled="{{d.off}}">
+                </span>
+              </div>
+            </sc-for>
+          </section>
+
+          <section class="card" aria-label="外す日と足す日" style="padding: 14px 18px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+            <div style="display: flex; flex-direction: column">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-bottom: 4px">
+                <h2 class="h3">授業時間から外す日</h2>
+                <button type="button" class="ghost">＋ 足す</button>
+              </div>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 0">
+                <input type="checkbox" checked style="width: 17px; height: 17px; accent-color: #1E4438">
+                祝日は自動で外す
+              </label>
+              <div class="row">
+                <span style="display: flex; flex-direction: column; gap: 1px"><strong style="font-size: 13px">冬休み</strong><span style="font-size: 11px; color: #55615B; font-variant-numeric: tabular-nums">12/25（金）〜 1/7（木）</span></span>
+                <button type="button" class="ghost" style="color: #A8321F">削除</button>
+              </div>
+              <div class="row">
+                <span style="display: flex; flex-direction: column; gap: 1px"><strong style="font-size: 13px">春休み</strong><span style="font-size: 11px; color: #55615B; font-variant-numeric: tabular-nums">3/25（木）〜 4/5（月）</span></span>
+                <button type="button" class="ghost" style="color: #A8321F">削除</button>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-bottom: 4px">
+                <h2 class="h3">授業時間に足す日</h2>
+                <button type="button" class="ghost">＋ 足す</button>
+              </div>
+              <p class="sub" style="padding: 6px 0">土日の行事や、時間の外の社会科見学など</p>
+              <div class="row">
+                <span style="display: flex; flex-direction: column; gap: 1px"><strong style="font-size: 13px">学習発表会</strong><span style="font-size: 11px; color: #55615B; font-variant-numeric: tabular-nums">11/14（土） 8:30〜12:00</span></span>
+                <button type="button" class="ghost" style="color: #A8321F">削除</button>
+              </div>
+            </div>
+          </section>
+
+          <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px">
+            <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 2px">
+              <p class="sub">変えた時間は、これから保存されるものに使います。前に保存されたものの見え方は変わりません。</p>
+              <p class="sub">保存した時刻で分けるため、欠席の日などに授業時間中に家で保存したものも見えます（保護者向けの資料で説明しています）。</p>
+            </div>
+            <button type="button" class="btn btn-p" style="height: 40px">授業時間を保存</button>
+          </div>
+        </div>
+
+        <section class="card panel" aria-labelledby="h-cal" style="padding: 14px 18px; display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+            <h2 id="h-cal" class="h2">カレンダー</h2>
+            <span style="display: flex; align-items: center; gap: 4px">
+              <button type="button" class="btn btn-s" aria-label="10月" style="width: 32px; height: 32px; padding: 0; border-color: #C5CFCA">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+              </button>
+              <span style="min-width: 92px; text-align: center; font-size: 13px; font-weight: 700">2026年11月</span>
+              <button type="button" class="btn btn-s" aria-label="12月" style="width: 32px; height: 32px; padding: 0; border-color: #C5CFCA">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+            </span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: #2E3A35">
+            <span style="display: inline-flex; align-items: center; gap: 5px"><span aria-hidden="true" style="width: 16px; height: 5px; border-radius: 3px; background: #1E4438"></span>授業時間がある日</span>
+            <span style="display: inline-flex; align-items: center; gap: 5px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #ECEFED; border: 1px solid #D5DDD9"></span>外した日</span>
+            <span style="display: inline-flex; align-items: center; gap: 5px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #FFF6D9; border: 1px solid #E2B32A"></span>足した日</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+            <sc-for list="{{dows}}" as="w" hint-placeholder-count="7">
+              <span style="text-align: center; font-size: 11px; font-weight: 700; color: {{w.color}}; padding: 2px 0">{{w.name}}</span>
+            </sc-for>
+            <sc-for list="{{cells}}" as="c" hint-placeholder-count="35">
+              <div style="min-height: 72px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: {{c.bg}}; border: 1px solid {{c.border}}">
+                <span style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: {{c.fg}}; box-shadow: {{c.ring}}">{{c.d}}</span>
+                <span style="font-size: 10px; line-height: 1.35; color: {{c.labelColor}}">{{c.label}}</span>
+                <span aria-hidden="true" style="margin-top: auto; height: 4px; border-radius: 2px; background: {{c.bar}}"></span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+
+      <div class="bento" style="flex: 1; min-height: 0; display: {{joinDisplay}}; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px">
+        <div class="panel" style="display: flex; flex-direction: column; gap: 14px">
+          <section class="card" aria-labelledby="h-code" style="padding: 18px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <h2 id="h-code" class="h2">参加コード</h2>
+                <p class="sub">子どもが「せってい」でコードを入れ、先生が確認すると参加が完了します。</p>
+              </div>
+              <button type="button" role="switch" aria-checked="{{openStr}}" onClick="{{toggleOpen}}" style="display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 700; color: #16201B; cursor: pointer; padding: 6px 0; white-space: nowrap">
+                {{openLabel}}
+                <span aria-hidden="true" style="position: relative; display: inline-block; width: 44px; height: 26px; border-radius: 13px; background: {{trackColor}}">
+                  <span style="position: absolute; top: 3px; left: {{knobLeft}}; width: 20px; height: 20px; border-radius: 10px; background: #FFFFFF"></span>
+                </span>
+              </button>
+            </div>
+            <div style="padding: 18px; border-radius: 12px; background: {{codeBg}}; display: flex; flex-direction: column; align-items: center; gap: 14px">
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 40px; font-weight: 700; letter-spacing: 0.12em; color: {{codeColor}}">K7Q-4M2X</span>
+              <span style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px">
+                <button type="button" class="btn btn-s">コピー</button>
+                <button type="button" class="btn" style="background: #F5C33B; border-color: #F5C33B; color: #16201B">
+                  <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
+                  教室に大きく映す
+                </button>
+              </span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px">
+              <p class="sub">{{openNote}}</p>
+              <button type="button" class="ghost">コードを作り直す</button>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="h-class" style="padding: 18px; display: flex; flex-direction: column; gap: 10px">
+            <h2 id="h-class" class="h2">クラスの情報</h2>
+            <dl style="margin: 0; display: grid; grid-template-columns: 96px 1fr; gap: 8px 14px; font-size: 13px">
+              <dt style="color: #55615B">クラス名</dt><dd style="margin: 0">5年2組</dd>
+              <dt style="color: #55615B">学年</dt><dd style="margin: 0">5年</dd>
+              <dt style="color: #55615B">年度</dt><dd style="margin: 0">2026年度（4月1日〜3月31日）</dd>
+            </dl>
+            <p class="sub">クラスは年度ごとに作り直します。進級やクラス替えのときは、子どもが新しいコードで入り直します。</p>
+          </section>
+        </div>
+
+        <section class="card panel" aria-labelledby="h-teachers" style="padding: 18px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 id="h-teachers" class="h2">一緒に見る先生</h2>
+            <p class="sub">追加した先生も、確認・ミッション・設定の操作ができます。先生の追加と解除は担任だけができます。</p>
+          </div>
+          <table style="width: 100%; border-collapse: collapse">
+            <thead><tr><th class="th" scope="col">名前</th><th class="th" scope="col">役割</th><th class="th" scope="col"><span class="sr">操作</span></th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="td"><span style="display: flex; flex-direction: column; gap: 1px"><strong>山田 花子<span style="font-weight: 400; color: #55615B">（あなた）</span></strong><span style="font-size: 11px; color: #55615B">yamada.hanako@example.ed.jp</span></span></td>
+                <td class="td"><span style="display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 11px; background: #1E4438; color: #FFFFFF; font-size: 11px; font-weight: 700">担任</span></td>
+                <td class="td"></td>
+              </tr>
+              <tr>
+                <td class="td"><span style="display: flex; flex-direction: column; gap: 1px"><strong>田中 美咲</strong><span style="font-size: 11px; color: #55615B">tanaka.misaki@example.ed.jp</span></span></td>
+                <td class="td"><span style="display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 11px; background: #E3EEE8; color: #1E4438; font-size: 11px; font-weight: 700">副担任</span></td>
+                <td class="td" style="text-align: right; white-space: nowrap"><button type="button" class="ghost">担任を渡す</button><button type="button" class="ghost" style="color: #A8321F">外す</button></td>
+              </tr>
+              <tr>
+                <td class="td"><span style="display: flex; flex-direction: column; gap: 1px"><strong>佐々木 健</strong><span style="font-size: 11px; color: #55615B">sasaki.ken@example.ed.jp</span></span></td>
+                <td class="td"><span style="display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 11px; background: #E3EEE8; color: #1E4438; font-size: 11px; font-weight: 700">学年の先生</span></td>
+                <td class="td" style="text-align: right; white-space: nowrap"><button type="button" class="ghost">担任を渡す</button><button type="button" class="ghost" style="color: #A8321F">外す</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; padding: 14px; border-radius: 10px; background: #F4F7F5">
+            <label style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px">
+              <span class="h3">先生を追加する</span>
+              <input class="field" type="email" placeholder="学校のメールアドレス（@example.ed.jp）" style="height: 40px; width: 100%">
+            </label>
+            <button type="button" class="btn btn-p" style="height: 40px">追加する</button>
+            <p class="sub" style="flex-basis: 100%">同じ学校のアカウントだけ追加できます。子どもとしてクラスに参加中のアカウントは追加できません。</p>
+          </div>
+        </section>
+      </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"initialTab":{"editor":"enum","options":["hours","join"],"default":"hours"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tab: null,
+      open: true,
+      times: {
+        mon: { on: true, start: '08:30', end: '15:30' },
+        tue: { on: true, start: '08:30', end: '15:30' },
+        wed: { on: true, start: '08:30', end: '14:40' },
+        thu: { on: true, start: '08:30', end: '15:30' },
+        fri: { on: true, start: '08:30', end: '15:30' }
+      }
+    };
+  }
+  renderVals() {
+    const s = this.state;
+    const tab = s.tab ?? (this.props.initialTab ?? 'hours');
+    const MIN0 = 7 * 60, SPAN = 11 * 60;
+    const toMin = (t) => { const [h, m] = String(t || '0:0').split(':').map(Number); return h * 60 + (m || 0); };
+    const pct = (min) => (Math.max(0, Math.min(SPAN, min - MIN0)) / SPAN * 100).toFixed(2) + '%';
+    const names = { mon: '月', tue: '火', wed: '水', thu: '木', fri: '金' };
+    const setT = (key, field) => (e) => this.setState({ times: { ...this.state.times, [key]: { ...this.state.times[key], [field]: e.target.value } } });
+    const days = Object.keys(names).map((key) => {
+      const t = s.times[key];
+      const a = toMin(t.start), b = Math.max(toMin(t.end), a);
+      return {
+        name: names[key], on: t.on, off: !t.on, start: t.start, end: t.end,
+        left: pct(a), width: ((Math.min(b, MIN0 + SPAN) - Math.max(a, MIN0)) / SPAN * 100).toFixed(2) + '%',
+        toggleLabel: names[key] + '曜日を授業時間にする',
+        startLabel: names[key] + '曜日のはじまり', endLabel: names[key] + '曜日のおわり',
+        toggle: () => this.setState({ times: { ...this.state.times, [key]: { ...t, on: !t.on } } }),
+        setStart: setT(key, 'start'), setEnd: setT(key, 'end')
+      };
+    });
+    const ticks = [7, 9, 11, 13, 15, 17].map((h) => ({ label: h + ':00', left: pct(h * 60) }));
+    const dows = ['日', '月', '火', '水', '木', '金', '土'].map((n, i) => ({ name: n, color: (i === 0 || i === 6) ? '#55615B' : '#2E3A35' }));
+    const holidays = { 3: '文化の日', 23: '勤労感謝の日' };
+    const added = { 14: '学習発表会 〜12:00' };
+    const dowKey = [null, 'mon', 'tue', 'wed', 'thu', 'fri', null];
+    const cells = [];
+    for (let d = 1; d <= 30; d++) {
+      const w = (d - 1) % 7;
+      const weekend = w === 0 || w === 6;
+      const key = dowKey[w];
+      const dayOn = key ? s.times[key].on : false;
+      let c = { d, label: '', bg: '#FFFFFF', border: '#E3E9E6', fg: '#16201B', labelColor: '#55615B', bar: '#1E4438', ring: 'none' };
+      if (holidays[d]) c = { ...c, label: holidays[d], bg: '#ECEFED', border: '#D5DDD9', fg: '#55615B', bar: 'transparent' };
+      else if (added[d]) c = { ...c, label: added[d], bg: '#FFF6D9', border: '#E2B32A', labelColor: '#5A4300' };
+      else if (weekend) c = { ...c, bg: '#F7F9F8', border: '#EDF1EF', fg: '#55615B', bar: 'transparent' };
+      else if (!dayOn) c = { ...c, label: '授業時間なし', bar: 'transparent' };
+      if (d === 4) c = { ...c, ring: '0 0 0 2px #1E4438', label: c.label || 'きょう' };
+      cells.push(c);
+    }
+    for (let k = 0; k < 5; k++) cells.push({ d: '', label: '', bg: 'transparent', border: 'transparent', fg: '#16201B', labelColor: '#55615B', bar: 'transparent', ring: 'none' });
+    const segOn = { sel: 'true', bg: '#FFFFFF', fg: '#16201B', fw: '700' };
+    const segOff = { sel: 'false', bg: 'transparent', fg: '#2E3A35', fw: '400' };
+    const open = s.open;
+    return {
+      hoursDisplay: tab === 'hours' ? 'grid' : 'none',
+      joinDisplay: tab === 'join' ? 'grid' : 'none',
+      tabA: tab === 'hours' ? segOn : segOff,
+      tabB: tab === 'join' ? segOn : segOff,
+      showHours: () => this.setState({ tab: 'hours' }),
+      showJoin: () => this.setState({ tab: 'join' }),
+      days, ticks, dows, cells,
+      openStr: open ? 'true' : 'false',
+      openLabel: open ? '受付中' : '受付を止めています',
+      trackColor: open ? '#1E4438' : '#B4C0BA',
+      knobLeft: open ? '21px' : '3px',
+      codeBg: open ? '#E3EEE8' : '#F1F4F2',
+      codeColor: open ? '#16201B' : '#7D8984',
+      openNote: open ? 'クラスの全員が入ったら、受付を止めておくと安心です。' : '受付を止めている間は、このコードを入れても参加できません。',
+      toggleOpen: () => this.setState({ open: !this.state.open })
+    };
+  }
+}
+</script>
+</body>
+</html>

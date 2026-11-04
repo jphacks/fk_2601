@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>教室に映す（黒板に投影）よそう｜先生用 管理画面（黒板案）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Klee+One:wght@400;600&family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+<style>body{background:#000000}</style>
+</head>
+<body>
+<!-- 見本の画面です（アプリのコードではありません）。名前・数・写真はすべて見本です。 -->
+<div style="position: relative; width: 1600px; height: 900px; overflow: hidden; background: #000000; font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif; color: #FFFFFF">
+
+  <div style="position: absolute; left: 64px; right: 64px; top: 40px; display: flex; align-items: center; justify-content: space-between; gap: 24px">
+    <div style="display: flex; align-items: center; gap: 18px">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 32px; background: #FFFFFF">
+        <img src="../../assets/navi/navi-smile.png" alt="" style="width: 54px; height: 54px">
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 32px; font-weight: 900; letter-spacing: 0.04em; text-shadow: none">そらまめ さんが みつけた はてな</span>
+        <span style="font-family: 'BIZ UDPGothic', sans-serif; font-size: 16px; font-weight: 700; color: #FFFFFF">5年2組 ・ さんすう（めんせき） ・ 1 / 3</span>
+      </span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px; font-family: 'BIZ UDPGothic', sans-serif">
+      <div role="group" aria-label="映す先" style="display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 12px; border: 2px solid #FFFFFF">
+        <span style="padding: 0 8px; font-size: 13px; font-weight: 700; color: #FFFFFF">映す先</span>
+        <button type="button" aria-pressed="false" onClick="() => this.setState({ mode: 'monitor' })" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: #FFFFFF; font-family: 'BIZ UDPGothic', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="M8 20h8" /><path d="M12 16v4" /></svg>
+          モニター
+        </button>
+        <button type="button" aria-pressed="true" onClick="() => this.setState({ mode: 'board' })" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border: 0; border-radius: 8px; background: #FFE14D; color: #000000; font-family: 'BIZ UDPGothic', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="1" /><path d="M5 20h14" /><path d="M15 20v-3" /></svg>
+          黒板
+        </button>
+      </div>
+      <div role="group" aria-label="先生の操作" style="display: flex; gap: 8px">
+        <button type="button" aria-label="まえの はてな" style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 10px; border: 2px solid #FFFFFF; background: transparent; color: #FFFFFF; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+        </button>
+        <button type="button" aria-label="つぎの はてな" style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 10px; border: 2px solid #FFFFFF; background: transparent; color: #FFFFFF; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+        </button>
+        <a href="03-hatena-shared.html" style="display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 16px; border-radius: 10px; border: 2px solid #FFFFFF; color: #FFFFFF; font-size: 15px; font-weight: 700; text-decoration: none">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6L6 18" /></svg>
+          とじる
+        </a>
+      </div>
+    </div>
+  </div>
+
+    <div style="position: absolute; left: 112px; right: 112px; top: 160px; bottom: 176px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 48px">
+      <p style="margin: 0; font-size: 46px; font-weight: 900; line-height: 1.8; letter-spacing: 0.04em; text-align: center; text-shadow: none">この ろうかに、タイルは <ruby>何<rt style="font-size: 0.42em; letter-spacing: 0">なん</rt></ruby>まい しきつめて ある？</p>
+      <div style="width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px">
+        
+          <div style="border: 6px solid #FFFFFF; border-radius: 32px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 24px">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 88px; height: 88px; border-radius: 44px; border: 6px solid #FFFFFF; color: #FFFFFF; font-size: 48px; font-weight: 900">ア</span>
+            <span style="font-size: 64px; font-weight: 900; font-variant-numeric: tabular-nums; text-shadow: none">150まい</span>
+          </div>
+        
+          <div style="border: 6px solid #FFFFFF; border-radius: 32px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 24px">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 88px; height: 88px; border-radius: 44px; border: 6px solid #FFFFFF; color: #FFFFFF; font-size: 48px; font-weight: 900">イ</span>
+            <span style="font-size: 64px; font-weight: 900; font-variant-numeric: tabular-nums; text-shadow: none">1,500まい</span>
+          </div>
+        
+          <div style="border: 6px solid #FFFFFF; border-radius: 32px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 24px">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 88px; height: 88px; border-radius: 44px; border: 6px solid #FFFFFF; color: #FFFFFF; font-size: 48px; font-weight: 900">ウ</span>
+            <span style="font-size: 64px; font-weight: 900; font-variant-numeric: tabular-nums; text-shadow: none">15,000まい</span>
+          </div>
+        
+      </div>
+      <p style="margin: 0; font-size: 44px; font-weight: 900; color: #FFE14D; text-shadow: none">せーの！で てを あげよう</p>
+    </div>
+
+  <div style="position: absolute; left: 64px; right: 64px; bottom: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px">
+    <ol aria-label="すすみぐあい" style="list-style: none; margin: 0; padding: 0; display: flex; gap: 12px">
+      
+        <li>
+          <button type="button" onClick="() => this.setState({ step: n })" style="display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 20px 0 10px; border-radius: 26px; border: 3px solid #FFFFFF; background: transparent; color: #FFFFFF; font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif; font-size: 24px; font-weight: 900; cursor: pointer">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 17px; background: #FFFFFF; color: #000000; font-size: 20px">1</span>
+            はてな
+          </button>
+        </li>
+      
+        <li>
+          <button type="button" onClick="() => this.setState({ step: n })" aria-current="step" style="display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 20px 0 10px; border-radius: 26px; border: 2px solid #FFE14D; background: #FFE14D; color: #000000; font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif; font-size: 24px; font-weight: 900; cursor: pointer">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 17px; background: #000000; color: #FFE14D; font-size: 20px">2</span>
+            よそう
+          </button>
+        </li>
+      
+        <li>
+          <button type="button" onClick="() => this.setState({ step: n })" style="display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 20px 0 10px; border-radius: 26px; border: 3px solid #FFFFFF; background: transparent; color: #FFFFFF; font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif; font-size: 24px; font-weight: 900; cursor: pointer">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 17px; background: #FFFFFF; color: #000000; font-size: 20px">3</span>
+            しょうたい
+          </button>
+        </li>
+      
+    </ol>
+    <div style="display: flex; gap: 10px">
+      <button type="button" onClick="() => this.setState({ step: Math.max(1, step - 1) })" style="display: inline-flex; align-items: center; justify-content: center; height: 56px; padding: 0 20px; border-radius: 12px; border: 2px solid #FFFFFF; background: transparent; color: #FFFFFF; font-family: 'BIZ UDPGothic', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; opacity: 1">もどる</button>
+      <button type="button" onClick="() => this.setState({ step: step >= 3 ? 1 : step + 1 })" style="display: inline-flex; align-items: center; gap: 10px; height: 56px; padding: 0 28px; border-radius: 12px; border: 0; background: #FFE14D; color: #000000; font-family: 'BIZ UDPGothic', sans-serif; font-size: 18px; font-weight: 700; cursor: pointer">
+        しょうたいを 見せる
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -32,7 +32,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 ```
 .
 ├── AGENTS.md / CLAUDE.md / GEMINI.md   # この指示書（ルールは AGENTS.md に書く。他は @AGENTS.md を読み込むだけ）
-├── docs/                 # 仕様の正（Source of Truth）。下の「参照先」を参照。docs/design/ は見た目の見本（アプリのコードではない）。docs/images/ は README に載せる画面の画像
+├── docs/                 # 仕様の正（Source of Truth）。下の「参照先」を参照。docs/design/ は見た目の見本（アプリのコードではない。先生用の管理画面は docs/design/teachers/）。docs/images/ は README に載せる画面の画像
 ├── firestore.rules       # Firestore のセキュリティルール（本人だけが読み書きできる）
 ├── public/navi/          # ナビの7つの表情とスタンプ（stamp-*）の画像（docs/design/assets/navi/ と同じもの）
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
@@ -67,6 +67,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 | 画面・機能の詳細仕様 | `docs/02-spec.md`（仕様書） |
 | 技術スタック・構成・外部API | `docs/03-technical.md`（技術計画書） |
 | MVP の範囲 | `docs/04-mvp.md`（最小構成書） |
+| 先生用の管理画面の見た目・動き | `docs/design/teachers/README.md`（デザイン見本） |
 | ブランチ・コミット・PR のルール | `docs/05-contributing.md`（git/GitHub 開発手順書） |
 | 学校導入・先生の機能・クラスと友達グループの共有（構想。ハッカソンまでに運用しない） | `docs/06-school-expansion.md`（学校導入・共有機能 構想書） |
 
@@ -95,7 +96,8 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 - 予想と結果のズレが一目で分かるように見せる（驚きがこのアプリの中心）
 - 答え合わせの後に、条件を変えて考え直せる構造を保つ
 - アプリ内の文言は小学生が読める平易な日本語にする。専門用語を使う場合は短い説明を添える
-- 見た目は `docs/design/README.md` の見本に従う（色トークン・太さ 3px の `ink` の線・下にずらした影・ナビの7つの表情）。22px 以上の文字の漢字にはふりがなを付け、それより小さい文字はひらがなで書く（AI が書いた文を小さく出すときは `<RubyText kana>`、単位は `unitRuby`・`unitKana`：`src/lib/ruby.ts`）。ひらがなにするときは、むずかしい熟語を そのまま読みにせず、やさしい ことばに言いかえる（例：前提 → まえてい・ぜんてい ✕／「〜と する」「こたえの もとに なった データ」○。言いかえの表は `docs/02-spec.md` 2.2。新しい言いかえを使ったら表に足す）。画面の共通部品は `src/components/ui.tsx`・`Page.tsx`・`TabBar.tsx`・`Decor.tsx`・`Icons.tsx`
+- 子どもの画面の見た目は `docs/design/README.md` の見本に従う（色トークン・太さ 3px の `ink` の線・下にずらした影・ナビの7つの表情）。22px 以上の文字の漢字にはふりがなを付け、それより小さい文字はひらがなで書く（AI が書いた文を小さく出すときは `<RubyText kana>`、単位は `unitRuby`・`unitKana`：`src/lib/ruby.ts`）。ひらがなにするときは、むずかしい熟語を そのまま読みにせず、やさしい ことばに言いかえる（例：前提 → まえてい・ぜんてい ✕／「〜と する」「こたえの もとに なった データ」○。言いかえの表は `docs/02-spec.md` 2.2。新しい言いかえを使ったら表に足す）。画面の共通部品は `src/components/ui.tsx`・`Page.tsx`・`TabBar.tsx`・`Decor.tsx`・`Icons.tsx`
+- 先生用の管理画面を作るときは、`docs/design/teachers/` の見本（決まりは同じフォルダの `README.md`）に従う。見本にある画面・機能・動きは実装するものとして扱う（仮の値と【未決】、見本の中だけの絵は除く）。色は `t-` 付きのトークンを使い、子どもの画面の文字の決まり（ふりがな・ひらがな）は使わない。例外（教室に映す画面など、子どもが読むもの）は同じ `README.md` の「文字」に従う
 
 ### LLM の扱い
 - API キーはサーバー側だけで扱う。クライアント（ブラウザ・アプリ）に埋め込まない（中身は誰でも見られるため）

@@ -1,0 +1,67 @@
+/*
+ * 先生用 管理画面（黒板案）の Tailwind CSS v4 用テーマ（tokens.css と同じ名前・同じ値）
+ *
+ * 使い方：アプリの src/app/globals.css で、子どもの画面のテーマのあとに
+ *   @import "tailwindcss";
+ *   @import "../../docs/design/tailwind-theme.css";           ← 子どもの画面
+ *   @import "../../docs/design/teachers/tailwind-theme.css";   ← 先生の画面（パスはアプリの置き場所に合わせる）
+ * とすると、次のようなクラスが使えるようになります（すべて t- 付きなので、子どもの画面のクラスとはぶつかりません）。
+ *   bg-t-board / text-t-on-board / bg-t-board-tint / bg-t-chalk / text-t-chalk-text
+ *   bg-t-ground / border-t-line / text-t-text / text-t-text-sub
+ *   bg-t-math / bg-t-sci / bg-t-info / text-t-danger
+ *   font-t-body / font-t-chalk / font-t-cast
+ *   rounded-t-card / rounded-t-btn
+ *
+ * フォントは next/font/google で BIZ_UDPGothic・Klee_One・Zen_Maru_Gothic を読み込み、
+ * 変数を --font-t-body / --font-t-chalk / --font-t-cast に渡してください（README の「アプリへの取り込み方」）。
+ */
+@theme {
+  --color-t-board: #1E4438;
+  --color-t-board-dark: #122C24;
+  --color-t-board-tint: #E3EEE8;
+  --color-t-board-soft: #F3F8F5;
+  --color-t-board-line: #A9C4B8;
+  --color-t-on-board: #C9DCD3;
+
+  --color-t-chalk: #F5C33B;
+  --color-t-chalk-soft: #FFF6D9;
+  --color-t-chalk-line: #EBCB6E;
+  --color-t-chalk-text: #5A4300;
+  --color-t-pending: #FFF8E1;
+
+  --color-t-ground: #F4F7F5;
+  --color-t-surface: #FFFFFF;
+  --color-t-line: #DCE3DF;
+  --color-t-line-soft: #EDF1EF;
+  --color-t-field-line: #C5CFCA;
+
+  --color-t-text: #16201B;
+  --color-t-text-2: #2E3A35;
+  --color-t-text-sub: #55615B;
+
+  --color-t-math: #3B5BDB;
+  --color-t-sci: #0F8A6C;
+  --color-t-info: #7B4FE0;
+
+  --color-t-danger: #A8321F;
+  --color-t-danger-line: #DDB0A7;
+
+  --color-t-live: #4CD38A;
+
+  --color-t-proj-board: #1F4237;
+  --color-t-proj-chalk: #F4F1E8;
+  --color-t-proj-yellow: #F5D774;
+  --color-t-proj-pink: #F2A7B8;
+  --color-t-proj-sub: #BFD3C9;
+
+  --color-t-cast-bg: #000000;
+  --color-t-cast-fg: #FFFFFF;
+  --color-t-cast-yellow: #FFE14D;
+
+  --font-t-body: "BIZ UDPGothic", system-ui, sans-serif;
+  --font-t-chalk: "Klee One", "BIZ UDPGothic", sans-serif;
+  --font-t-cast: "Zen Maru Gothic", "BIZ UDPGothic", sans-serif;
+
+  --radius-t-card: 14px;
+  --radius-t-btn: 8px;
+}
