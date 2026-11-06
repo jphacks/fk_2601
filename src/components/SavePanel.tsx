@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { stampCounts } from "@/lib/collection";
-import { groupOf, STAMP_GOAL, SUBJECT_KANA, TITLE_LABEL, type GroupId } from "@/lib/constants";
+import { groupOf, STAMP_GOAL, SUBJECT_KANA, type GroupId } from "@/lib/constants";
+import { newlyEarned, nextGoal, TIER_LABEL, TITLE_FAMILIES, titleLabel, titleStats, titleTier } from "@/lib/titles";
 import { messageOf } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
@@ -101,6 +102,10 @@ export function SavePanel({
   const count = saved ? stampCounts(archives)[question.subject] : 0;
   const earned = count >= STAMP_GOAL;
   const shownStamps = Math.min(count, STAMP_GOAL);
+  // 保存した記録は、ずかんの いちばん前（新しい順）。それを足して、新しく もらえた称号
+  const gotTitles = saved && archives.length > 0 ? newlyEarned(archives.slice(1), archives) : [];
+  const subjectFamily = TITLE_FAMILIES.find((f) => f.id === question.subject);
+  const subjectNext = saved && subjectFamily ? nextGoal(subjectFamily, titleStats(archives)) : null;
 
   if (!saved) {
     return (
@@ -200,22 +205,22 @@ export function SavePanel({
             return <Stamp key={i} subject={i < shownStamps ? question.subject : null} size={50} />;
           })}
         </div>
-        {!earned && (
+        {subjectFamily && subjectNext && (
           <span className={`text-sm font-black ${s.dark}`}>
-            あと {STAMP_GOAL - shownStamps}こで「{TITLE_LABEL[question.subject]}」
+            あと {subjectNext.left}こで「{subjectFamily.name}（{TIER_LABEL[subjectNext.tier]}）」
           </span>
         )}
       </section>
 
-      {earned && count === STAMP_GOAL && (
-        <div className="flex items-center gap-3 rounded-card bg-purple px-4 py-3 text-white">
-          <Medal size={40} />
+      {gotTitles.map((id) => (
+        <div key={id} className="flex items-center gap-3 rounded-card bg-purple px-4 py-3 text-white">
+          <Medal size={40} tier={titleTier(id) ?? "gold"} />
           <div className="flex flex-col">
             <span className="text-[15px] font-black">しょうごう ゲット！</span>
-            <span className="font-pop text-[22px]">{TITLE_LABEL[question.subject]}</span>
+            <span className="font-pop text-[22px]">{titleLabel(id)}</span>
           </div>
         </div>
-      )}
+      ))}
 
       <div className="mt-auto flex gap-2.5">        <button
           type="button"

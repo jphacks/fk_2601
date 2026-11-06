@@ -155,10 +155,12 @@ export function Icon({
   );
 }
 
-/** しょうごうのメダル（見本 19・20） */
-export function Medal({ size = 34 }: { size?: number }) {
+const MEDAL_FILL = { bronze: "#E0A06A", silver: "#D3D8E2", gold: "#FFC83D" } as const;
+
+/** しょうごうのメダル（見本 19・20）。tier で どう・ぎん・きん の色にする（ないときは きん） */
+export function Medal({ size = 34, tier = "gold" }: { size?: number; tier?: keyof typeof MEDAL_FILL }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="#FFC83D" stroke="#22223A" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={MEDAL_FILL[tier]} stroke="#22223A" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
       <circle cx="12" cy="9" r="6" />
       <path d="M8.5 14L7 22l5-3 5 3-1.5-8" fill="#FF6F9C" />
     </svg>

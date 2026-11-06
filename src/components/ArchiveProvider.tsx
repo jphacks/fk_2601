@@ -7,6 +7,7 @@ import type { Guess, Rating } from "@/lib/rating";
 import { GROUPS, type GroupId } from "@/lib/constants";
 import type { ArchiveRecord, GroupPost, Profile } from "@/lib/types";
 import type { Question } from "@/server/llm/schema";
+import { legacyTitle } from "@/lib/titles";
 import { useApp } from "./AuthProvider";
 
 type ArchiveContext = {
@@ -133,7 +134,17 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
       if (groups.length === 0) return { record, shareFailed: false };
 
       // 見せられたグループだけを印にのこす（1つ失敗しても、ほかのグループには見せる）
-      const results = await Promise.allSettled(groups.map((g) => backend.saveGroupPost(user.uid, g, groupPost(profile, record))));
+      const post = groupPost(profile, record);
+      const results = await Promise.allSettled(
+        groups.map((g) =>
+          backend.saveGroupPost(user.uid, g, post).catch((error: unknown) => {
+            // 新しい称号（「math-gold」など）を、まだ読めないルールに断られたときだけ、前の形（分類の名前か null）で出しなおす
+            const legacy = legacyTitle(post.title);
+            if ((error as { code?: string }).code !== "permission-denied" || legacy === post.title) throw error;
+            return backend.saveGroupPost(user.uid, g, { ...post, title: legacy });
+          }),
+        ),
+      );
       const shared = groups.filter((_, i) => results[i].status === "fulfilled");
       const next = { ...record, sharedGroups: shared };
       if (shared.length > 0) {
