@@ -159,6 +159,22 @@ service cloud.firestore {
         allow update: if false;
       }
 
+      // ミッション（#139）：missions/{日付}（日本時間の「2026-11-15」）。date・text・updatedAt。読めるのはメンバー、書く・消すのは管理者。
+      // 子どもの画面に出すので、文は 1〜60 文字の ひらがな（漢字を断る）
+      match /missions/{date} {
+        allow read: if isMember(groupId);
+        allow create, update: if isAdmin(groupId)
+          && request.resource.data.keys().hasOnly(['date', 'text', 'updatedAt'])
+          && request.resource.data.keys().hasAll(['date', 'text', 'updatedAt'])
+          && date.matches('^20[0-9]{2}-[01][0-9]-[0-3][0-9]$')
+          && request.resource.data.date == date
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 60
+          && !request.resource.data.text.matches('(?s).*\\p{Han}.*')
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if isAdmin(groupId);
+      }
+
       // 通報：メンバーなら、グループにある投稿を通報できる（reports/{投稿の ID}__{自分の uid}。同じ人の2回目は作れない）。
       // 読める・消せるのは管理者だけ（通報した人は、ほかのメンバーに見えない）
       match /reports/{reportId} {

@@ -133,6 +133,7 @@ export function TeacherHeader() {
     const nav = base
       ? [
           { href: base, label: "はてな", active: pathname === base },
+          { href: `${base}/missions`, label: "ミッション", active: isActive(pathname, `${base}/missions`) },
           { href: `${base}/members`, label: "メンバー", active: isActive(pathname, `${base}/members`) },
         ]
       : [];

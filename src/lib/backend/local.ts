@@ -1,7 +1,7 @@
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import { GROUP_POSTS_PAGE, GROUPS, type GroupId } from "@/lib/constants";
 import { newJoinCode } from "@/lib/joinCode";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
 import { usernameToLocalId, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -20,6 +20,8 @@ const groupSettingsKey = (groupId: GroupId) => `local:groupSettings:${groupId}`;
 const KEY_JOIN_CODES = "local:joinCodes";
 const groupJoinCodeKey = (groupId: GroupId) => `local:groupJoinCode:${groupId}`;
 type LocalJoinCodes = Record<string, { groupId: GroupId; open: boolean }>;
+// グループのミッション（#139）：日付 → 文
+const groupMissionsKey = (groupId: GroupId) => `local:groupMissions:${groupId}`;
 
 type LocalGroups = Partial<Record<GroupId, GroupRole>>;
 
@@ -191,6 +193,28 @@ export const localBackend: Backend = {
 
   async stopAutoJoin(groupId) {
     writeJson(groupSettingsKey(groupId), { autoJoinUntil: Date.now() });
+  },
+
+  async getGroupMission(groupId, date) {
+    const text = readJson<Record<string, string>>(groupMissionsKey(groupId), {})[date];
+    return text ? { groupId, date, text } : null;
+  },
+
+  async listGroupMissions(groupId, from, to) {
+    return Object.entries(readJson<Record<string, string>>(groupMissionsKey(groupId), {}))
+      .filter(([date]) => date >= from && date <= to)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, text]): GroupMission => ({ groupId, date, text }));
+  },
+
+  async saveGroupMission(groupId, date, text) {
+    writeJson(groupMissionsKey(groupId), { ...readJson<Record<string, string>>(groupMissionsKey(groupId), {}), [date]: text });
+  },
+
+  async deleteGroupMission(groupId, date) {
+    const all = readJson<Record<string, string>>(groupMissionsKey(groupId), {});
+    delete all[date];
+    writeJson(groupMissionsKey(groupId), all);
   },
 
   async getJoinCode(groupId) {

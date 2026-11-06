@@ -29,7 +29,7 @@ import {
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import { GROUP_POSTS_PAGE, GROUPS, type GroupId } from "@/lib/constants";
 import { newJoinCode } from "@/lib/joinCode";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, JoinCode, Membership, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, JoinCode, Membership, Profile } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -190,6 +190,30 @@ export const firebaseBackend: Backend = {
   // ルールで、いまの時刻（サーバーの時計）にするときだけ通す
   async stopAutoJoin(groupId) {
     await updateDoc(doc(db(), "groups", groupId), { autoJoinUntil: serverTimestamp() });
+  },
+
+  async getGroupMission(groupId, date) {
+    const snapshot = await getDoc(doc(db(), "groups", groupId, "missions", date));
+    const text = snapshot.data()?.text;
+    return typeof text === "string" ? { groupId, date, text } : null;
+  },
+
+  async listGroupMissions(groupId, from, to) {
+    const snapshot = await getDocs(
+      query(collection(db(), "groups", groupId, "missions"), where("date", ">=", from), where("date", "<=", to), orderBy("date")),
+    );
+    return snapshot.docs.flatMap((d): GroupMission[] => {
+      const data = d.data();
+      return typeof data.text === "string" ? [{ groupId, date: d.id, text: data.text }] : [];
+    });
+  },
+
+  async saveGroupMission(groupId, date, text) {
+    await setDoc(doc(db(), "groups", groupId, "missions", date), { date, text, updatedAt: serverTimestamp() });
+  },
+
+  async deleteGroupMission(groupId, date) {
+    await deleteDoc(doc(db(), "groups", groupId, "missions", date));
   },
 
   async getJoinCode(groupId) {

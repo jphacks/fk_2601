@@ -12,7 +12,8 @@ import { Icon } from "@/components/Icons";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
 import { SceneSamples } from "@/components/SceneSamples";
-import { CAPTURE_WITH_PROMISE, GUIDE_PARAM, titleLabel } from "@/lib/constants";
+import { CAPTURE_WITH_PROMISE, GUIDE_PARAM, groupOf, titleLabel } from "@/lib/constants";
+import { useTodayGroupMissions } from "@/components/GroupMissions";
 import { missionDone, todaysMission } from "@/lib/missions";
 
 /** まちの絵（見本 04）。いえ・き・しんごうに「はてな」がかくれている */
@@ -47,6 +48,8 @@ function HomeContent() {
   const captureRef = useRef<HTMLAnchorElement>(null);
   const [guideStep, setGuideStep] = useState<GuideStep>(0);
   const [guideClosed, setGuideClosed] = useState(false);
+  // グループのミッション（#139）。どのグループも出していない日・読み込み中は、いつもの きょうの おだいを出す
+  const groupMissions = useTodayGroupMissions();
   if (!profile) return null;
 
   const done = missionDone(archives);
@@ -82,16 +85,21 @@ function HomeContent() {
           </div>
         </section>
 
-        {/* 今日のお題（押せないので地の色だけ） */}
-        <div className="flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-3">
-          <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-white">
-            <Icon name="star" size={26} fill="#FFC83D" stroke="#22223A" strokeWidth={2} />
-          </span>
-          <span className="flex min-w-0 grow flex-col">
-            <span className="text-sm font-black">きょうの おだい{done ? "（クリア！）" : ""}</span>
-            <span className="font-pop text-[19px] leading-snug">{todaysMission()}</span>
-          </span>
-        </div>
+        {/* 今日のお題（押せないので地の色だけ）。グループのミッションがあれば、グループごとに ならべる */}
+        {(groupMissions?.length ? groupMissions.map((m) => ({ key: m.groupId, label: `${groupOf(m.groupId).kana} の おだい`, text: m.text })) : [{ key: "daily", label: "きょうの おだい", text: todaysMission() }]).map((m) => (
+          <div key={m.key} className="flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-3">
+            <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-white">
+              <Icon name="star" size={26} fill="#FFC83D" stroke="#22223A" strokeWidth={2} />
+            </span>
+            <span className="flex min-w-0 grow flex-col">
+              <span className="text-sm font-black">
+                {m.label}
+                {done ? "（クリア！）" : ""}
+              </span>
+              <span className="font-pop text-[19px] leading-snug">{m.text}</span>
+            </span>
+          </div>
+        ))}
 
         <Link
           ref={captureRef}
