@@ -183,7 +183,7 @@ Firestore:
 - 公開データの持ち主（2026-11-06 に決めた）：同じ人の投稿をひも付けられないよう、`public` には持ち主を入れない
   - 持ち主の uid は `publicOwners/{postId}` に分ける。だれも読めない（本人も読まない）
   - 公開するときは `public` と `publicOwners` を同じバッチで書く（`src/lib/backend/firebase.ts` の `savePublic`）。ルールで、`publicOwners` の uid が本人で、まだない投稿のときだけ作れる（ほかの人の投稿の持ち主になれない）
-  - 消すときも同じバッチで消す（`deletePublic`）。`public` を消せるのは、`publicOwners` の uid が本人のとき。`publicOwners` だけを消して投稿を残すことはできない
+  - 消すときも同じバッチで消す（`deletePublic`）。`public` を消せるのは、`publicOwners` の uid が本人のとき。`publicOwners` だけを消して投稿を残すことはできない。もうない投稿を消す操作は通す（管理者が投稿を消したあとも、ずかんの「けす」「みんなに みせるのを やめる」が失敗しないように）
   - 「きみの はてな」の印は、自分のずかんで公開中のもの（アーカイブの `publicId`）と照らして出す（`src/app/others/page.tsx`）
   - この変更より前の投稿には `ownerUid` が入ったまま残る。その投稿は、`ownerUid` が本人なら今までどおり消せる。前の投稿を書きかえる（`ownerUid` を外して `publicOwners` を作る）かどうかは【未決】（本番のデータを変えるので、人間の許可を取ってから行う）
   - ルールとアプリは同時に公開する（片方だけだと、公開に失敗する）
