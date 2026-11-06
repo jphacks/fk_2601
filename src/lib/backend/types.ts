@@ -59,6 +59,8 @@ export interface Backend {
   joinWithCode(uid: string, username: string, code: string): Promise<{ groupId: GroupId; already: boolean }>;
   /** グループに見せた問い（新しい順に GROUP_POSTS_PAGE 件）。before（ミリ秒）を渡すと、それより前の分。読めるのはグループのメンバーだけ */
   listGroupPosts(groupId: GroupId, options?: { before?: number }): Promise<GroupPost[]>;
+  /** since（ミリ秒）からあとの投稿の数（画像は読まない）。管理画面の「きょう」で使う（#140） */
+  countGroupPostsSince(groupId: GroupId, since: number): Promise<number>;
   /** 投稿を1件（もうなければ null）。管理画面で、通報された古い投稿を出すのに使う */
   getGroupPost(groupId: GroupId, id: string): Promise<GroupPost | null>;
   /** グループに見せる。uid は持ち主（投稿には入れず、本人だけが消せるようにするために別に持つ） */

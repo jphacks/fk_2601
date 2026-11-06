@@ -261,6 +261,10 @@ export const localBackend: Backend = {
       .slice(0, GROUP_POSTS_PAGE);
   },
 
+  async countGroupPostsSince(groupId, since) {
+    return readJson<GroupPost[]>(groupPostsKey(groupId), []).filter((p) => p.createdAt >= since).length;
+  },
+
   async getGroupPost(groupId, id) {
     return readJson<GroupPost[]>(groupPostsKey(groupId), []).find((p) => p.id === id) ?? null;
   },

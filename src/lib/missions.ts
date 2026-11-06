@@ -49,3 +49,8 @@ export function jstDate(date = new Date(), days = 0): string {
 export function hasKanji(text: string): boolean {
   return /\p{Script=Han}/u.test(text);
 }
+
+/** 日本時間の、その日の0時（ミリ秒）。「きょう」の数を数えるのに使う（#140） */
+export function jstDayStart(date = new Date()): number {
+  return new Date(`${jstDate(date)}T00:00:00+09:00`).getTime();
+}
