@@ -21,11 +21,13 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  type Timestamp,
+  updateDoc,
   writeBatch,
 } from "firebase/firestore";
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import { GROUPS } from "@/lib/constants";
-import type { ArchiveRecord, AuthUser, GroupPost, Membership, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, Membership, Profile } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -139,19 +141,60 @@ export const firebaseBackend: Backend = {
     );
   },
 
-  // 入れるのは、グループの autoJoinUntil より前だけ（firestore.rules）。過ぎていたら断られるので、何もしない
-  async joinAutoGroups(uid) {
+  // 入れるのは、グループの autoJoinUntil より前だけ（firestore.rules）。過ぎていたら断られるので、何もしない。
+  // ログイン ID は、ルールで ID トークンの名前と同じかを確かめる。登録した直後のトークンには名前がないことがあるので、取り直してから書く
+  async joinAutoGroups(uid, username) {
+    await auth().currentUser?.getIdToken(true);
     for (const g of GROUPS) {
       if (!g.autoJoin) continue;
       const ref = doc(db(), "groups", g.id, "members", uid);
-      // もう入っている人（管理者など）の記録を上書きしない（ルールでも更新を断る）
+      // もう入っている人（管理者など）の記録を上書きしない（ルールでも本人の更新を断る）
       if ((await getDoc(ref)).exists()) continue;
       try {
-        await setDoc(ref, { role: "member", joinedAt: serverTimestamp() });
+        await setDoc(ref, { role: "member", joinedAt: serverTimestamp(), username });
       } catch (error) {
         if ((error as { code?: string }).code !== "permission-denied") throw error;
+        // トークンの名前が合わなかったときのために、ログイン ID なしで1回だけ入りなおす（期限切れなら、これも断られる）
+        try {
+          await setDoc(ref, { role: "member", joinedAt: serverTimestamp() });
+        } catch (retry) {
+          if ((retry as { code?: string }).code !== "permission-denied") throw retry;
+        }
       }
     }
+  },
+
+  async listMembers(groupId) {
+    const snapshot = await getDocs(collection(db(), "groups", groupId, "members"));
+    return snapshot.docs.map((d): GroupMember => {
+      const data = d.data();
+      return {
+        uid: d.id,
+        username: typeof data.username === "string" ? data.username : null,
+        role: data.role === "admin" ? "admin" : "member",
+        joinedAt: (data.joinedAt as Timestamp | undefined)?.toMillis?.() ?? null,
+      };
+    });
+  },
+
+  async setMemberRole(groupId, uid, role) {
+    await updateDoc(doc(db(), "groups", groupId, "members", uid), { role });
+  },
+
+  async removeMember(groupId, uid) {
+    await deleteDoc(doc(db(), "groups", groupId, "members", uid));
+  },
+
+  // ルールで、いまの時刻（サーバーの時計）にするときだけ通す
+  async stopAutoJoin(groupId) {
+    await updateDoc(doc(db(), "groups", groupId), { autoJoinUntil: serverTimestamp() });
+  },
+
+  async getGroupSettings(groupId) {
+    const snapshot = await getDoc(doc(db(), "groups", groupId));
+    const until = (snapshot.data()?.autoJoinUntil as Timestamp | undefined)?.toMillis?.() ?? null;
+    // 端末の時計で決めるのは、表示のためだけ（入れるかどうかは、ルールがサーバーの時刻で決める）
+    return { autoJoinUntil: until, open: until !== null && Date.now() < until };
   },
 
   async listGroupPosts(groupId) {
@@ -172,6 +215,27 @@ export const firebaseBackend: Backend = {
     batch.delete(doc(db(), "groups", groupId, "posts", id));
     batch.delete(doc(db(), "groups", groupId, "owners", id));
     await batch.commit();
+  },
+
+  // 通報は reports/{投稿の ID}__{通報した人の uid}。同じ人の2回目は ID が同じなので、ルールが断る（成功として扱う）。
+  // 通報した人を管理者にも見せたくないので、uid は ID の中だけ（読めるのは管理者だけ。firestore.rules）
+  async reportGroupPost(uid, groupId, postId) {
+    try {
+      await setDoc(doc(db(), "groups", groupId, "reports", `${postId}__${uid}`), { postId, createdAt: serverTimestamp() });
+    } catch (error) {
+      if ((error as { code?: string }).code !== "permission-denied") throw error;
+      // もう通報ずみ（ルールが2回目を断った）か、投稿がもうない。どちらも、子どもには「つうほうしたよ」で よい
+    }
+  },
+
+  async listGroupReports(groupId) {
+    const snapshot = await getDocs(collection(db(), "groups", groupId, "reports"));
+    const counts: Record<string, number> = {};
+    for (const d of snapshot.docs) {
+      const postId = String(d.data().postId ?? "");
+      if (postId) counts[postId] = (counts[postId] ?? 0) + 1;
+    }
+    return counts;
   },
 
   // 端末に残った古い写しで「ない」と判断しないよう、サーバーに聞く

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatNumber } from "@/lib/format";
+import { DECIMAL_GRADE, formatNumber } from "@/lib/format";
 import { unitKana } from "@/lib/ruby";
 import { binEdges, binValue, BIN_COUNT, usesChoices, type Guess } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
@@ -10,6 +10,8 @@ import { RubyText } from "./RubyText";
 import { Button, CHOICE_DOWN, CHOICE_UP, Say } from "./ui";
 
 const RATIO_CHOICES = [1.5, 2, 3, 5, 10, 20, 50, 100];
+// 小数を まだ習っていない学年（1・2年）には、整数だけを出す（docs/02-spec.md 2.4）
+const RATIO_CHOICES_INT = [2, 3, 4, 5, 10, 20, 50, 100];
 
 // 5つの範囲の色（見本 13）：えらぶと、こい色になる
 const BIN_STYLE = [
@@ -135,7 +137,7 @@ function EstimateForm({ question, grade, onSubmit, hint }: FormProps & { grade: 
             >
               <BinIcon index={i} />
               <span>
-                {formatNumber(edges[i])} 〜 {formatNumber(edges[i + 1])} {unitKana(question.answerUnit)}
+                {formatNumber(edges[i], grade)} 〜 {formatNumber(edges[i + 1], grade)} {unitKana(question.answerUnit)}
               </span>
             </button>
           ))}
@@ -191,7 +193,7 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
         <span className="text-center font-pop text-lg">おおきい ほうは、なんばい くらい？</span>
         {small ? (
           <div className="grid grid-cols-2 gap-2.5">
-            {RATIO_CHOICES.map((r) => (
+            {(grade < DECIMAL_GRADE ? RATIO_CHOICES_INT : RATIO_CHOICES).map((r) => (
               <button
                 key={r}
                 type="button"

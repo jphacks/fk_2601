@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useApp } from "@/components/AuthProvider";
 import { Icon } from "@/components/Icons";
-import { APP_NAME } from "@/lib/constants";
+import { APP_NAME, GROUPS, type GroupId } from "@/lib/constants";
 import { classUntilNow, DEMO_TEACHER } from "@/lib/teacherDemo";
+import { groupLabel } from "./GroupAdmin";
 import { useTeacher } from "./TeacherProvider";
 
 const NAV = [
@@ -16,8 +18,15 @@ const NAV = [
 ];
 
 const SETTINGS_HREF = "/teacher/settings";
-// グループの管理（#120）は見本ではなく本物のデータを扱うので、見本のクラス・先生・メニューを出さない
+// グループの管理（#120・#129）は見本ではなく本物のデータを扱うので、見本の先生・メニュー・授業時間を出さない
 const GROUPS_HREF = "/teacher/groups";
+const GROUP_VALUE = "group:";
+
+/** いま開いているグループ（/teacher/groups/{グループ}/...）。グループの一覧（/teacher/groups）や見本の画面では null */
+function groupOfPath(pathname: string): GroupId | null {
+  const id = pathname.match(/^\/teacher\/groups\/([^/]+)/)?.[1];
+  return GROUPS.find((g) => g.id === id)?.id ?? null;
+}
 
 function isActive(pathname: string, href: string) {
   if (href === "/teacher") return pathname === href;
@@ -29,29 +38,56 @@ const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visi
 // 見本は PC 向けに 36px。タブレットでは押せるものを 44px 以上にする（docs/design/teachers/README.md「形とレイアウト」）
 const CONTROL_HEIGHT = "h-9 pointer-coarse:h-11";
 
-// クラスの切りかえ：見た目は見本のボタンのまま、選ぶところは端末の標準の選択肢を使う
-function ClassSwitcher() {
+// クラスの切りかえ：見た目は見本のボタンのまま、選ぶところは端末の標準の選択肢を使う。
+// 上の段は見本のクラス（架空）、下の段は本番のグループ（ログインして、管理者になっているものだけ）。
+// グループを選ぶとグループの管理へ、見本のクラスを選ぶと見本の画面へ移る（本物と架空を1つの画面に混ぜない）
+function ClassSwitcher({ groupId }: { groupId: GroupId | null }) {
+  const router = useRouter();
   const { classes, currentClass, selectClass } = useTeacher();
+  const { memberships } = useApp();
+  const adminGroups = GROUPS.filter((g) => g.id === groupId || memberships?.some((m) => m.groupId === g.id && m.role === "admin"));
+  const label = groupId ? groupLabel(groupId) : currentClass.name;
+
+  function choose(value: string) {
+    if (value.startsWith(GROUP_VALUE)) {
+      router.push(`${GROUPS_HREF}/${value.slice(GROUP_VALUE.length)}`);
+      return;
+    }
+    selectClass(value);
+    if (groupId) router.push("/teacher");
+  }
+
   return (
     <label
       className={`relative inline-flex ${CONTROL_HEIGHT} cursor-pointer items-center gap-2 rounded-tbtn border border-white/30 px-2.5 text-sm font-bold whitespace-nowrap text-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-white`}
     >
-      {currentClass.name}
-      <span className="text-[11px] font-normal text-t-on-board">{currentClass.schoolYear}</span>
+      {label}
+      <span className="text-[11px] font-normal text-t-on-board">{groupId ? "グループ" : currentClass.schoolYear}</span>
       <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M6 9l6 6 6-6" />
       </svg>
       <select
-        aria-label={`クラスを切り替える（表示中：${currentClass.name}）`}
-        value={currentClass.id}
-        onChange={(e) => selectClass(e.target.value)}
+        aria-label={`クラス・グループを切り替える（表示中：${label}）`}
+        value={groupId ? `${GROUP_VALUE}${groupId}` : currentClass.id}
+        onChange={(e) => choose(e.target.value)}
         className="absolute inset-0 cursor-pointer text-base text-t-text opacity-0"
       >
-        {classes.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}（{c.schoolYear}・{c.role}）
-          </option>
-        ))}
+        <optgroup label="見本のクラス（架空のデータ）">
+          {classes.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}（{c.schoolYear}・{c.role}）
+            </option>
+          ))}
+        </optgroup>
+        {adminGroups.length > 0 && (
+          <optgroup label="グループ（本番のデータ）">
+            {adminGroups.map((g) => (
+              <option key={g.id} value={`${GROUP_VALUE}${g.id}`}>
+                {groupLabel(g.id)}（管理者）
+              </option>
+            ))}
+          </optgroup>
+        )}
       </select>
     </label>
   );
@@ -92,11 +128,37 @@ export function TeacherHeader() {
   const onSettings = isActive(pathname, SETTINGS_HREF);
 
   if (isActive(pathname, GROUPS_HREF)) {
+    const groupId = groupOfPath(pathname);
+    const base = groupId ? `${GROUPS_HREF}/${groupId}` : null;
+    const nav = base
+      ? [
+          { href: base, label: "投稿", active: pathname === base },
+          { href: `${base}/members`, label: "メンバー", active: isActive(pathname, `${base}/members`) },
+        ]
+      : [];
     return (
       <header className="w-full shrink-0 bg-t-board text-white">
-        <div className="mx-auto flex min-h-14 max-w-[1400px] flex-wrap items-center gap-x-3.5 px-6">
-          <Logo href={GROUPS_HREF} sub="管理者用" />
-          <span className="text-sm font-bold">グループの管理</span>
+        <div className="mx-auto flex min-h-14 max-w-[1400px] flex-wrap items-center gap-x-3.5 px-6 min-[1360px]:gap-x-[22px]">
+          <Logo href={base ?? GROUPS_HREF} sub="管理者用" />
+          <span
+            title="本番のデータです。消したものは元に戻せません"
+            className="inline-flex h-6 items-center rounded-full border border-white/40 px-2.5 text-xs font-bold whitespace-nowrap text-white"
+          >
+            本番のデータ
+          </span>
+          <ClassSwitcher groupId={groupId} />
+          <nav aria-label="グループのメニュー" className="flex flex-auto flex-wrap gap-x-3.5 self-stretch min-[1360px]:gap-x-[22px]">
+            {nav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={item.active ? "page" : undefined}
+                className={`inline-flex min-h-14 items-center px-0.5 text-sm ${FOCUS} ${item.active ? "font-bold text-white shadow-[inset_0_-3px_0_var(--color-t-chalk)]" : "text-t-on-board"}`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </header>
     );
@@ -114,7 +176,7 @@ export function TeacherHeader() {
           見本（デモ）
         </span>
 
-        <ClassSwitcher />
+        <ClassSwitcher groupId={null} />
 
         <nav aria-label="メインメニュー" className="flex flex-auto flex-wrap gap-x-3.5 self-stretch min-[1360px]:gap-x-[22px]">
           {NAV.map((item) => {
