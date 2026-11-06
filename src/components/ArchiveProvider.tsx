@@ -9,14 +9,13 @@ import type { Question } from "@/server/llm/schema";
 import { useApp } from "./AuthProvider";
 
 type ArchiveContext = {
-  status: "loading" | "ready";
+  status: "loading" | "ready" | "error";
   archives: ArchiveRecord[];
-  /** 図鑑に保存する。publish が true のときは、匿名で公開もする */
   add: (input: { question: Question; guess: Guess; rating: Rating; image: string; publish: boolean }) => Promise<ArchiveRecord>;
   remove: (id: string) => Promise<void>;
   removeAll: () => Promise<void>;
-  /** 公開をやめる（図鑑には残す） */
   unpublish: (id: string) => Promise<void>;
+  retry: () => void;
 };
 
 const Context = createContext<ArchiveContext | null>(null);
@@ -48,21 +47,39 @@ function publicPost(uid: string, profile: Profile, record: ArchiveRecord): Publi
 
 function ArchiveState({ children }: { children: React.ReactNode }) {
   const { backend, user, profile } = useApp();
-  const [status, setStatus] = useState<"loading" | "ready">(profile && user ? "loading" : "ready");
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(profile && user ? "loading" : "ready");
   const [archives, setArchives] = useState<ArchiveRecord[]>([]);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const retry = useCallback(() => {
+    setRetryCount((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
-    if (!user || !profile) return;
+    if (!user || !profile) {
+      setStatus("ready");
+      return;
+    }
     let cancelled = false;
+    setStatus("loading");
     backend
       .listArchives(user.uid, profile.id)
-      .then((list) => !cancelled && setArchives(list))
-      .catch(() => !cancelled && setArchives([]))
-      .finally(() => !cancelled && setStatus("ready"));
+      .then((list) => {
+        if (!cancelled) {
+          setArchives(list);
+          setStatus("ready");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setArchives([]);
+          setStatus("error");
+        }
+      });
     return () => {
       cancelled = true;
     };
-  }, [backend, user, profile]);
+  }, [backend, user, profile, retryCount]);
 
   const add = useCallback<ArchiveContext["add"]>(
     async ({ question, guess, rating, image, publish }) => {
@@ -124,8 +141,8 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<ArchiveContext>(
-    () => ({ status, archives, add, remove, removeAll, unpublish }),
-    [status, archives, add, remove, removeAll, unpublish],
+    () => ({ status, archives, add, remove, removeAll, unpublish, retry }),
+    [status, archives, add, remove, removeAll, unpublish, retry],
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
