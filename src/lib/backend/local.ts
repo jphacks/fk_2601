@@ -1,5 +1,5 @@
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
-import { GROUPS, type GroupId } from "@/lib/constants";
+import { GROUP_POSTS_PAGE, GROUPS, type GroupId } from "@/lib/constants";
 import { newJoinCode } from "@/lib/joinCode";
 import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
 import { usernameToLocalId, validatePassword, validateUsername } from "@/lib/username";
@@ -229,8 +229,16 @@ export const localBackend: Backend = {
     return { autoJoinUntil: stoppedAt(groupId), open: autoJoinOpen(groupId) };
   },
 
-  async listGroupPosts(groupId) {
-    return readJson<GroupPost[]>(groupPostsKey(groupId), []).sort((a, b) => b.createdAt - a.createdAt).slice(0, 30);
+  async listGroupPosts(groupId, options) {
+    const before = options?.before ?? Infinity;
+    return readJson<GroupPost[]>(groupPostsKey(groupId), [])
+      .filter((p) => p.createdAt < before)
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, GROUP_POSTS_PAGE);
+  },
+
+  async getGroupPost(groupId, id) {
+    return readJson<GroupPost[]>(groupPostsKey(groupId), []).find((p) => p.id === id) ?? null;
   },
 
   // ローカル版は1つのブラウザの中だけなので、持ち主は持たない

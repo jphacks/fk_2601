@@ -132,7 +132,7 @@ export function TeacherHeader() {
     const base = groupId ? `${GROUPS_HREF}/${groupId}` : null;
     const nav = base
       ? [
-          { href: base, label: "投稿", active: pathname === base },
+          { href: base, label: "はてな", active: pathname === base },
           { href: `${base}/members`, label: "メンバー", active: isActive(pathname, `${base}/members`) },
         ]
       : [];
