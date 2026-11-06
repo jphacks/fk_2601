@@ -1,5 +1,5 @@
-import { TeacherPlaceholder } from "@/components/teacher/TeacherPlaceholder";
+import { MissionsScreen } from "@/components/teacher/MissionsScreen";
 
 export default function TeacherMissionsPage() {
-  return <TeacherPlaceholder title="ミッション" description="今週とこれまでのミッションを出し、作ったり変えたりできるようにします。" />;
+  return <MissionsScreen />;
 }
