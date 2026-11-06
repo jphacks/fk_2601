@@ -1,5 +1,11 @@
-import { TeacherPlaceholder } from "@/components/teacher/TeacherPlaceholder";
+import { SettingsScreen } from "@/components/teacher/SettingsScreen";
+import { CAST_FONT_STYLE, chalkFont } from "../castFonts";
 
+// 参加コードを教室に大きく映すので、映す画面の文字をこのページで読み込む（contents で、外わくのレイアウトは変えない）
 export default function TeacherSettingsPage() {
-  return <TeacherPlaceholder title="クラスの設定" description="授業時間、参加コード、一緒に見る先生を設定できるようにします。" />;
+  return (
+    <div className={`${chalkFont.variable} contents`} style={CAST_FONT_STYLE}>
+      <SettingsScreen />
+    </div>
+  );
 }

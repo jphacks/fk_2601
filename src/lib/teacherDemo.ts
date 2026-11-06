@@ -31,9 +31,11 @@ export type TeacherClass = {
   name: string;
   grade: string;
   schoolYear: string;
-  role: TeacherRole;
-  // 授業時間のおわりの時刻。いまが授業時間の外なら null（docs/06-school-expansion.md 5.2）
-  classUntil: string | null;
+  role: TeacherRole; // あなた（DEMO_TEACHER）の役割。teachers の「me」と同じにする（TeacherProvider がそろえる）
+  hours: ClassHours; // 授業時間（いま授業時間中かは classUntilNow で計算する）
+  joinCode: string;
+  joinOpen: boolean; // 参加コードの受付中／受付停止
+  teachers: ClassTeacher[];
   members: DemoMember[];
   pending: DemoPending[];
   shared: DemoShared[];
@@ -93,8 +95,111 @@ export type DemoRecord = {
 
 export const DEMO_TEACHER = { name: "山田 花子", initial: "山" };
 
+// ---- クラスの設定（docs/06-school-expansion.md 5.1・5.2・5.6。見本 docs/design/teachers/screens/15〜18） ----
+
+export const WEEKDAYS = ["月", "火", "水", "木", "金"] as const;
+export type Weekday = (typeof WEEKDAYS)[number];
+export type DayHours = { on: boolean; start: string; end: string }; // 時刻は「HH:MM」
+export type ExcludedDays = { id: string; name: string; from: string; to: string }; // 日付は「YYYY-MM-DD」
+export type AddedDay = { id: string; name: string; date: string; start: string; end: string };
+export type ClassHours = { week: Record<Weekday, DayHours>; autoHolidays: boolean; excluded: ExcludedDays[]; added: AddedDay[] };
+
+// 一緒に見る先生。name が null のときは、追加したばかりで まだログインしていない
+export type ClassTeacher = { id: string; name: string | null; mail: string; role: TeacherRole; me: boolean };
+
+// 年度と、学校のアカウントのドメイン（見本。仮の値）
+export const SCHOOL_YEAR = { from: "2026-04-01", to: "2027-03-31", label: "2026年度（4月1日〜3月31日）" };
+export const SCHOOL_DOMAIN = "example.ed.jp";
+
+// 見本の年度の祝日（振替休日・国民の休日を含む）。カレンダーと「いま授業時間中か」に使う
+export const SCHOOL_YEAR_HOLIDAYS: Record<string, string> = {
+  "2026-04-29": "昭和の日",
+  "2026-05-03": "憲法記念日",
+  "2026-05-04": "みどりの日",
+  "2026-05-05": "こどもの日",
+  "2026-05-06": "振替休日",
+  "2026-07-20": "海の日",
+  "2026-08-11": "山の日",
+  "2026-09-21": "敬老の日",
+  "2026-09-22": "国民の休日",
+  "2026-09-23": "秋分の日",
+  "2026-10-12": "スポーツの日",
+  "2026-11-03": "文化の日",
+  "2026-11-23": "勤労感謝の日",
+  "2027-01-01": "元日",
+  "2027-01-11": "成人の日",
+  "2027-02-11": "建国記念の日",
+  "2027-02-23": "天皇誕生日",
+  "2027-03-21": "春分の日",
+  "2027-03-22": "振替休日",
+};
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+export const dateKey = (y: number, m: number, d: number) => `${y}-${pad2(m)}-${pad2(d)}`;
+export function parseDateKey(key: string) {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+export const toMinutes = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+};
+// 「08:30」→「8:30」
+export const shortTime = (t: string) => t.replace(/^0(\d)/, "$1");
+
+// その日の授業時間。kind は カレンダーの見た目に使う（足した日が いちばん強い）
+export type DaySchedule =
+  | { kind: "added"; label: string; start: string; end: string }
+  | { kind: "class"; label: string; start: string; end: string }
+  | { kind: "excluded" | "holiday"; label: string }
+  | { kind: "weekend" | "off"; label: string };
+
+export function scheduleOf(h: ClassHours, key: string): DaySchedule {
+  const added = h.added.find((a) => a.date === key);
+  if (added) return { kind: "added", label: added.name, start: added.start, end: added.end };
+  const excluded = h.excluded.find((e) => e.from <= key && key <= e.to);
+  if (excluded) return { kind: "excluded", label: excluded.name };
+  const holiday = SCHOOL_YEAR_HOLIDAYS[key];
+  if (holiday && h.autoHolidays) return { kind: "holiday", label: holiday };
+  const dow = parseDateKey(key).getDay();
+  if (dow === 0 || dow === 6) return { kind: "weekend", label: holiday ?? "" };
+  const day = h.week[WEEKDAYS[dow - 1]];
+  if (!day.on) return { kind: "off", label: holiday ?? "授業時間なし" };
+  return { kind: "class", label: holiday ?? "", start: day.start, end: day.end };
+}
+
+// いま（見本の DEMO_TODAY・DEMO_NOW）が授業時間中なら、そのおわりの時刻（「15:30」の形）。外なら null（5.2）
+export function classUntilNow(h: ClassHours): string | null {
+  const s = scheduleOf(h, TODAY_KEY);
+  if (s.kind !== "class" && s.kind !== "added") return null;
+  const now = toMinutes(DEMO_NOW);
+  return toMinutes(s.start) <= now && now < toMinutes(s.end) ? shortTime(s.end) : null;
+}
+
+// 参加コード。見まちがえやすい 0・O・1・I・L は使わない
+const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+export function newJoinCode() {
+  const values = crypto.getRandomValues(new Uint32Array(7));
+  const chars = [...values].map((v) => CODE_CHARS[v % CODE_CHARS.length]).join("");
+  return `${chars.slice(0, 3)}-${chars.slice(3)}`;
+}
+
+const weekHours = (wed: [string, string]): Record<Weekday, DayHours> => ({
+  月: { on: true, start: "08:30", end: "15:30" },
+  火: { on: true, start: "08:30", end: "15:30" },
+  水: { on: true, start: wed[0], end: wed[1] },
+  木: { on: true, start: "08:30", end: "15:30" },
+  金: { on: true, start: "08:30", end: "15:30" },
+});
+
+const HOLIDAY_BREAKS: ExcludedDays[] = [
+  { id: "x-winter", name: "冬休み", from: "2026-12-25", to: "2027-01-07" },
+  { id: "x-spring", name: "春休み", from: "2027-03-25", to: "2027-04-05" },
+];
+
 // 見本の「いま」（docs/design/teachers/README.md「見本の決まりごと」）
 export const DEMO_TODAY = "2026/11/4";
+export const TODAY_KEY = dateKey(...(DEMO_TODAY.split("/").map(Number) as [number, number, number]));
 
 export const DEMO_RECORDS: DemoRecord[] = [
   { field: "情報", unit: "プログラミング", scene: "signal", question: "この信号は、1日に何回 切りかわる？", guess: "100回", formula: "24*60*60/s", scope: { s: 60 }, answerUnit: "回" },
@@ -144,7 +249,7 @@ export function answerText(r: DemoRecord) {
   return `${rounded === result.value ? "" : "約"}${rounded.toLocaleString("ja-JP")}${r.answerUnit}`;
 }
 
-const mail = (local: string) => `${local}@example.ed.jp`;
+const mail = (local: string) => `${local}@${SCHOOL_DOMAIN}`;
 
 function member(
   id: string,
@@ -179,7 +284,19 @@ export const DEMO_CLASSES: TeacherClass[] = [
     grade: "5年",
     schoolYear: "2026年度",
     role: "担任",
-    classUntil: "15:30",
+    hours: {
+      week: weekHours(["08:30", "14:40"]),
+      autoHolidays: true,
+      excluded: HOLIDAY_BREAKS,
+      added: [{ id: "a-happyokai", name: "学習発表会", date: "2026-11-14", start: "08:30", end: "12:00" }],
+    },
+    joinCode: "K7Q-4M2X",
+    joinOpen: true,
+    teachers: [
+      { id: "t-yamada", name: DEMO_TEACHER.name, mail: mail("yamada.hanako"), role: "担任", me: true },
+      { id: "t-tanaka", name: "田中 美咲", mail: mail("tanaka.misaki"), role: "副担任", me: false },
+      { id: "t-sasaki", name: "佐々木 健", mail: mail("sasaki.ken"), role: "学年の先生", me: false },
+    ],
     members: [
       member("m1", 1, "青木 空", "そらまめ", "aoki.sora", "2026/4/9", "はかせの たまご", [7, 5, 2, 9, 9]),
       member("m2", 2, "井上 陽翔", "ハルト", "inoue.haruto", "2026/4/9", "データ たんてい", [5, 3, 4, 6, 8]),
@@ -248,7 +365,19 @@ export const DEMO_CLASSES: TeacherClass[] = [
     grade: "5年",
     schoolYear: "2026年度",
     role: "学年の先生",
-    classUntil: null,
+    // きょうは学級閉鎖で授業時間から外している（見本で「授業時間の外」のヘッダーを見せるため）
+    hours: {
+      week: weekHours(["08:30", "14:40"]),
+      autoHolidays: true,
+      excluded: [{ id: "x-closure", name: "学級閉鎖", from: "2026-11-04", to: "2026-11-06" }, ...HOLIDAY_BREAKS],
+      added: [{ id: "a-happyokai", name: "学習発表会", date: "2026-11-14", start: "08:30", end: "12:00" }],
+    },
+    joinCode: "R3W-8HNT",
+    joinOpen: false,
+    teachers: [
+      { id: "t-mori", name: "森 健一", mail: mail("mori.kenichi"), role: "担任", me: false },
+      { id: "t-yamada", name: DEMO_TEACHER.name, mail: mail("yamada.hanako"), role: "学年の先生", me: true },
+    ],
     members: [
       member("k1", 1, "石井 翼", "つばさ", "ishii.tsubasa", "2026/4/9", "はかせの たまご", [4, 3, 1, 5, 6]),
       member("k2", 2, "大野 千尋", "ちひろ", "ono.chihiro", "2026/4/9", "しぜん はかせ", [2, 5, 1, 3, 7]),
