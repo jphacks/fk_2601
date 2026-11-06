@@ -7,6 +7,7 @@ import { useApp } from "@/components/AuthProvider";
 import { Gate } from "@/components/Gate";
 import { Icon, Medal } from "@/components/Icons";
 import { Loading } from "@/components/Loading";
+import { ErrorNotice } from "@/components/ui";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
 import { StampCards } from "@/components/StampCards";
@@ -61,7 +62,7 @@ function LockedRow({ subject, left }: { subject: Subject; left: number }) {
 
 function StampContent() {
   const { profile, saveProfile } = useApp();
-  const { status, archives } = useArchive();
+  const { status, archives, reload } = useArchive();
   const params = useSearchParams();
   const [view, setView] = useState<View>(params.get("view") === "titles" ? "titles" : "cards");
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +72,14 @@ function StampContent() {
     return (
       <Page tab="stamp">
         <Loading message="スタンプを ひらいているよ" />
+      </Page>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <Page tab="stamp">
+        <ErrorNotice onRetry={() => void reload()}>スタンプを よみこめなかったよ。ネットに つながっているか みて、もういちど ためしてね</ErrorNotice>
       </Page>
     );
   }
