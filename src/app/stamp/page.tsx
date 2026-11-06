@@ -21,6 +21,7 @@ import {
   TIER_LABEL,
   TIERS,
   TITLE_FAMILIES,
+  TITLE_GROUPS,
   titleId,
   titleLabel,
   titleStats,
@@ -77,7 +78,7 @@ function FamilyCard({
   return (
     <section className="flex flex-col gap-2 rounded-card bg-cloud px-3.5 pb-3.5 pt-3">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="text-lg font-black">{family.name}</h3>
+        <h4 className="text-lg font-black">{family.name}</h4>
         <span className="shrink-0 text-[13px] font-black text-ink-sub">いま {value}</span>
       </div>
       <span className="text-[13px] font-black leading-[1.6] text-ink-sub">
@@ -201,8 +202,14 @@ function StampContent() {
           </div>
           <div role="radiogroup" aria-label="しょうごうを えらぶ" className="flex flex-col gap-3">
             <TitleRow name={FIRST_TITLE_LABEL} note="はじめて あそんだ ときに もらえる" selected={current === null} onClick={() => void equip(null)} />
-            {TITLE_FAMILIES.map((family) => (
-              <FamilyCard key={family.id} family={family} stats={stats} selected={current} onPick={(id) => void equip(id)} />
+            {/* まとまりごとに見出しをつける（見出しは押せないので、文字だけ） */}
+            {TITLE_GROUPS.map((group) => (
+              <div key={group.id} className="flex flex-col gap-3">
+                <h3 className="mt-2 font-pop text-base font-normal text-ink-sub">{group.name}</h3>
+                {TITLE_FAMILIES.filter((f) => f.group === group.id).map((family) => (
+                  <FamilyCard key={family.id} family={family} stats={stats} selected={current} onPick={(id) => void equip(id)} />
+                ))}
+              </div>
             ))}
           </div>
           {error && (

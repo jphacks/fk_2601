@@ -24,11 +24,41 @@ export type TitleStats = {
   kinds: number;
   /** なかまに見せた数 */
   shared: number;
+  /** 問いの形ごとの数（「なぜ？」・数を予想・くらべる） */
+  why: number;
+  estimate: number;
+  compare: number;
+  /** 予想が「おしい」だった数 */
+  oshii: number;
+  /** つづけて あそんだ日の、いちばん長い れんぞく */
+  streak: number;
+  /** 土よう・日ように あそんだ日の数 */
+  weekend: number;
+  /** あさ（6時〜9時まえ）に のこした数 */
+  morning: number;
+  /** 1日に のこした数の、いちばん多い日 */
+  burst: number;
+  /** たんげん（単元）の種類 */
+  topics: number;
+  /** きん の称号の数（「きんメダル コレクター」をのぞく） */
+  medals: number;
 };
 
+/** 称号の まとまり（スタンプの画面の見出し） */
+export const TITLE_GROUPS = [
+  { id: "subject", name: "ぶんるいの スタンプ" },
+  { id: "guess", name: "よそうと こたえ" },
+  { id: "explore", name: "たんけん" },
+  { id: "daily", name: "まいにち" },
+  { id: "special", name: "なかま・とくべつ" },
+] as const;
+export type TitleGroupId = (typeof TITLE_GROUPS)[number]["id"];
+
 export type TitleFamily = {
+  /** 英小文字だけ（ID は「math-gold」の形。firestore.rules も この形だけを通す） */
   id: string;
   name: string;
+  group: TitleGroupId;
   /** どう・ぎん・きん に必要な数 */
   goals: [number, number, number];
   /** もらいかた（{n} に数が入る） */
@@ -37,22 +67,38 @@ export type TitleFamily = {
 };
 
 export const TITLE_FAMILIES: TitleFamily[] = [
-  { id: "math", name: "すうがく はかせ", goals: [5, 15, 30], how: "さんすうの スタンプを {n}こ あつめる", value: (s) => s.stamps.math },
-  { id: "science", name: "りか マスター", goals: [5, 15, 30], how: "りかの スタンプを {n}こ あつめる", value: (s) => s.stamps.science },
-  { id: "info", name: "エンジニア レベル", goals: [5, 15, 30], how: "じょうほうの スタンプを {n}こ あつめる", value: (s) => s.stamps.info },
+  // ぶんるいの スタンプ
+  { id: "math", group: "subject", name: "すうがく はかせ", goals: [5, 15, 30], how: "さんすうの スタンプを {n}こ あつめる", value: (s) => s.stamps.math },
+  { id: "science", group: "subject", name: "りか マスター", goals: [5, 15, 30], how: "りかの スタンプを {n}こ あつめる", value: (s) => s.stamps.science },
+  { id: "info", group: "subject", name: "エンジニア レベル", goals: [5, 15, 30], how: "じょうほうの スタンプを {n}こ あつめる", value: (s) => s.stamps.info },
   {
     id: "allround",
+    group: "subject",
     name: "オールラウンダー",
     goals: [3, 10, 20],
     how: "3つの ぶんるいの スタンプを {n}こずつ あつめる",
     value: (s) => Math.min(s.stamps.math, s.stamps.science, s.stamps.info),
   },
-  { id: "pita", name: "よそう めいじん", goals: [1, 5, 15], how: "よそうを {n}かい ピタリと あてる", value: (s) => s.pita },
-  { id: "hazure", name: "びっくり たんけんか", goals: [3, 10, 30], how: "おおはずれで {n}かい おどろく", value: (s) => s.hazure },
-  { id: "days", name: "まいにち たんけんか", goals: [3, 7, 20], how: "{n}にち ずかんに のこす", value: (s) => s.days },
-  { id: "total", name: "はてな コレクター", goals: [10, 30, 100], how: "ずかんに {n}こ のこす", value: (s) => s.total },
-  { id: "kinds", name: "なんでも はかせ", goals: [5, 15, 40], how: "ちがう ものを {n}こ みつける", value: (s) => s.kinds },
-  { id: "shared", name: "みせっこ なかま", goals: [1, 5, 15], how: "なかまに {n}かい みせる", value: (s) => s.shared },
+  // よそうと こたえ
+  { id: "pita", group: "guess", name: "よそう めいじん", goals: [1, 5, 15], how: "よそうを {n}かい ピタリと あてる", value: (s) => s.pita },
+  { id: "oshii", group: "guess", name: "あと いっぽ", goals: [3, 10, 25], how: "よそうが {n}かい おしい", value: (s) => s.oshii },
+  { id: "hazure", group: "guess", name: "びっくり たんけんか", goals: [3, 10, 30], how: "おおはずれで {n}かい おどろく", value: (s) => s.hazure },
+  { id: "why", group: "guess", name: "なぜなぜ たんてい", goals: [3, 10, 25], how: "「なぜ？」の はてなを {n}こ とく", value: (s) => s.why },
+  { id: "estimate", group: "guess", name: "かず よそうや", goals: [3, 10, 25], how: "かずを よそうする はてなを {n}こ とく", value: (s) => s.estimate },
+  { id: "compare", group: "guess", name: "くらべっこ めいじん", goals: [2, 5, 15], how: "くらべる はてなを {n}こ とく", value: (s) => s.compare },
+  // たんけん
+  { id: "total", group: "explore", name: "はてな コレクター", goals: [10, 30, 100], how: "ずかんに {n}こ のこす", value: (s) => s.total },
+  { id: "kinds", group: "explore", name: "なんでも はかせ", goals: [5, 15, 40], how: "ちがう ものを {n}こ みつける", value: (s) => s.kinds },
+  { id: "topics", group: "explore", name: "ひきだし いっぱい", goals: [5, 15, 30], how: "ちがう たんげんの はてなを {n}こ みつける", value: (s) => s.topics },
+  { id: "burst", group: "explore", name: "いっき たんけんか", goals: [3, 5, 10], how: "1にちに {n}こ のこす", value: (s) => s.burst },
+  // まいにち
+  { id: "days", group: "daily", name: "まいにち たんけんか", goals: [3, 7, 20], how: "{n}にち ずかんに のこす", value: (s) => s.days },
+  { id: "streak", group: "daily", name: "つづけ めいじん", goals: [2, 5, 10], how: "{n}にち つづけて のこす", value: (s) => s.streak },
+  { id: "weekend", group: "daily", name: "しゅうまつ たんけんか", goals: [2, 5, 15], how: "どよう・にちように {n}にち のこす", value: (s) => s.weekend },
+  { id: "morning", group: "daily", name: "あさの たんけんか", goals: [1, 5, 15], how: "あさ（6じ〜9じ）に {n}こ のこす", value: (s) => s.morning },
+  // なかま・とくべつ
+  { id: "shared", group: "special", name: "みせっこ なかま", goals: [1, 5, 15], how: "なかまに {n}かい みせる", value: (s) => s.shared },
+  { id: "medals", group: "special", name: "きんメダル コレクター", goals: [1, 3, 6], how: "ほかの しょうごうの きんを {n}こ もらう", value: (s) => s.medals },
 ];
 
 // はじめから持っている称号。称号をえらんでいない（title が null）ときに出す
@@ -96,22 +142,58 @@ function dayKey(ms: number): string {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
+/** いちばん長い れんぞくの日数（日付は、その日の0時の時刻） */
+function longestStreak(dayStarts: number[]): number {
+  const sorted = [...new Set(dayStarts)].sort((a, b) => a - b);
+  let best = 0;
+  let run = 0;
+  for (let i = 0; i < sorted.length; i++) {
+    // となりの日（ちょうど1日。夏時間などで ずれても、12時間いないなら となりの日とみる）
+    run = i > 0 && Math.abs(sorted[i] - sorted[i - 1] - 86_400_000) < 43_200_000 ? run + 1 : 1;
+    best = Math.max(best, run);
+  }
+  return best;
+}
+
 export function titleStats(archives: ArchiveRecord[]): TitleStats {
   const stamps: Record<Subject, number> = { math: 0, science: 0, info: 0 };
-  const days = new Set<string>();
+  const perDay = new Map<string, number>();
+  const weekendDays = new Set<string>();
   const kinds = new Set<string>();
-  let pita = 0;
-  let hazure = 0;
-  let shared = 0;
+  const topics = new Set<string>();
+  const counts = { pita: 0, hazure: 0, oshii: 0, shared: 0, why: 0, estimate: 0, compare: 0, morning: 0 };
+  const dayStarts: number[] = [];
   for (const a of archives) {
+    const d = new Date(a.createdAt);
+    const key = dayKey(a.createdAt);
     stamps[a.question.subject] += 1;
-    days.add(dayKey(a.createdAt));
+    perDay.set(key, (perDay.get(key) ?? 0) + 1);
+    dayStarts.push(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime());
+    if (d.getDay() === 0 || d.getDay() === 6) weekendDays.add(key);
+    if (d.getHours() >= 6 && d.getHours() < 9) counts.morning += 1;
     kinds.add(a.question.target.trim());
-    if (a.rating === "pita") pita += 1;
-    if (a.rating === "ohazure") hazure += 1;
-    if ((a.sharedGroups?.length ?? 0) > 0) shared += 1;
+    topics.add(a.question.topic.trim());
+    if (a.rating === "pita") counts.pita += 1;
+    if (a.rating === "oshii") counts.oshii += 1;
+    if (a.rating === "ohazure") counts.hazure += 1;
+    if ((a.sharedGroups?.length ?? 0) > 0) counts.shared += 1;
+    counts[a.question.type] += 1;
   }
-  return { stamps, total: archives.length, pita, hazure, days: days.size, kinds: kinds.size, shared };
+  const stats: TitleStats = {
+    stamps,
+    total: archives.length,
+    ...counts,
+    days: perDay.size,
+    kinds: kinds.size,
+    topics: topics.size,
+    streak: longestStreak(dayStarts),
+    weekend: weekendDays.size,
+    burst: Math.max(0, ...perDay.values()),
+    medals: 0,
+  };
+  // きんメダル コレクター：ほかの種類で「きん」を もらった数（自分自身は数えない）
+  stats.medals = TITLE_FAMILIES.filter((f) => f.id !== "medals" && f.value(stats) >= f.goals[2]).length;
+  return stats;
 }
 
 /** その種類の、いま もらっている いちばん上の段階（まだなら null） */
