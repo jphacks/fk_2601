@@ -50,23 +50,11 @@ export function groupOf(id: GroupId) {
   return GROUPS.find((g) => g.id === id) ?? GROUPS[0];
 }
 
-// 称号を得るのに必要な個数。未決（docs/02-spec.md 16章）なので仮の値
+// スタンプカードの1まい（5こ）。分類の称号の「どう」と同じ数（src/lib/titles.ts）
 export const STAMP_GOAL = 5;
 
-// 称号の名前（仮。docs/design/README.md「見本の決まりごと」）。小さい文字で出すので、ひらがなで書く
-export const TITLE_LABEL: Record<Subject, string> = {
-  math: "すうがく はかせ",
-  science: "りか マスター",
-  info: "エンジニア レベル",
-};
-
-// はじめから持っている称号（仮。docs/design/README.md「見本の決まりごと」）。称号をえらんでいない（title が null）ときに出す
-export const FIRST_TITLE_LABEL = "はてなハンター";
-
-/** いま つけている称号の名前 */
-export function titleLabel(title: Subject | null | undefined): string {
-  return title ? TITLE_LABEL[title] : FIRST_TITLE_LABEL;
-}
+// 称号の名前・もらいかたは src/lib/titles.ts（金・銀・銅の3段階。docs/02-spec.md 16章）
+export { FIRST_TITLE_LABEL, titleLabel } from "./titles";
 
 // 切り抜き画像：長辺のピクセル数と JPEG の品質（Firestore の1件 1MiB に収めるため）
 export const CROP_MAX_EDGE = 1024;

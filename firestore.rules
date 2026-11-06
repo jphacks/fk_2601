@@ -62,7 +62,58 @@ service cloud.firestore {
         && d.text is string && d.text.size() > 0 && d.text.size() <= 400
         && d.subject in subjects
         && d.topic is string && d.topic.size() <= 100
-        && (d.title == null || d.title in subjects);
+        // 称号：はじめの称号（null）・前の形（分類の名前）・金銀銅の称号（「math-gold」など。src/lib/titles.ts）
+        && (d.title == null || d.title in subjects
+          || (d.title is string && d.title.size() <= 32 && d.title.matches('^[a-z]+-(bronze|silver|gold)
+    }
+
+    match /groups/{groupId} {
+      allow read: if isMember(groupId);
+      allow write: if false;
+
+      // メンバー：role（'member' か 'admin'）・joinedAt。読めるのは本人と管理者。
+      // 自分で作れるのは、期限の前に 'member' として入るときだけ（管理者にはなれない）。変える・抜けるのはコンソールから
+      match /members/{uid} {
+        allow read: if request.auth != null && (request.auth.uid == uid || isAdmin(groupId));
+        allow create: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['role', 'joinedAt'])
+          && request.resource.data.keys().hasAll(['role', 'joinedAt'])
+          && request.resource.data.role == 'member'
+          && request.resource.data.joinedAt == request.time
+          && autoJoinOpen(groupId);
+        allow update, delete: if false;
+      }
+
+      // 投稿：読めるのはメンバーだけ。作れるのはメンバーの本人だけで、持ち主の記録（owners）を同じバッチで書く。
+      // 消せるのは持ち主と管理者。もうない投稿を消すのはゆるす（管理者が消したあとも、ずかんの操作が失敗しないように）
+      match /posts/{postId} {
+        allow read: if isMember(groupId);
+        allow create: if isMember(groupId) && validPost(postId)
+          && getAfter(ownerDoc(groupId, postId)).data.uid == request.auth.uid;
+        allow delete: if request.auth != null
+          && (resource == null || isPostOwner(groupId, postId) || isAdmin(groupId));
+        allow update: if false;
+      }
+
+      // 投稿の持ち主（本人が消せるようにするためだけの記録）。だれも読めない（管理者も読めない）。
+      // 作れるのは、まだない投稿を同じバッチで作るときだけ（ほかの人の投稿の持ち主になれない）。
+      // 消すのは投稿と同じバッチ（投稿が残ったまま、持ち主の記録だけを消せない）
+      match /owners/{postId} {
+        allow read: if false;
+        allow create: if request.auth != null
+          && request.resource.data.keys().hasOnly(['uid'])
+          && request.resource.data.uid == request.auth.uid
+          && !exists(postDoc(groupId, postId))
+          && existsAfter(postDoc(groupId, postId));
+        allow delete: if request.auth != null
+          && (resource == null || resource.data.uid == request.auth.uid || isAdmin(groupId))
+          && !existsAfter(postDoc(groupId, postId));
+        allow update: if false;
+      }
+    }
+  }
+}
+)));
     }
 
     match /groups/{groupId} {

@@ -14,7 +14,8 @@ export type Profile = {
   nickname: string;
   grade: number;
   /** 切り替えて使う称号（その分類のスタンプが貯まると選べる） */
-  title: Subject | null;
+  /** つけている称号の ID（src/lib/titles.ts。「math-gold」など。前の形の「math」なども読める）。null は はじめの称号 */
+  title: string | null;
   /** 問いの出し方：先に3択を出すか、自分で書く入力欄を出すか */
   firstMode: FirstMode;
   /**
@@ -61,5 +62,5 @@ export type GroupPost = {
   text: string;
   subject: Subject;
   topic: string;
-  title: Subject | null;
+  title: string | null;
 };

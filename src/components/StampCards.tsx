@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { STAMP_GOAL, SUBJECT_LABEL, SUBJECT_KANA, SUBJECTS, TITLE_LABEL } from "@/lib/constants";
+import { STAMP_GOAL, SUBJECT_LABEL, SUBJECT_KANA, SUBJECTS } from "@/lib/constants";
+import { TIER_LABEL, TITLE_FAMILIES, titleLabel } from "@/lib/titles";
 import type { Subject } from "@/server/llm/schema";
 import { SUBJECT_STYLE } from "./QuestionCard";
 
@@ -20,9 +21,16 @@ export function Stamp({ subject, size = 54, react = false }: { subject: Subject 
   );
 }
 
+/** その分類の称号で、つぎの段階まで あといくつか（もう きん なら null） */
+function nextTier(subject: Subject, count: number) {
+  const family = TITLE_FAMILIES.find((f) => f.id === subject);
+  const i = family ? family.goals.findIndex((g) => count < g) : -1;
+  return family && i >= 0 ? { label: TIER_LABEL[(["bronze", "silver", "gold"] as const)[i]], left: family.goals[i] - count } : null;
+}
+
 /**
  * 分類ごとのスタンプカード（見本 21）。押せないので地の色だけ。
- * 目標の数を集めると称号がもらえる（称号は「しょうごう」のタブで えらぶ）
+ * 5こ集めると、その分類の称号の「どう」がもらえる。そのあとは、ぎん（15こ）・きん（30こ）まで あといくつかを出す（称号は「しょうごう」のタブで えらぶ）
  */
 export function StampCards({ counts }: { counts: Record<Subject, number> }) {
   return (
@@ -41,7 +49,7 @@ export function StampCards({ counts }: { counts: Record<Subject, number> }) {
                   <rt>{SUBJECT_KANA[subject]}</rt>
                 </ruby>
               </h2>
-              <span className={`font-pop text-[17px] ${s.dark}`}>{earned ? `${STAMP_GOAL}/${STAMP_GOAL} コンプリート！` : `${shown}/${STAMP_GOAL}`}</span>
+              <span className={`font-pop text-[17px] ${s.dark}`}>{earned ? `${count}こ` : `${shown}/${STAMP_GOAL}`}</span>
             </div>
             <div role="img" aria-label={`スタンプ ${STAMP_GOAL}こちゅう ${shown}こ`} className="grid grid-cols-5 justify-items-center">
               {Array.from({ length: STAMP_GOAL }, (_, i) => (
@@ -49,7 +57,12 @@ export function StampCards({ counts }: { counts: Record<Subject, number> }) {
               ))}
             </div>
             <span className={`text-[15px] font-black ${s.dark}`}>
-              {earned ? `「${TITLE_LABEL[subject]}」 ゲット！` : `あと ${STAMP_GOAL - shown}こで「${TITLE_LABEL[subject]}」`}
+              {(() => {
+                const next = nextTier(subject, count);
+                if (!next) return `「${titleLabel(`${subject}-gold`)}」 ゲット！ ぜんぶ あつめたよ`;
+                if (!earned) return `あと ${next.left}こで「${titleLabel(`${subject}-bronze`)}」`;
+                return `あと ${next.left}こで「${TITLE_FAMILIES.find((f) => f.id === subject)?.name ?? ""}（${next.label}）」`;
+              })()}
             </span>
           </section>
         );
