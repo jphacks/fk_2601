@@ -9,6 +9,8 @@ export interface Backend {
   signUp(username: string, password: string): Promise<AuthUser>;
   signIn(username: string, password: string): Promise<AuthUser>;
   signOut(): Promise<void>;
+  /** 本人確認後、公開した投稿・全プロフィールのデータ・アカウントの順に消す。失敗後も再実行できる */
+  deleteAccount(password: string): Promise<void>;
   /** API の呼び出しに付ける ID トークン（ローカル版は null） */
   getIdToken(): Promise<string | null>;
 

@@ -12,6 +12,7 @@ const KEY_SESSION = "local:session";
 const profilesKey = (uid: string) => `local:profiles:${uid}`;
 const archivesKey = (uid: string, profileId: string) => `local:archives:${uid}:${profileId}`;
 const groupsKey = (uid: string) => `local:groups:${uid}`;
+const groupOwnersKey = (groupId: GroupId) => `local:groupOwners:${groupId}`;
 const groupPostsKey = (groupId: GroupId) => `local:groupPosts:${groupId}`;
 const groupReportsKey = (groupId: GroupId) => `local:groupReports:${groupId}`;
 const groupSettingsKey = (groupId: GroupId) => `local:groupSettings:${groupId}`;
@@ -117,6 +118,28 @@ export const localBackend: Backend = {
     notify();
   },
 
+  async deleteAccount() {
+    const user = currentUser();
+    if (!user) throw new UserFacingError("ログインしなおしてね");
+    // 旧データには持ち主がないため、ずかんの ID も照らし合わせる。
+    const archiveKeys = Object.keys(localStorage).filter((key) => key.startsWith(`local:archives:${user.uid}:`));
+    const ids = new Set(archiveKeys.flatMap((key) => readJson<ArchiveRecord[]>(key, []).map((a) => a.id)));
+    for (const group of GROUPS) {
+      const owners = readJson<Record<string, string>>(groupOwnersKey(group.id), {});
+      const posts = readJson<GroupPost[]>(groupPostsKey(group.id), []);
+      writeJson(groupPostsKey(group.id), posts.filter((post) => owners[post.id] !== user.uid && !(ids.has(post.id) && !owners[post.id])));
+      writeJson(groupOwnersKey(group.id), Object.fromEntries(Object.entries(owners).filter(([, uid]) => uid !== user.uid)));
+    }
+    for (const key of archiveKeys) localStorage.removeItem(key);
+    localStorage.removeItem(groupsKey(user.uid));
+    localStorage.removeItem(profilesKey(user.uid));
+    const users = readJson<Record<string, AuthUser>>(KEY_USERS, {});
+    delete users[user.username];
+    writeJson(KEY_USERS, users);
+    localStorage.removeItem(KEY_SESSION);
+    notify();
+  },
+
   async getIdToken() {
     return null;
   },
@@ -196,14 +219,18 @@ export const localBackend: Backend = {
     return readJson<GroupPost[]>(groupPostsKey(groupId), []).sort((a, b) => b.createdAt - a.createdAt).slice(0, 30);
   },
 
-  // ローカル版は1つのブラウザの中だけなので、持ち主は持たない
-  async saveGroupPost(_uid, groupId, post) {
+  // 退会時に、ほかのアカウントの投稿を消さないよう持ち主を残す
+  async saveGroupPost(uid, groupId, post) {
     const all = readJson<GroupPost[]>(groupPostsKey(groupId), []).filter((p) => p.id !== post.id);
+    writeJson(groupOwnersKey(groupId), { ...readJson<Record<string, string>>(groupOwnersKey(groupId), {}), [post.id]: uid });
     writeJson(groupPostsKey(groupId), [...all, post]);
   },
 
   async deleteGroupPost(groupId, id) {
     writeJson(groupPostsKey(groupId), readJson<GroupPost[]>(groupPostsKey(groupId), []).filter((p) => p.id !== id));
+    const owners = readJson<Record<string, string>>(groupOwnersKey(groupId), {});
+    delete owners[id];
+    writeJson(groupOwnersKey(groupId), owners);
   },
 
   // ローカル版は、同じ人が同じ投稿を2回通報しても、1件にしかならない（「だれが」は、uid だけを持つ）
