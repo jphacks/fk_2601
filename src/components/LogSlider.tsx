@@ -8,6 +8,17 @@ import { RubyText } from "./RubyText";
 const STEPS = 1000;
 const THUMB = 44;
 
+/**
+ * スライダーで出る値を、選びやすい きりのいい数にそろえる（8倍・10倍・100倍 などを、指で選べるようにするため）。
+ * 1より小さいとき：0.05きざみ（0.1〜1）／1〜10：0.5きざみ／10〜100：1きざみ／100〜1000：10きざみ／1000〜：100きざみ（以下 10倍ごとに10倍）
+ */
+export function niceValue(raw: number, min: number, max: number): number {
+  const exponent = Math.floor(Math.log10(raw));
+  const step = exponent <= 0 ? 5 * 10 ** (exponent - 1) : 10 ** (exponent - 1);
+  const rounded = Number((Math.round(raw / step) * step).toPrecision(8));
+  return Math.min(max, Math.max(min, rounded));
+}
+
 /** めもり（1・10・100…）。範囲の中にある 10 のべき乗だけを出す */
 function tickValues(min: number, max: number): number[] {
   const ticks: number[] = [];
@@ -78,7 +89,7 @@ export function LogSlider({
           value={position}
           onChange={(e) => {
             setText(null);
-            onChange(Number((min * Math.exp((Number(e.target.value) / STEPS) * ratio)).toPrecision(3)));
+            onChange(niceValue(min * Math.exp((Number(e.target.value) / STEPS) * ratio), min, max));
           }}
           aria-label="よそうする かずを えらぶ"
         />
