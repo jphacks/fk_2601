@@ -3,8 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { calculate } from "@/lib/calc";
-import { DEMO_RECORD_TIMES, DEMO_RECORDS, DEMO_TODAY, type DemoField, type DemoMember, type DemoPending, type TeacherClass } from "@/lib/teacherDemo";
+import { answerText, DEMO_TODAY, memberRecords, type DemoField, type DemoMember, type DemoPending, type TeacherClass } from "@/lib/teacherDemo";
 import { SceneThumb } from "./SceneThumb";
 import { useTeacher } from "./TeacherProvider";
 
@@ -59,14 +58,6 @@ const normalize = (s: string) => s.replace(/\s/g, "");
 
 function inClassTotal(m: DemoMember) {
   return FIELDS.reduce((sum, f) => sum + m.fields[f], 0);
-}
-
-// 答えは式から計算する（LLM や手書きの数を使わない）
-function formatAnswer(formula: string, scope: Record<string, number>, unit: string) {
-  const result = calculate(formula, scope);
-  if (!result.ok) return "—";
-  const rounded = Math.round(result.value);
-  return `${rounded === result.value ? "" : "約"}${rounded.toLocaleString("ja-JP")}${unit}`;
 }
 
 function Avatar({ size }: { size: number }) {
@@ -204,10 +195,7 @@ function NumberEditor({ row, onSave }: { row: Row; onSave: (no: number | null) =
 
 function MemberDetail({ row, grade, onNumber, onAskRemove }: { row: Row; grade: string; onNumber: (no: number | null) => void; onAskRemove: () => void }) {
   const inClass = inClassTotal(row);
-  const records = DEMO_RECORD_TIMES.slice(0, Math.min(inClass, DEMO_RECORD_TIMES.length)).map((at, k) => ({
-    at,
-    ...DEMO_RECORDS[(row.recordStart + k) % DEMO_RECORDS.length],
-  }));
+  const records = memberRecords(row);
   const fieldLabel = FIELDS.map((f) => `${f}${row.fields[f]}件`).join("、");
 
   return (
@@ -282,7 +270,7 @@ function MemberDetail({ row, grade, onNumber, onAskRemove }: { row: Row; grade: 
         {records.length > 0 ? (
           <div className="grid grid-cols-3 gap-3 max-[640px]:grid-cols-1">
             {records.map((r) => (
-              <article key={r.at} className="flex flex-col overflow-hidden rounded-xl border border-[#E3E9E6]">
+              <article key={r.id} className="flex flex-col overflow-hidden rounded-xl border border-[#E3E9E6]">
                 <SceneThumb scene={r.scene} className="h-24 w-full" />
                 <div className="flex flex-1 flex-col gap-1.5 px-3 py-2.5">
                   <span className="inline-flex items-center gap-1.5 text-[11px] text-t-text-2">
@@ -297,7 +285,7 @@ function MemberDetail({ row, grade, onNumber, onAskRemove }: { row: Row; grade: 
                       →
                     </span>
                     <span className="sr-only">答え</span>
-                    <strong>{formatAnswer(r.formula, r.scope, r.answerUnit)}</strong>
+                    <strong>{answerText(r)}</strong>
                   </span>
                 </div>
               </article>
@@ -386,6 +374,7 @@ function Members({ klass }: { klass: TeacherClass }) {
         out: 0,
         missions: 0,
         recordStart: 0,
+        recordShift: 0,
         joinedOrder: prev.length,
         isNew: true,
       },
