@@ -10,7 +10,7 @@ import { Page } from "@/components/Page";
 import { SUBJECT_STYLE } from "@/components/QuestionCard";
 import { kanaOf } from "@/lib/ruby";
 import { ErrorNotice, Say } from "@/components/ui";
-import { titleLabel } from "@/lib/constants";
+import { PUBLIC_SHARING_PAUSED, titleLabel } from "@/lib/constants";
 import type { PublicPost } from "@/lib/types";
 
 function OthersContent() {
@@ -96,10 +96,25 @@ function OthersContent() {
   );
 }
 
-export default function OthersPage() {
+/** グループの共有（#120）ができるまでの表示 */
+function OthersPaused() {
   return (
-    <Gate>
-      <OthersContent />
-    </Gate>
+    <Page tab="minna">
+      <h1 className="font-pop text-[26px] font-normal">みんなの はてな</h1>
+      <Say mood="think" size={76}>
+        <span className="text-lg">
+          いまは
+          <br />
+          じゅんびちゅう だよ
+        </span>
+      </Say>
+      <p className="rounded-card bg-pink-light px-4 py-3 text-lg font-black leading-[1.7]">
+        もうすぐ、おなじ グループの なかまと はてなを みせあえるように なるよ。たのしみに まっててね！
+      </p>
+    </Page>
   );
+}
+
+export default function OthersPage() {
+  return <Gate>{PUBLIC_SHARING_PAUSED ? <OthersPaused /> : <OthersContent />}</Gate>;
 }

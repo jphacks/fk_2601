@@ -10,7 +10,8 @@ service cloud.firestore {
     // 匿名で公開された問いが、アプリが作る形（項目・型・文字数・画像の大きさ）かを確かめる。
     // 画像は、切り抜きの JPEG（base64）で 600,000 文字まで（src/lib/constants.ts の IMAGE_MAX_BASE64_BYTES）。
     // 問題文は 400 文字まで（src/server/llm/validate.ts）。createdAt は端末の時計なので、10分先まではゆるす。
-    // 同じ人の投稿をひも付けられないよう、持ち主（uid）は入れない（下の publicOwners に分ける）
+    // 同じ人の投稿をひも付けられないよう、持ち主（uid）は入れない（下の publicOwners に分ける）。
+    // いまは新しい公開を止めているので使わない（グループの共有 #120 で、投稿の確かめに使う）
     function validPost(postId) {
       let d = request.resource.data;
       let subjects = ['math', 'science', 'info'];
@@ -33,29 +34,25 @@ service cloud.firestore {
       return exists(ownerPath(postId)) && get(ownerPath(postId)).data.uid == request.auth.uid;
     }
 
-    // 匿名で公開された問い：ログインした人が読める。書けるのは作った本人だけ（更新はできない）。
-    // 作るときは、持ち主の記録（publicOwners）と同じバッチで書く。
+    // 匿名で公開された問い：ログインした人が読める（更新はできない）。
+    // グループの共有（#120）ができるまで、新しい公開は止めている（src/lib/constants.ts の PUBLIC_SHARING_PAUSED）。
+    // 再開するときは、validPost(postId) と、持ち主の記録（publicOwners）を同じバッチで書くことを確かめる。
     // 消せるのは持ち主の記録が本人のもの。ownerUid が入った古い投稿は、その ownerUid が本人なら消せる。
     // もうない投稿を消すのはゆるす（管理者が投稿を消したあとも、ずかんから けす・みせるのを やめるが失敗しないように）
     match /public/{postId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null && validPost(postId)
-        && getAfter(ownerPath(postId)).data.uid == request.auth.uid;
+      allow create: if false;
       allow delete: if request.auth != null
         && (resource == null || isPostOwner(postId) || resource.data.get('ownerUid', null) == request.auth.uid);
       allow update: if false;
     }
 
     // 公開した問いの持ち主（本人が消せるようにするためだけの記録）。だれも読めない。
-    // 作れるのは、まだない投稿を同じバッチで作るときだけ（ほかの人の投稿を自分のものにできない）。
+    // 新しい公開を止めているので、作れない。
     // 消すのは投稿と同じバッチ（投稿が残ったまま、持ち主の記録だけを消せない）
     match /publicOwners/{postId} {
       allow read: if false;
-      allow create: if request.auth != null
-        && request.resource.data.keys().hasOnly(['uid'])
-        && request.resource.data.uid == request.auth.uid
-        && !exists(/databases/$(database)/documents/public/$(postId))
-        && existsAfter(/databases/$(database)/documents/public/$(postId));
+      allow create: if false;
       allow delete: if request.auth != null
         && (resource == null || resource.data.uid == request.auth.uid)
         && !existsAfter(/databases/$(database)/documents/public/$(postId));

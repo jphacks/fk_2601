@@ -35,6 +35,10 @@ export const GUIDE_AGAIN = `/?${GUIDE_PARAM}=1`;
 export const ASKED_MAX = 200;
 export const ASKED_FROM_ARCHIVE = 150;
 
+// 「みんなの はてな」（全員への匿名公開）を止めている。グループの共有（#120）ができるまで、
+// 新しく公開できず、/others は準備中の表示にする（firestore.rules でも新しい公開を断る。docs/02-spec.md 15章）
+export const PUBLIC_SHARING_PAUSED = true;
+
 // 称号を得るのに必要な個数。未決（docs/02-spec.md 16章）なので仮の値
 export const STAMP_GOAL = 5;
 
