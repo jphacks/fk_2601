@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: `グループの管理｜${APP_NAME}`,
 };
 
+// 管理者になっている はじめのグループの投稿へ移る
 export default function TeacherGroupsPage() {
-  return <GroupsScreen />;
+  return <GroupsScreen groupId={null} />;
 }
