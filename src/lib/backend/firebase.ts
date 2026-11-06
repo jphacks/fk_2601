@@ -12,17 +12,20 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocFromServer,
   getDocs,
   getFirestore,
   limit,
   orderBy,
   query,
+  serverTimestamp,
   setDoc,
   writeBatch,
 } from "firebase/firestore";
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
-import type { ArchiveRecord, AuthUser, Profile, PublicPost } from "@/lib/types";
+import { GROUPS } from "@/lib/constants";
+import type { ArchiveRecord, AuthUser, GroupPost, Membership, Profile } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -128,29 +131,52 @@ export const firebaseBackend: Backend = {
     }
   },
 
-  async listPublic() {
-    const snapshot = await getDocs(query(collection(db(), "public"), orderBy("createdAt", "desc"), limit(30)));
-    return snapshot.docs.map((d) => d.data() as PublicPost);
+  async listMemberships(uid) {
+    // 入っているグループは少ない（GROUPS）ので、1つずつ自分のメンバーの記録を見る（本人だけが読める。firestore.rules）
+    const snapshots = await Promise.all(GROUPS.map((g) => getDoc(doc(db(), "groups", g.id, "members", uid))));
+    return snapshots.flatMap((snapshot, i): Membership[] =>
+      snapshot.exists() ? [{ groupId: GROUPS[i].id, role: snapshot.data().role === "admin" ? "admin" : "member" }] : [],
+    );
   },
 
-  // 持ち主はだれも読めない publicOwners に分け、公開データと同じバッチで書く・消す（firestore.rules）
-  async savePublic(uid, post) {
+  // 入れるのは、グループの autoJoinUntil より前だけ（firestore.rules）。過ぎていたら断られるので、何もしない
+  async joinAutoGroups(uid) {
+    for (const g of GROUPS) {
+      if (!g.autoJoin) continue;
+      const ref = doc(db(), "groups", g.id, "members", uid);
+      // もう入っている人（管理者など）の記録を上書きしない（ルールでも更新を断る）
+      if ((await getDoc(ref)).exists()) continue;
+      try {
+        await setDoc(ref, { role: "member", joinedAt: serverTimestamp() });
+      } catch (error) {
+        if ((error as { code?: string }).code !== "permission-denied") throw error;
+      }
+    }
+  },
+
+  async listGroupPosts(groupId) {
+    const snapshot = await getDocs(query(collection(db(), "groups", groupId, "posts"), orderBy("createdAt", "desc"), limit(30)));
+    return snapshot.docs.map((d) => d.data() as GroupPost);
+  },
+
+  // 持ち主はだれも読めない owners に分け、投稿と同じバッチで書く・消す（firestore.rules）
+  async saveGroupPost(uid, groupId, post) {
     const batch = writeBatch(db());
-    batch.set(doc(db(), "public", post.id), JSON.parse(JSON.stringify(post)));
-    batch.set(doc(db(), "publicOwners", post.id), { uid });
+    batch.set(doc(db(), "groups", groupId, "posts", post.id), JSON.parse(JSON.stringify(post)));
+    batch.set(doc(db(), "groups", groupId, "owners", post.id), { uid });
     await batch.commit();
   },
 
-  async deletePublic(id) {
+  async deleteGroupPost(groupId, id) {
     const batch = writeBatch(db());
-    batch.delete(doc(db(), "public", id));
-    batch.delete(doc(db(), "publicOwners", id));
+    batch.delete(doc(db(), "groups", groupId, "posts", id));
+    batch.delete(doc(db(), "groups", groupId, "owners", id));
     await batch.commit();
   },
 
   // 端末に残った古い写しで「ない」と判断しないよう、サーバーに聞く
-  async missingPublic(ids) {
-    const snapshots = await Promise.all(ids.map((id) => getDocFromServer(doc(db(), "public", id))));
+  async missingGroupPosts(groupId, ids) {
+    const snapshots = await Promise.all(ids.map((id) => getDocFromServer(doc(db(), "groups", groupId, "posts", id))));
     return snapshots.filter((s) => !s.exists()).map((s) => s.id);
   },
 };

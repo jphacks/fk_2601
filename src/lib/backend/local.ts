@@ -1,5 +1,6 @@
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
-import type { ArchiveRecord, AuthUser, Profile, PublicPost } from "@/lib/types";
+import { GROUPS, type GroupId } from "@/lib/constants";
+import type { ArchiveRecord, AuthUser, GroupPost, GroupRole, Membership, Profile } from "@/lib/types";
 import { usernameToLocalId, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -10,7 +11,8 @@ const KEY_USERS = "local:users";
 const KEY_SESSION = "local:session";
 const profilesKey = (uid: string) => `local:profiles:${uid}`;
 const archivesKey = (uid: string, profileId: string) => `local:archives:${uid}:${profileId}`;
-const KEY_PUBLIC = "local:public";
+const groupsKey = (uid: string) => `local:groups:${uid}`;
+const groupPostsKey = (groupId: GroupId) => `local:groupPosts:${groupId}`;
 
 export function readJson<T>(key: string, fallback: T): T {
   try {
@@ -41,6 +43,14 @@ export function seedLocalUser(user: AuthUser, profile: Profile): void {
   writeJson(KEY_USERS, { [user.username]: user });
   writeJson(KEY_SESSION, user);
   writeJson(profilesKey(user.uid), [profile]);
+  // 本物の はじめての登録と同じく、自動で入るグループ（JPHACKS）に入れておく
+  writeJson(groupsKey(user.uid), autoJoined({}));
+}
+
+function autoJoined(groups: Partial<Record<GroupId, GroupRole>>): Partial<Record<GroupId, GroupRole>> {
+  const next = { ...groups };
+  for (const g of GROUPS) if (g.autoJoin && !next[g.id]) next[g.id] = "member";
+  return next;
 }
 
 const listeners = new Set<(user: AuthUser | null) => void>();
@@ -127,22 +137,35 @@ export const localBackend: Backend = {
     localStorage.removeItem(archivesKey(uid, profileId));
   },
 
-  async listPublic() {
-    return readJson<PublicPost[]>(KEY_PUBLIC, []).sort((a, b) => b.createdAt - a.createdAt);
+  // ローカル版は入る期限を持たない。管理者にするときは、localStorage の local:groups:{uid} を手で書きかえる
+  async listMemberships(uid) {
+    const groups = readJson<Partial<Record<GroupId, GroupRole>>>(groupsKey(uid), {});
+    return GROUPS.flatMap((g): Membership[] => {
+      const role = groups[g.id];
+      return role ? [{ groupId: g.id, role }] : [];
+    });
   },
 
-  // ローカル版はこのブラウザの中だけなので、持ち主は持たない
-  async savePublic(_uid, post) {
-    const all = readJson<PublicPost[]>(KEY_PUBLIC, []).filter((p) => p.id !== post.id);
-    writeJson(KEY_PUBLIC, [...all, post]);
+  async joinAutoGroups(uid) {
+    writeJson(groupsKey(uid), autoJoined(readJson(groupsKey(uid), {})));
   },
 
-  async deletePublic(id) {
-    writeJson(KEY_PUBLIC, readJson<PublicPost[]>(KEY_PUBLIC, []).filter((p) => p.id !== id));
+  async listGroupPosts(groupId) {
+    return readJson<GroupPost[]>(groupPostsKey(groupId), []).sort((a, b) => b.createdAt - a.createdAt).slice(0, 30);
   },
 
-  async missingPublic(ids) {
-    const existing = new Set(readJson<PublicPost[]>(KEY_PUBLIC, []).map((p) => p.id));
+  // ローカル版は1つのブラウザの中だけなので、持ち主は持たない
+  async saveGroupPost(_uid, groupId, post) {
+    const all = readJson<GroupPost[]>(groupPostsKey(groupId), []).filter((p) => p.id !== post.id);
+    writeJson(groupPostsKey(groupId), [...all, post]);
+  },
+
+  async deleteGroupPost(groupId, id) {
+    writeJson(groupPostsKey(groupId), readJson<GroupPost[]>(groupPostsKey(groupId), []).filter((p) => p.id !== id));
+  },
+
+  async missingGroupPosts(groupId, ids) {
+    const existing = new Set(readJson<GroupPost[]>(groupPostsKey(groupId), []).map((p) => p.id));
     return ids.filter((id) => !existing.has(id));
   },
 };

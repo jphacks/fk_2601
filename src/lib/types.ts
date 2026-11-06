@@ -1,4 +1,5 @@
 import type { Subject, Question } from "@/server/llm/schema";
+import type { GroupId } from "./constants";
 import type { Guess, Rating } from "./rating";
 
 export type AuthUser = {
@@ -34,15 +35,26 @@ export type ArchiveRecord = {
   rating: Rating;
   /** 切り抜き画像（JPEG の data URL） */
   image: string;
-  /** 匿名で公開しているときの、公開用のデータの ID */
-  publicId: string | null;
+  /**
+   * 見せているグループ（グループの投稿の ID は、この記録の id と同じ）。ないのは、どこにも見せていないもの。
+   * この項目より前の記録には、全員への匿名公開（やめた）の publicId が残っていることがあるが、使わない
+   */
+  sharedGroups?: GroupId[];
+};
+
+export type GroupRole = "member" | "admin";
+
+/** 入っているグループ */
+export type Membership = {
+  groupId: GroupId;
+  role: GroupRole;
 };
 
 /**
- * 匿名で公開する問い（切り抜き画像・問い・称号だけ。ユーザー名・位置情報は入れない）。
- * 同じ人の投稿をひも付けられないよう、持ち主も入れない（Firebase 版では、だれも読めない publicOwners に分けて持つ）
+ * グループに見せる問い（切り抜き画像・問い・称号だけ。ユーザー名・ニックネーム・位置情報は入れない）。
+ * 同じ人の投稿をひも付けられないよう、持ち主も入れない（Firebase 版では、だれも読めない groups/{id}/owners に分けて持つ）
  */
-export type PublicPost = {
+export type GroupPost = {
   id: string;
   createdAt: number;
   image: string;

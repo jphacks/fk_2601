@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getBackend, type Backend } from "@/lib/backend";
 import { newId } from "@/lib/id";
-import type { AuthUser, Profile } from "@/lib/types";
+import type { AuthUser, Membership, Profile } from "@/lib/types";
 
 type Status = "loading" | "out" | "in";
 
@@ -25,6 +25,11 @@ type AppContext = {
   saveProfile: (input: ProfileInput) => Promise<Profile>;
   /** あそびかたの説明を見おわった（とばした）ことを残す。残せなくても説明は閉じる（次に また出るだけ） */
   markGuideSeen: () => Promise<void>;
+  /** 入っているグループ。null は読み込み中か、読み込みに失敗したとき（membershipsFailed） */
+  memberships: Membership[] | null;
+  membershipsFailed: boolean;
+  /** 入っているグループを読み込み直す */
+  reloadMemberships: () => Promise<void>;
 };
 
 const Context = createContext<AppContext | null>(null);
@@ -46,6 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [profileFailed, setProfileFailed] = useState(false);
+  const [memberships, setMemberships] = useState<Membership[] | null>(null);
+  const [membershipsFailed, setMembershipsFailed] = useState(false);
 
   useEffect(() => {
     return backend.subscribeAuth(async (next) => {
@@ -78,6 +85,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       setProfileFailed(true);
     }
+  }, [backend, user]);
+
+  const reloadMemberships = useCallback(async () => {
+    if (!user) return;
+    setMemberships(null);
+    setMembershipsFailed(false);
+    try {
+      setMemberships(await backend.listMemberships(user.uid));
+    } catch {
+      setMembershipsFailed(true);
+    }
+  }, [backend, user]);
+
+  // ログインした人が変わったら、入っているグループを読み込み直す（ログインの画面を重くしないよう、プロフィールとは別に読む）
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    backend
+      .listMemberships(user.uid)
+      .then((list) => {
+        if (cancelled) return;
+        setMemberships(list);
+        setMembershipsFailed(false);
+      })
+      .catch(() => !cancelled && setMembershipsFailed(true));
+    return () => {
+      cancelled = true;
+      setMemberships(null);
+      setMembershipsFailed(false);
+    };
   }, [backend, user]);
 
   // 切り替え画面は MVP 以降。いまは最初のプロフィールを使う
@@ -115,6 +152,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const next: Profile = { ...base, ...input };
       await backend.saveProfile(user.uid, next);
       setProfiles((prev) => (prev.some((p) => p.id === next.id) ? prev.map((p) => (p.id === next.id ? next : p)) : [...prev, next]));
+      // はじめての登録（「じゅんび できたよ」の前）で、自動で入るグループ（JPHACKS）に入れる。
+      // 入れなくても登録は止めない（みんなの はてなが見られないだけ）
+      if (!profile) {
+        try {
+          await backend.joinAutoGroups(user.uid);
+          setMemberships(await backend.listMemberships(user.uid));
+        } catch {
+          // 何もしない
+        }
+      }
       return next;
     },
     [backend, user, profile],
@@ -130,8 +177,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [profile, saveProfile]);
 
   const value = useMemo<AppContext>(
-    () => ({ backend, status, profileFailed, retryProfiles, user, profile, signUp, signIn, signOut, saveProfile, markGuideSeen }),
-    [backend, status, profileFailed, retryProfiles, user, profile, signUp, signIn, signOut, saveProfile, markGuideSeen],
+    () => ({
+      backend,
+      status,
+      profileFailed,
+      retryProfiles,
+      user,
+      profile,
+      signUp,
+      signIn,
+      signOut,
+      saveProfile,
+      markGuideSeen,
+      memberships,
+      membershipsFailed,
+      reloadMemberships,
+    }),
+    [backend, status, profileFailed, retryProfiles, user, profile, signUp, signIn, signOut, saveProfile, markGuideSeen, memberships, membershipsFailed, reloadMemberships],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

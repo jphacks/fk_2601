@@ -16,6 +16,8 @@ const NAV = [
 ];
 
 const SETTINGS_HREF = "/teacher/settings";
+// グループの管理（#120）は見本ではなく本物のデータを扱うので、見本のクラス・先生・メニューを出さない
+const GROUPS_HREF = "/teacher/groups";
 
 function isActive(pathname: string, href: string) {
   if (href === "/teacher") return pathname === href;
@@ -73,20 +75,37 @@ function SessionStatus() {
   );
 }
 
+function Logo({ href, sub }: { href: string; sub: string }) {
+  return (
+    <Link href={href} className={`flex items-center gap-2.5 py-2 text-white ${FOCUS}`}>
+      <Image src="/navi/navi-smile.png" alt="" width={32} height={32} className="size-8 rounded-[9px] bg-white p-[3px]" />
+      <span className="flex flex-col gap-px leading-[1.2]">
+        <span className="font-pop text-sm">{APP_NAME}</span>
+        <span className="text-[10px] text-t-on-board">{sub}</span>
+      </span>
+    </Link>
+  );
+}
+
 export function TeacherHeader() {
   const pathname = usePathname();
   const onSettings = isActive(pathname, SETTINGS_HREF);
 
+  if (isActive(pathname, GROUPS_HREF)) {
+    return (
+      <header className="w-full shrink-0 bg-t-board text-white">
+        <div className="mx-auto flex min-h-14 max-w-[1400px] flex-wrap items-center gap-x-3.5 px-6">
+          <Logo href={GROUPS_HREF} sub="管理者用" />
+          <span className="text-sm font-bold">グループの管理</span>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="w-full shrink-0 bg-t-board text-white">
       <div className="mx-auto flex min-h-14 max-w-[1400px] flex-wrap items-center gap-x-3.5 px-6 min-[1360px]:gap-x-[22px]">
-        <Link href="/teacher" className={`flex items-center gap-2.5 py-2 text-white ${FOCUS}`}>
-          <Image src="/navi/navi-smile.png" alt="" width={32} height={32} className="size-8 rounded-[9px] bg-white p-[3px]" />
-          <span className="flex flex-col gap-px leading-[1.2]">
-            <span className="font-pop text-sm">{APP_NAME}</span>
-            <span className="text-[10px] text-t-on-board">先生用</span>
-          </span>
-        </Link>
+        <Logo href="/teacher" sub="先生用" />
 
         <span
           title="架空のクラスのデータです。実際の子どもの情報は入っていません"
