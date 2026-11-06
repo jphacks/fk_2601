@@ -10,7 +10,7 @@
  *   bg-t-ground / border-t-line / text-t-text / text-t-text-sub
  *   bg-t-math / bg-t-sci / bg-t-info / text-t-danger
  *   font-t-body / font-t-chalk / font-t-cast
- *   rounded-t-card / rounded-t-btn
+ *   rounded-tcard / rounded-tbtn（角丸だけ t の後ろにハイフンを付けない。rounded-t-* は Tailwind の「上の角だけ丸める」と重なるため）
  *
  * フォントは next/font/google で BIZ_UDPGothic・Klee_One・Zen_Maru_Gothic を読み込み、
  * 変数を --font-t-body / --font-t-chalk / --font-t-cast に渡してください（README の「アプリへの取り込み方」）。
@@ -62,6 +62,6 @@
   --font-t-chalk: "Klee One", "BIZ UDPGothic", sans-serif;
   --font-t-cast: "Zen Maru Gothic", "BIZ UDPGothic", sans-serif;
 
-  --radius-t-card: 14px;
-  --radius-t-btn: 8px;
+  --radius-tcard: 14px;
+  --radius-tbtn: 8px;
 }

@@ -21,6 +21,7 @@
 | みんなの はてな | `/others` | 22 | 匿名で公開された問いを見る | 対象 |
 | せってい | `/settings` | 23 | 学年・問いの出し方の順番・称号・ログアウト | 対象 |
 | 今日のお題 | `/mission` | ― | 今日のお題 | Should（実装済み） |
+| 先生用の管理画面（見本） | `/teacher`・`/teacher/hatena`・`/teacher/missions`・`/teacher/members`・`/teacher/settings`・`/teacher/cast` | `docs/design/teachers` | 発表で見せる見本（デモ）。架空のデータだけを使い、ログインなしで開く。子どもの下のナビに入口を出さない（URL を直接開く）。共通レイアウトだけ作ってあり、各画面の中身はまだ。仕様は `docs/06-school-expansion.md` 5章 | 対象外 |
 
 - 下のナビ（ずかん・スタンプ ｜ ホーム ｜ みんな・せってい の5つ。ホームだけ まんなかの大きい丸）は、この5つの画面にだけ出す（`docs/design/README.md`「下のナビ」）
 - ホームの「きょうの おだい」は押せないカード（見本 04）。今日のお題の画面（`/mission`）へのリンクは いまは ない

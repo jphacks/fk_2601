@@ -83,32 +83,30 @@ teachers/
 ## 形とレイアウト
 | 部品 | 形 |
 |---|---|
-| カード | 白・1px の `t-line`・角丸 14px（`rounded-t-card`）。影はつけない |
-| メインボタン | `t-board` の地に白い文字・角丸 8px（`rounded-t-btn`）・高さ 36〜40px |
+| カード | 白・1px の `t-line`・角丸 14px（`rounded-tcard`）。影はつけない |
+| メインボタン | `t-board` の地に白い文字・角丸 8px（`rounded-tbtn`）・高さ 36〜40px |
 | サブボタン | 白い地に `t-board` の線と文字 |
 | 文字だけのボタン | 地も線もなし・`t-board` の太字（「ちがう」「変える」など） |
 | 消すボタン | 白い地に `t-danger-line` の線と `t-danger` の文字。確認のダイアログの中だけ `t-danger` の地 |
 | 数のタイル | `t-ground` の地・角丸 10px・小さい説明＋大きな数 |
 | ピル（状態） | 高さ 22〜24px・角丸いっぱい（「きょう」「予定」「まだ」「祝日」など） |
 
-- タブレットで使うときは、押せるものの高さを 44px 以上にする（見本は PC 向けに 36〜40px）
+- タブレットで使うときは、押せるものの高さを 44px 以上にする（見本は PC 向けに 36〜40px。`pointer-coarse:h-11`）
+- 角丸のクラスは `rounded-tcard`・`rounded-tbtn`。`rounded-t-card` と書くと、Tailwind の「上の角だけ丸める」と子どもの画面の `--radius-card` にも当たり、上の角だけ 24px になる
 - 外わくは `height: 100vh`、パネルは `min-height: 0; overflow: auto`。グリッドの中でカードがつぶれないよう、`grid-auto-rows: max-content` を付ける
 - 1100px より狭いときは、パネルを1列にして、ページのスクロールにもどす
 
 ```tsx
-// 画面の外わく（ヘッダー＋パネル）
-<div className="flex h-screen flex-col overflow-hidden bg-t-ground font-t-body text-t-text max-[1100px]:h-auto max-[1100px]:overflow-visible">
-  <TeacherHeader active="today" />
-  <main className="mx-auto flex min-h-0 w-full max-w-[1400px] flex-1 flex-col gap-3.5 px-6 pt-4 pb-5">
-    <div className="grid min-h-0 flex-1 grid-cols-[5fr_7fr] gap-4 max-[1100px]:grid-cols-1">
-      <section className="min-h-0 overflow-auto rounded-t-card border border-t-line bg-t-surface p-4">…</section>
-    </div>
-  </main>
-</div>
+// 画面の中身（ヘッダーを含む外わくは src/app/teacher/layout.tsx にある）
+<main className="mx-auto flex min-h-0 w-full max-w-[1400px] flex-1 flex-col gap-3.5 px-6 pt-4 pb-5">
+  <div className="grid min-h-0 flex-1 grid-cols-[5fr_7fr] gap-4 max-[1100px]:grid-cols-1">
+    <section className="min-h-0 overflow-auto rounded-tcard border border-t-line bg-t-surface p-4">…</section>
+  </div>
+</main>
 
 // メインボタン／サブボタン
-<button className="h-9 rounded-t-btn bg-t-board px-3.5 text-[13px] font-bold text-white">確認</button>
-<button className="h-9 rounded-t-btn border border-t-board bg-white px-3.5 text-[13px] font-bold text-t-board">目を通した</button>
+<button className="h-9 rounded-tbtn bg-t-board px-3.5 text-[13px] font-bold text-white">確認</button>
+<button className="h-9 rounded-tbtn border border-t-board bg-white px-3.5 text-[13px] font-bold text-t-board">目を通した</button>
 
 // 数のタイル
 <div className="flex flex-col gap-1.5 rounded-[10px] bg-t-ground px-3.5 py-3">
@@ -173,8 +171,8 @@ teachers/
 - 教室に映すときの3択（ア・イ・ウ）の作り方（答えの 0.1倍・約1倍・10倍 など）：【未決】
 
 ## アプリへの取り込み方
-1. `src/app/globals.css` で、子どもの画面のテーマのあとに `teachers/tailwind-theme.css` を読み込む
-2. フォントは `next/font/google` で `BIZ_UDPGothic`（400・700）、`Klee_One`（600）、`Zen_Maru_Gothic`（700・900）を読み込み、`--font-t-body` / `--font-t-chalk` / `--font-t-cast` に割り当てる。先生の画面の中だけで読み込む（子どもの画面を重くしない）
+1. `src/app/globals.css` で `teachers/tailwind-theme.css` を読み込む（済み）
+2. フォントは `next/font/google` で読み込み、先生の画面の中だけで使う（子どもの画面を重くしない）。`BIZ_UDPGothic`（400・700）を `--font-t-body` に割り当てる（`src/app/teacher/layout.tsx` で済み）。教室に映す画面を作るときに、`Klee_One`（600）を `--font-t-chalk`、`Zen_Maru_Gothic`（700・900）を `--font-t-cast` に割り当てる
 3. ナビの絵は、子どもの画面と同じ `public/navi/` のものを使う
 4. 画面は見本の HTML を見ながら、上のレシピで組み立てる（インラインスタイルの値はトークンと同じ）
 5. `assets/samples/` の絵はアプリに持ち込まない（本物は子どもが囲んだ切り抜き画像）
