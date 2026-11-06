@@ -93,7 +93,8 @@ export function CastFrame({ label, title, info, controls, onClose, onKeyDown, ch
             </span>
             <span className="flex min-w-0 flex-col gap-1.5">
               <span className={`text-[32px] tracking-[0.04em] ${t.weight} ${t.chalk}`}>{title}</span>
-              <span className={`font-t-body text-base tabular-nums ${t.monitor ? "text-t-proj-sub" : "font-bold"}`}>{info}</span>
+              {/* 全画面で管理画面のヘッダーが隠れるので、見本（デモ）の印もここに出す */}
+              <span className={`font-t-body text-base tabular-nums ${t.monitor ? "text-t-proj-sub" : "font-bold"}`}>{info} ・ 見本（デモ）</span>
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-4 font-t-body">
