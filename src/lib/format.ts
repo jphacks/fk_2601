@@ -9,6 +9,16 @@ const BIG_UNITS: [number, string, string, number][] = [
   [1e4, "万", "まん", 2],
 ];
 
+// 学年ごとの表記（docs/02-spec.md 2.4。2026-11-06 に決めた）：小数は3年、分数（○分の1）は3年、「倍」は2年で習う
+export const DECIMAL_GRADE = 3;
+export const FRACTION_GRADE = 3;
+export const TIMES_GRADE = 2;
+
+/** 小数を まだ習っていない学年では、1より大きい数を整数にまるめる（1より小さい数は、そのまま） */
+function roundForGrade(value: number, grade?: number): number {
+  return grade !== undefined && grade < DECIMAL_GRADE && Math.abs(value) >= 1 && Math.abs(value) < 9999.5 ? Math.round(value) : value;
+}
+
 /** 位の書き方。習った学年からは ふりがなつきの漢字、それより前は ひらがな（学年が分からないときは漢字） */
 function unitName(i: number, grade?: number): string {
   const [, kanji, yomi, learned] = BIG_UNITS[i];
@@ -27,8 +37,9 @@ function roundBig(value: number): number {
  * 1万から上は「万・億・兆・京」を使い、上から4けたに丸める（例：123456789 →「1{億|おく}2350{万|まん}」）。
  * grade を渡すと、まだ習っていない漢字は ひらがなにする（3年生なら「1おく2350{万|まん}」）
  */
-export function numberRuby(value: number, grade?: number): string {
-  if (!Number.isFinite(value)) return "—";
+export function numberRuby(rawValue: number, grade?: number): string {
+  if (!Number.isFinite(rawValue)) return "—";
+  const value = roundForGrade(rawValue, grade);
   const abs = Math.abs(value);
   if (abs === 0) return "0";
   if (abs >= 1e20) return value.toExponential(2).replace("e+", "×10^");
@@ -51,9 +62,12 @@ export function numberRuby(value: number, grade?: number): string {
   return value.toExponential(2).replace("e-", "×10^-");
 }
 
-/** 数を子どもにも読みやすい形にする（22px より小さい文字に使うので、万・億などは ひらがなで書く：「1おく2350まん」） */
-export function formatNumber(value: number): string {
-  return kanaOf(numberRuby(value));
+/**
+ * 数を子どもにも読みやすい形にする（22px より小さい文字に使うので、万・億などは ひらがなで書く：「1おく2350まん」）。
+ * grade を渡すと、小数を まだ習っていない学年（1・2年）では、整数にまるめる
+ */
+export function formatNumber(value: number, grade?: number): string {
+  return kanaOf(numberRuby(value, grade));
 }
 
 /** 大きく出す数の、見た目の長さ（漢字・ひらがなは数字の2つぶんの幅として数える。字の大きさを決めるのに使う） */
@@ -87,7 +101,8 @@ function roundForDisplay(value: number): number {
   return value;
 }
 
-/** 画面に出す数が、丸めた数（ほんとうの数とすこしちがう）か */
-export function isApprox(value: number): boolean {
-  return Math.abs(roundForDisplay(value) - value) > Math.abs(value) * 0.001;
+/** 画面に出す数が、丸めた数（ほんとうの数とすこしちがう）か。grade を渡すと、1・2年の整数へのまるめも考える */
+export function isApprox(value: number, grade?: number): boolean {
+  const shown = roundForGrade(roundForDisplay(value), grade);
+  return Math.abs(shown - value) > Math.abs(value) * 0.001;
 }
