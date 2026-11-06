@@ -68,6 +68,13 @@ export type GroupMember = {
  * グループの設定。autoJoinUntil は自分で入れる期限（ミリ秒。null は期限が入っていない）。
  * open は、読んだときに自分で入れたか（Firebase 版は期限の前のときだけ。ローカル版は止めるまで期限なしで入れる）
  */
+/** グループのミッション（#139）。date は日本時間の日付（「2026-11-15」）。text は ひらがなで書く */
+export type GroupMission = {
+  groupId: GroupId;
+  date: string;
+  text: string;
+};
+
 /** 参加コード（#137）。open は受付中か */
 export type JoinCode = {
   code: string;

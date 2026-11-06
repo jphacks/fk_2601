@@ -1,5 +1,5 @@
 import type { GroupId } from "@/lib/constants";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, GroupRole, GroupSettings, JoinCode, Membership, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupRole, GroupSettings, JoinCode, Membership, Profile } from "@/lib/types";
 
 /** 認証とデータの保存。Firebase 版と、Firebase なしで動かす開発用のローカル版がある */
 export interface Backend {
@@ -38,6 +38,14 @@ export interface Backend {
   stopAutoJoin(groupId: GroupId): Promise<void>;
   /** グループの設定（メンバーなら読める） */
   getGroupSettings(groupId: GroupId): Promise<GroupSettings>;
+  /** グループのミッション（#139）。その日の分（なければ null）。メンバーなら読める */
+  getGroupMission(groupId: GroupId, date: string): Promise<GroupMission | null>;
+  /** from〜to（日付。両はしを含む）の分。日付の順 */
+  listGroupMissions(groupId: GroupId, from: string, to: string): Promise<GroupMission[]>;
+  /** 出す・変える。管理者だけ */
+  saveGroupMission(groupId: GroupId, date: string, text: string): Promise<void>;
+  /** 消す（その日は出さない）。管理者だけ */
+  deleteGroupMission(groupId: GroupId, date: string): Promise<void>;
   /** 参加コード（#137）。いまのコード（まだ作っていなければ null）。管理者だけ */
   getJoinCode(groupId: GroupId): Promise<JoinCode | null>;
   /** 新しいコードを作る（前のコードは使えなくなる）。受付中にする。管理者だけ */
