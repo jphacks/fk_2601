@@ -33,6 +33,11 @@ export type ArchiveRecord = {
   question: Question;
   guess: Guess;
   rating: Rating;
+  /**
+   * 記録のもと。ないときや "own" は、自分で囲んで作った問い。"played" は、ほかの人の問いで遊んだもの
+   * （学習の進み具合の点数には数えない。src/lib/progress.ts）。ほかの人の問いで遊ぶ機能は、まだない
+   */
+  origin?: "own" | "played";
   /** 切り抜き画像（JPEG の data URL） */
   image: string;
   /**

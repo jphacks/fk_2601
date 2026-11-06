@@ -59,7 +59,7 @@ function ChooseContent() {
     try {
       const result = await requestCustom(backend, {
         image: crop.base64,
-        ...buildGenerationContext(profile, archives.map((a) => a.question)),
+        ...buildGenerationContext(profile, archives),
         text: text.trim(),
         ...(scene ? { scene } : {}),
       });
