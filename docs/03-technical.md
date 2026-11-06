@@ -172,7 +172,7 @@ Firestore:
     ├ members/{uid}                 role（"member" | "admin"）, joinedAt
     ├ posts/{postId}                id, createdAt, image, text, subject, topic, title
     │                               （ユーザー名・ニックネーム・位置情報・持ち主は入れない。ID はアーカイブと同じ）
-    └ owners/{postId}               uid（投稿の持ち主。だれも読めない。本人が消せるようにするためだけに持つ）
+    └ owners/{postId}               uid（投稿の持ち主。本人の記録だけ読める。本人が消せるようにするためだけに持つ）
 ```
 - 開発用のローカル版（`NEXT_PUBLIC_BACKEND=local`）は、同じ形をブラウザの localStorage に保存する（`src/lib/backend/local.ts`）
 - あそびかたの説明を見おわったか（`docs/02-spec.md` 4.2）は、プロフィールの `guideSeenAt` に持つ（2026-11-06 に決めた）
@@ -190,13 +190,15 @@ Firestore:
   - チームメンバーは両方に入る。C専会・C3 と、登録より前のアカウントの JPHACKS は、コンソールで `members/{uid}` を作る（`role`：`member`、`joinedAt`：その日時）
   - 管理者：`members/{uid}` の `role` を `admin` にする（コンソールから。アプリからはなれない）。管理者は 2026-11-06 に決めた：ログイン ID `saku_0875`（3つのグループすべて）
   - 読めるのはグループのメンバーだけ・作れるのはメンバーの本人だけ・消せるのは持ち主とグループの管理者（ルールで確かめる。画面で隠すだけにしない）。投稿の形は `validPost`（項目の種類・型・文字数（問題文 400 文字、題材 100 文字まで）・画像（切り抜きの JPEG で 650,000 文字まで））で確かめる。書きかえはできない
-  - 投稿の持ち主：同じ人の投稿をひも付けられないよう、投稿には持ち主・ニックネーム・ユーザー名を入れない。持ち主の uid は `groups/{groupId}/owners/{postId}` に分け、だれも読めない（本人も管理者も読まない）。投稿と同じバッチで書く・消す（`src/lib/backend/firebase.ts` の `saveGroupPost`・`deleteGroupPost`）。持ち主の記録は、まだない投稿を同じバッチで作るときだけ作れ、投稿を残したまま消せない。もうない投稿を消す操作は通す（管理者が消したあとも、ずかんの「けす」「なかまに みせるのを やめる」が失敗しないように）
+  - 投稿の持ち主：同じ人の投稿をひも付けられないよう、投稿には持ち主・ニックネーム・ユーザー名を入れない。持ち主の uid は `groups/{groupId}/owners/{postId}` に分け、本人の記録だけ読める（管理者も他人の記録は読めない）。投稿と同じバッチで書く・消す（`src/lib/backend/firebase.ts` の `saveGroupPost`・`deleteGroupPost`）。持ち主の記録は、まだない投稿を同じバッチで作るときだけ作れ、投稿を残したまま消せない。もうない投稿を消す操作は通す（管理者が消したあとも、ずかんの「けす」「なかまに みせるのを やめる」が失敗しないように）
   - アーカイブの `sharedGroups` に、見せているグループを持つ（投稿の ID はアーカイブの ID と同じ）。「きみの はてな」の印は、これと照らして出す。ずかんを読み込んだとき、投稿がもうないもの（管理者が消したなど）は `sharedGroups` から外して保存する（`ArchiveProvider` の `clearGoneShares`）。確かめるのに失敗しても、ずかんはそのまま見せる
   - 管理画面：`/teacher/groups`（`src/components/teacher/GroupsScreen.tsx`）。見本（デモ）ではなく本番のデータを扱う。子どもの画面と同じアカウントでログインし、管理者になっているグループの投稿（新しい順に30件）を見て消せる。だれの投稿かは出ない。子どもの画面と `/teacher` の見本には入口を出さない（URL を直接入れて開く）
   - JPHACKS の期限：発表の日（2026-11-15）から1週間で消す（2026-11-06 に決めた。消すのは管理者の saku_0875）。`groups/jphacks` の `autoJoinUntil` は 2026-11-23 0:00（日本時間）にしてあり、そこで自動で入るのが止まる。投稿（`posts` と `owners`）・メンバー・グループの文書は、期限のあとにコンソールから消す（データを消すので、そのときも人間が行う）
   - 本番の Firestore への反映（2026-11-06）：グループの文書（`jphacks`・`csennkai`・`c3`）・メンバー（ログイン ID `3`・`a` は JPHACKS と C専会の member、`saku_0875` は3つの admin）を作り、`public` の 15 件を消し、この rules を反映した。Vercel（アプリ）はまだ古い版のままなので、本番の「みんなの はてな」は、アプリを公開し直すまで「ひらけなかったよ」になる
-  - ローカル版（`NEXT_PUBLIC_BACKEND=local`・`/demo`）は、期限と持ち主を持たない。登録したとき・デモを始めたときに JPHACKS のメンバーになる。管理者を試すときは、localStorage の `local:groups:{uid}` を `{"jphacks":"admin"}` のように書きかえる
+  - ローカル版（`NEXT_PUBLIC_BACKEND=local`・`/demo`）は、期限を持たない。投稿の持ち主は `local:groupOwners:{groupId}` に保存し、退会で本人の投稿だけ消す。以前の持ち主のない投稿は、全プロフィールのずかんの ID と照らし合わせる。登録したとき・デモを始めたときに JPHACKS のメンバーになる。管理者を試すときは、localStorage の `local:groups:{uid}` を `{"jphacks":"admin"}` のように書きかえる
 - 削除：個別・一括で削除できる（Firestore のドキュメントを消す）
+- 退会（#86）：`Backend.deleteAccount(password)`。Firebase は `reauthenticateWithCredential` で本人確認してから、各グループの `owners` を `where("uid", "==", currentUser.uid)` でサーバーから全件取得し、投稿と持ち主を1組ずつバッチで消す（ルールの文書アクセス数上限も守る）。ずかんもサーバーから全件取得し、400件ずつ消す。参加情報・全プロフィール・ユーザー文書を消し、最後に `deleteUser`。失敗時は止め、同じ処理をやり直せる。詳細は `02-spec.md` 4.3
+  - ルールは自分の `owners` だけ読むことと、自分の `members` を消すことを許可する。ほかの人の持ち主は引き続き読めない。アプリの利用前に更新した `firestore.rules` の反映が必要（公開・反映は人間の許可を取って行う）
 - 学校版（未実装）で変更：授業時間中に保存したものは、担当クラスの先生が読める。クラスの共有を足す（データの案は `docs/06-school-expansion.md` 10.2。グループの形はこの案に合わせてある）
 
 ## 7 開発環境
