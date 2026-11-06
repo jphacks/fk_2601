@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { newId } from "@/lib/id";
 import { UserFacingError } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
-import type { ArchiveRecord, Profile, PublicPost } from "@/lib/types";
+import { GROUPS, type GroupId } from "@/lib/constants";
+import type { ArchiveRecord, GroupPost, Profile } from "@/lib/types";
 import type { Question } from "@/server/llm/schema";
 import { useApp } from "./AuthProvider";
 
@@ -14,12 +15,15 @@ type ArchiveContext = {
   archives: ArchiveRecord[];
   /** 読み込みをやり直す。成功したら、ずかんの中身を返す（失敗したら null） */
   reload: () => Promise<ArchiveRecord[] | null>;
-  /** 図鑑に保存する。publish が true のときは、匿名で公開もする */
-  add: (input: { question: Question; guess: Guess; rating: Rating; image: string; publish: boolean }) => Promise<ArchiveRecord>;
+  /**
+   * 図鑑に保存する。groups に入れたグループにも見せる（名前は出さない）。
+   * 図鑑に保存できなかったときだけ例外にする（見せるのに失敗したときは shareFailed。もう一度押して、二重に保存しないように）
+   */
+  add: (input: { question: Question; guess: Guess; rating: Rating; image: string; groups: GroupId[] }) => Promise<{ record: ArchiveRecord; shareFailed: boolean }>;
   remove: (id: string) => Promise<void>;
   removeAll: () => Promise<void>;
-  /** 公開をやめる（図鑑には残す） */
-  unpublish: (id: string) => Promise<void>;
+  /** グループに見せるのをやめる（図鑑には残す） */
+  unshare: (id: string) => Promise<void>;
 };
 
 const Context = createContext<ArchiveContext | null>(null);
@@ -36,7 +40,7 @@ export function ArchiveProvider({ children }: { children: React.ReactNode }) {
   return <ArchiveState key={profile?.id ?? "none"}>{children}</ArchiveState>;
 }
 
-function publicPost(profile: Profile, record: ArchiveRecord): PublicPost {
+function groupPost(profile: Profile, record: ArchiveRecord): GroupPost {
   return {
     id: record.id,
     createdAt: record.createdAt,
@@ -53,16 +57,21 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">(profile && user ? "loading" : "ready");
   const [archives, setArchives] = useState<ArchiveRecord[]>([]);
 
-  // 公開データがもうない（管理者が消した・公開に失敗した）のに、公開中の印が残っているものは、印を外す。
+  // グループの投稿がもうない（管理者が消した・見せるのに失敗した）のに、見せている印が残っているものは、印を外す。
   // 失敗しても ずかんは そのまま見せる（次に読み込んだときに また確かめる）
-  const clearGonePublic = useCallback(
+  const clearGoneShares = useCallback(
     async (list: ArchiveRecord[]) => {
       if (!user || !profile) return;
-      const published = list.flatMap((a) => (a.publicId ? [a.publicId] : []));
-      if (published.length === 0) return;
       try {
-        const gone = new Set(await backend.missingPublic(published));
-        const fixed = list.filter((a) => a.publicId && gone.has(a.publicId)).map((a) => ({ ...a, publicId: null }));
+        const gone = new Map<GroupId, Set<string>>();
+        for (const g of GROUPS) {
+          const ids = list.filter((a) => a.sharedGroups?.includes(g.id)).map((a) => a.id);
+          if (ids.length > 0) gone.set(g.id, new Set(await backend.missingGroupPosts(g.id, ids)));
+        }
+        const fixed = list.flatMap((a) => {
+          const left = a.sharedGroups?.filter((g) => !gone.get(g)?.has(a.id));
+          return a.sharedGroups && left && left.length < a.sharedGroups.length ? [{ ...a, sharedGroups: left }] : [];
+        });
         if (fixed.length === 0) return;
         await Promise.all(fixed.map((r) => backend.saveArchive(user.uid, profile.id, r)));
         const byId = new Map(fixed.map((r) => [r.id, r]));
@@ -81,13 +90,13 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
       const list = await backend.listArchives(user.uid, profile.id);
       setArchives(list);
       setStatus("ready");
-      void clearGonePublic(list);
+      void clearGoneShares(list);
       return list;
     } catch {
       setStatus("error");
       return null;
     }
-  }, [backend, user, profile, clearGonePublic]);
+  }, [backend, user, profile, clearGoneShares]);
 
   useEffect(() => {
     if (!user || !profile) return;
@@ -98,38 +107,44 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
         if (cancelled) return;
         setArchives(list);
         setStatus("ready");
-        void clearGonePublic(list);
+        void clearGoneShares(list);
       })
       .catch(() => !cancelled && setStatus("error"));
     return () => {
       cancelled = true;
     };
-  }, [backend, user, profile, clearGonePublic]);
+  }, [backend, user, profile, clearGoneShares]);
 
   const add = useCallback<ArchiveContext["add"]>(
-    async ({ question, guess, rating, image, publish }) => {
+    async ({ question, guess, rating, image, groups }) => {
       if (!user || !profile) throw new UserFacingError("ログインしなおしてね");
-      const id = newId();
       const record: ArchiveRecord = {
-        id,
+        id: newId(),
         createdAt: Date.now(),
         grade: profile.grade,
         question,
         guess,
         rating,
         image,
-        publicId: publish ? id : null,
+        sharedGroups: [],
       };
       await backend.saveArchive(user.uid, profile.id, record);
       setArchives((prev) => [record, ...prev]);
-      if (publish) {
+      if (groups.length === 0) return { record, shareFailed: false };
+
+      // 見せられたグループだけを印にのこす（1つ失敗しても、ほかのグループには見せる）
+      const results = await Promise.allSettled(groups.map((g) => backend.saveGroupPost(user.uid, g, groupPost(profile, record))));
+      const shared = groups.filter((_, i) => results[i].status === "fulfilled");
+      const next = { ...record, sharedGroups: shared };
+      if (shared.length > 0) {
         try {
-          await backend.savePublic(user.uid, publicPost(profile, record));
+          await backend.saveArchive(user.uid, profile.id, next);
         } catch {
-          throw new UserFacingError("ずかんには のこせたけど、みんなには みせられなかったよ");
+          // 印を残せなくても、投稿は見えている（次に ずかんを読み込んだときには、印がないまま）
         }
+        setArchives((prev) => prev.map((a) => (a.id === record.id ? next : a)));
       }
-      return record;
+      return { record: next, shareFailed: shared.length < groups.length };
     },
     [backend, user, profile],
   );
@@ -138,7 +153,7 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
     async (id: string) => {
       if (!user || !profile) return;
       const target = archives.find((a) => a.id === id);
-      if (target?.publicId) await backend.deletePublic(target.publicId);
+      for (const g of target?.sharedGroups ?? []) await backend.deleteGroupPost(g, id);
       await backend.deleteArchive(user.uid, profile.id, id);
       setArchives((prev) => prev.filter((a) => a.id !== id));
     },
@@ -147,18 +162,18 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
 
   const removeAll = useCallback(async () => {
     if (!user || !profile) return;
-    for (const a of archives) if (a.publicId) await backend.deletePublic(a.publicId);
+    for (const a of archives) for (const g of a.sharedGroups ?? []) await backend.deleteGroupPost(g, a.id);
     await backend.deleteAllArchives(user.uid, profile.id);
     setArchives([]);
   }, [backend, user, profile, archives]);
 
-  const unpublish = useCallback(
+  const unshare = useCallback(
     async (id: string) => {
       if (!user || !profile) return;
       const target = archives.find((a) => a.id === id);
-      if (!target?.publicId) return;
-      await backend.deletePublic(target.publicId);
-      const next = { ...target, publicId: null };
+      if (!target?.sharedGroups?.length) return;
+      for (const g of target.sharedGroups) await backend.deleteGroupPost(g, id);
+      const next = { ...target, sharedGroups: [] };
       await backend.saveArchive(user.uid, profile.id, next);
       setArchives((prev) => prev.map((a) => (a.id === id ? next : a)));
     },
@@ -166,8 +181,8 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<ArchiveContext>(
-    () => ({ status, archives, reload, add, remove, removeAll, unpublish }),
-    [status, archives, reload, add, remove, removeAll, unpublish],
+    () => ({ status, archives, reload, add, remove, removeAll, unshare }),
+    [status, archives, reload, add, remove, removeAll, unshare],
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }

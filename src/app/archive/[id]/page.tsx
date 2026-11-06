@@ -15,6 +15,7 @@ import { ResultSummary } from "@/components/ResultSummary";
 import { RubyText } from "@/components/RubyText";
 import { Button, ErrorNotice, LinkButton, Say } from "@/components/ui";
 import { defaultScope } from "@/lib/calc";
+import { groupOf } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
 import { evaluate } from "@/lib/rating";
@@ -25,7 +26,7 @@ function DetailContent() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const { profile } = useApp();
-  const { status, archives, remove, unpublish, reload } = useArchive();
+  const { status, archives, remove, unshare, reload } = useArchive();
   const record = archives.find((a) => a.id === id);
   const [values, setValues] = useState<Record<string, number> | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -133,10 +134,16 @@ function DetailContent() {
             {error}
           </p>
         )}
-        {record.publicId && (
-          <Button variant="sub" onClick={() => run(() => unpublish(record.id))}>
-            みんなに みせるのを やめる
-          </Button>
+        {record.sharedGroups && record.sharedGroups.length > 0 && (
+          <>
+            {/* 小さい文字なので、ひらがなで出す */}
+            <p className="text-center text-base font-black text-ink-sub">
+              {record.sharedGroups.map((g) => groupOf(g).kana).join("・")} の なかまに みせているよ
+            </p>
+            <Button variant="sub" onClick={() => run(() => unshare(record.id))}>
+              なかまに みせるのを やめる
+            </Button>
+          </>
         )}
         {confirming ? (
           <>

@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { stampCounts } from "@/lib/collection";
-import { PUBLIC_SHARING_PAUSED, STAMP_GOAL, SUBJECT_KANA, TITLE_LABEL } from "@/lib/constants";
+import { groupOf, STAMP_GOAL, SUBJECT_KANA, TITLE_LABEL, type GroupId } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
 import { useArchive } from "./ArchiveProvider";
+import { useApp } from "./AuthProvider";
 import { Bunting, Confetti, Hanko, Rays, SideConfetti, Sparkle, Spotlight } from "./Decor";
 import { Medal } from "./Icons";
 import { Navigator } from "./Navigator";
@@ -45,7 +46,7 @@ export function CollectCard({ question, image, summary, rating }: { question: Qu
   );
 }
 
-/** 答え合わせのあと、ずかんに保存する（見本 19「はてなゲット！」）。匿名で他の人に見せるかも選べる */
+/** 答え合わせのあと、ずかんに保存する（見本 19「はてなゲット！」）。入っているグループの なかまに、名前を出さずに見せるかも選べる */
 export function SavePanel({
   question,
   guess,
@@ -64,16 +65,26 @@ export function SavePanel({
   // 保存したかは、問いの状態に持つ（画面をもどっても、同じ問いを2回保存しない）
   const { saved, markSaved } = useQuiz();
   const { archives, add } = useArchive();
-  const [publish, setPublish] = useState(false);
+  const { memberships } = useApp();
+  // 見せるグループ（はじめは どこにも見せない）
+  const [picked, setPicked] = useState<GroupId[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shareFailed, setShareFailed] = useState(false);
+
+  function toggle(id: GroupId, on: boolean) {
+    setPicked((prev) => (on ? [...prev.filter((g) => g !== id), id] : prev.filter((g) => g !== id)));
+  }
 
   async function save() {
     if (saved || busy) return;
     setBusy(true);
     setError(null);
     try {
-      await add({ question, guess, rating, image, publish: publish && !PUBLIC_SHARING_PAUSED });
+      // 入っているグループだけに見せる（ルールでも、メンバーでないグループには書けない）
+      const groups = picked.filter((g) => memberships?.some((m) => m.groupId === g));
+      const result = await add({ question, guess, rating, image, groups });
+      setShareFailed(result.shareFailed);
       markSaved();
     } catch (e) {
       setError(messageOf(e));
@@ -109,14 +120,29 @@ export function SavePanel({
           <CollectCard question={question} image={image} summary={summary} rating={rating} />
         </Spotlight>
 
-        {!PUBLIC_SHARING_PAUSED && (
-          <label className="flex cursor-pointer items-start gap-3 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm active:translate-y-1 active:shadow-none">
-            <input type="checkbox" checked={publish} onChange={(e) => setPublish(e.target.checked)} className="mt-1 size-6 shrink-0 accent-[var(--color-pink)]" />
-            <span className="text-[19px] font-black leading-[1.6]">
-              みんなにも みせる
-              <span className="block text-sm font-bold text-pink-dark">なまえは でないよ。かこんだ しゃしんと はてなだけ みえるよ。</span>
+        {memberships && memberships.length > 0 && (
+          <fieldset className="flex flex-col gap-2 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm">
+            <legend className="sr-only">グループの なかまにも みせる</legend>
+            <span aria-hidden="true" className="text-[19px] font-black leading-[1.6]">
+              なかまにも みせる
+              <span className="block text-sm font-bold text-pink-dark">なまえは でないよ。かこんだ しゃしんと はてなだけ、えらんだ グループの なかまに みえるよ。</span>
             </span>
-          </label>
+            {memberships.map((m) => (
+              <label
+                key={m.groupId}
+                className="flex cursor-pointer items-center gap-3 rounded-[16px] border-3 border-ink bg-white px-3 py-2 active:translate-y-0.5"
+              >
+                <input
+                  type="checkbox"
+                  checked={picked.includes(m.groupId)}
+                  onChange={(e) => toggle(m.groupId, e.target.checked)}
+                  className="size-6 shrink-0 accent-[var(--color-pink)]"
+                />
+                {/* 小さい文字なので、ひらがなで出す */}
+                <span className="text-[19px] font-black">{groupOf(m.groupId).kana}</span>
+              </label>
+            ))}
+          </fieldset>
         )}
 
         {/* ナビも いっしょに よろこぶ（のこった空白を うめる） */}
@@ -148,6 +174,12 @@ export function SavePanel({
         <h2 className="font-pop text-[34px] font-normal leading-tight text-yellow [-webkit-text-stroke:2px_var(--color-ink)]">はてなゲット！</h2>
       </div>
       <CollectCard question={question} image={image} summary={summary} rating={rating} />
+
+      {shareFailed && (
+        <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
+          ずかんには のこせたけど、なかまには みせられなかったよ。
+        </p>
+      )}
 
       <section className={`mt-auto flex flex-col gap-2.5 rounded-card px-4 py-3 ${s.light}`}>
         <div className={`flex items-center justify-between font-pop text-[17px] ${s.dark}`}>
