@@ -23,10 +23,11 @@ import {
   setDoc,
   type Timestamp,
   updateDoc,
+  where,
   writeBatch,
 } from "firebase/firestore";
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
-import { GROUPS, type GroupId } from "@/lib/constants";
+import { GROUP_POSTS_PAGE, GROUPS, type GroupId } from "@/lib/constants";
 import { newJoinCode } from "@/lib/joinCode";
 import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, JoinCode, Membership, Profile } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
@@ -239,9 +240,18 @@ export const firebaseBackend: Backend = {
     return { autoJoinUntil: until, open: until !== null && Date.now() < until };
   },
 
-  async listGroupPosts(groupId) {
-    const snapshot = await getDocs(query(collection(db(), "groups", groupId, "posts"), orderBy("createdAt", "desc"), limit(30)));
+  async listGroupPosts(groupId, options) {
+    const posts = collection(db(), "groups", groupId, "posts");
+    const page = options?.before === undefined
+      ? query(posts, orderBy("createdAt", "desc"), limit(GROUP_POSTS_PAGE))
+      : query(posts, where("createdAt", "<", options.before), orderBy("createdAt", "desc"), limit(GROUP_POSTS_PAGE));
+    const snapshot = await getDocs(page);
     return snapshot.docs.map((d) => d.data() as GroupPost);
+  },
+
+  async getGroupPost(groupId, id) {
+    const snapshot = await getDoc(doc(db(), "groups", groupId, "posts", id));
+    return snapshot.exists() ? (snapshot.data() as GroupPost) : null;
   },
 
   // 持ち主はだれも読めない owners に分け、投稿と同じバッチで書く・消す（firestore.rules）

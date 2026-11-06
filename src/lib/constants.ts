@@ -46,6 +46,9 @@ export const GROUPS = [
 ] as const;
 export type GroupId = (typeof GROUPS)[number]["id"];
 
+/** グループの投稿を1回に読む件数（画像が重いので、少しずつ読む） */
+export const GROUP_POSTS_PAGE = 30;
+
 export function groupOf(id: GroupId) {
   return GROUPS.find((g) => g.id === id) ?? GROUPS[0];
 }
