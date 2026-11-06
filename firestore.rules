@@ -62,7 +62,9 @@ service cloud.firestore {
         && d.text is string && d.text.size() > 0 && d.text.size() <= 400
         && d.subject in subjects
         && d.topic is string && d.topic.size() <= 100
-        && (d.title == null || d.title in subjects);
+        // 称号：はじめの称号（null）・前の形（分類の名前）・金銀銅の称号（「math-gold」など。src/lib/titles.ts）
+        && (d.title == null || d.title in subjects
+          || (d.title is string && d.title.size() <= 32 && d.title.matches('^[a-z]+-(bronze|silver|gold)
     }
 
     match /groups/{groupId} {
@@ -99,6 +101,83 @@ service cloud.firestore {
       // 消すのは投稿と同じバッチ（投稿が残ったまま、持ち主の記録だけを消せない）
       match /owners/{postId} {
         allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+        allow create: if request.auth != null
+          && request.resource.data.keys().hasOnly(['uid'])
+          && request.resource.data.uid == request.auth.uid
+          && !exists(postDoc(groupId, postId))
+          && existsAfter(postDoc(groupId, postId));
+        allow delete: if request.auth != null
+          && (resource == null || resource.data.uid == request.auth.uid || isAdmin(groupId))
+          && !existsAfter(postDoc(groupId, postId));
+        allow update: if false;
+      }
+    }
+  }
+}
+)));
+    }
+
+    // グループの文書：autoJoinUntil（自分で入れる期限）。読めるのはメンバー。作る・消すのはコンソールから。
+    // 管理者は、まだ入れるあいだに、期限を いまにする（自動で入るのを止める）ことだけができる（延ばす・入れなおすのはコンソールから）
+    match /groups/{groupId} {
+      allow read: if isMember(groupId);
+      allow update: if isAdmin(groupId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['autoJoinUntil'])
+        && request.resource.data.autoJoinUntil == request.time
+        && resource.data.get('autoJoinUntil', null) is timestamp
+        && request.time < resource.data.autoJoinUntil;
+      allow create, delete: if false;
+
+      // メンバー：role（'member' か 'admin'）・joinedAt・username（ログイン ID。#129 より前の記録にはない）。読めるのは本人と管理者。
+      // 自分で作れるのは、期限の前に 'member' として入るときだけ（管理者にはなれない）。
+      // username を入れるときは、ID トークンの名前（ログイン ID）と同じでなければならない（ほかの人の名前を名乗れない）。
+      // 役割を変える・外すのは管理者だけ。自分の役割は変えられず、自分は外せない（管理者がいなくなるのを防ぐ）
+      match /members/{uid} {
+        allow read: if request.auth != null && (request.auth.uid == uid || isAdmin(groupId));
+        allow create: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['role', 'joinedAt', 'username'])
+          && request.resource.data.keys().hasAll(['role', 'joinedAt'])
+          && request.resource.data.role == 'member'
+          && request.resource.data.joinedAt == request.time
+          && (!('username' in request.resource.data) || request.resource.data.username == request.auth.token.name)
+          && autoJoinOpen(groupId);
+        allow update: if isAdmin(groupId) && request.auth.uid != uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role'])
+          && request.resource.data.role in ['member', 'admin'];
+        allow delete: if isAdmin(groupId) && request.auth.uid != uid;
+      }
+
+      // 投稿：読めるのはメンバーだけ。作れるのはメンバーの本人だけで、持ち主の記録（owners）を同じバッチで書く。
+      // 消せるのは持ち主と管理者。もうない投稿を消すのはゆるす（管理者が消したあとも、ずかんの操作が失敗しないように）
+      match /posts/{postId} {
+        allow read: if isMember(groupId);
+        allow create: if isMember(groupId) && validPost(postId)
+          && getAfter(ownerDoc(groupId, postId)).data.uid == request.auth.uid;
+        allow delete: if request.auth != null
+          && (resource == null || isPostOwner(groupId, postId) || isAdmin(groupId));
+        allow update: if false;
+      }
+
+      // 通報：メンバーなら、グループにある投稿を通報できる（reports/{投稿の ID}__{自分の uid}。同じ人の2回目は作れない）。
+      // 読める・消せるのは管理者だけ（通報した人は、ほかのメンバーに見えない）
+      match /reports/{reportId} {
+        allow read: if isAdmin(groupId);
+        allow create: if isMember(groupId)
+          && request.resource.data.keys().hasOnly(['postId', 'createdAt'])
+          && request.resource.data.keys().hasAll(['postId', 'createdAt'])
+          && request.resource.data.postId is string && request.resource.data.postId.size() <= 64
+          && reportId == request.resource.data.postId + '__' + request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && exists(postDoc(groupId, request.resource.data.postId));
+        allow delete: if isAdmin(groupId);
+        allow update: if false;
+      }
+
+      // 投稿の持ち主（本人が消せるようにするためだけの記録）。だれも読めない（管理者も読めない）。
+      // 作れるのは、まだない投稿を同じバッチで作るときだけ（ほかの人の投稿の持ち主になれない）。
+      // 消すのは投稿と同じバッチ（投稿が残ったまま、持ち主の記録だけを消せない）
+      match /owners/{postId} {
+        allow read: if false;
         allow create: if request.auth != null
           && request.resource.data.keys().hasOnly(['uid'])
           && request.resource.data.uid == request.auth.uid

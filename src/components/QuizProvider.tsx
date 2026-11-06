@@ -94,7 +94,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
       loaded
         .then((list) => {
           if (!list) throw new UserFacingError("ずかんを よみこめなかったよ。ネットに つながっているか みて、もういちど ためしてね");
-          const context = buildGenerationContext(profile, list.map((a) => a.question));
+          const context = buildGenerationContext(profile, list);
           const body = {
             image: nextCrop.base64,
             ...context,

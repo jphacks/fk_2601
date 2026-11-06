@@ -15,7 +15,7 @@ import { groupOf, titleLabel, type GroupId } from "@/lib/constants";
 import type { GroupPost } from "@/lib/types";
 
 function OthersContent() {
-  const { backend, memberships, membershipsFailed, reloadMemberships } = useApp();
+  const { backend, user, memberships, membershipsFailed, reloadMemberships } = useApp();
   const { archives } = useArchive();
   const [picked, setPicked] = useState<GroupId | null>(null);
   // えらんだグループ（まだ えらんでいない・もう入っていないときは、はじめのグループ）
@@ -30,6 +30,22 @@ function OthersContent() {
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const posts = loaded && loaded.groupId === groupId ? loaded.posts : null;
+  // 通報：どの はてなを 通報するか たずねている最中（asking）と、通報したもの（reported）。グループを切りかえても残す
+  const [asking, setAsking] = useState<string | null>(null);
+  const [reported, setReported] = useState<Set<string>>(new Set());
+  const [reportFailed, setReportFailed] = useState(false);
+
+  async function report(postId: string) {
+    if (!user || !groupId) return;
+    setReportFailed(false);
+    try {
+      await backend.reportGroupPost(user.uid, groupId, postId);
+      setReported((prev) => new Set(prev).add(postId));
+      setAsking(null);
+    } catch {
+      setReportFailed(true);
+    }
+  }
   const many = (memberships?.length ?? 0) >= 3;
 
   useEffect(() => {
@@ -115,6 +131,8 @@ function OthersContent() {
         <p className="rounded-card bg-pink-light px-4 py-3 text-lg font-black leading-[1.7]">まだ だれも みせていないよ。きみが さいしょに みせてみよう！</p>
       )}
 
+      {reportFailed && <ErrorNotice>おしらせできなかったよ。ネットに つながっているか みて、もういちど ためしてね</ErrorNotice>}
+
       <ul className="grid grid-cols-2 gap-3">
         {posts?.map((p) => {
           const s = SUBJECT_STYLE[p.subject];
@@ -133,6 +151,42 @@ function OthersContent() {
                       <span className={`rounded-[10px] px-2 py-px text-xs font-black ${s.light} ${s.dark}`}>{titleLabel(p.title)}</span>
                       {mine.has(p.id) && <span className="text-xs font-black text-ink-muted">きみの はてな</span>}
                     </div>
+                    {/* いやな はてなや、のせては いけない ものを 見つけたら、おしらせできる（きみの はてなには 出さない） */}
+                    {!mine.has(p.id) &&
+                      (reported.has(p.id) ? (
+                        <span className="text-xs font-black text-ink-muted">つうほう したよ。ありがとう</span>
+                      ) : asking === p.id ? (
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-xs font-black leading-[1.5]">いやな はてな？ おとなに おしらせするよ</span>
+                          <div className="flex gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => void report(p.id)}
+                              className="min-h-9 flex-1 rounded-[12px] border-2 border-ink bg-pink px-1 text-xs font-black text-ink active:translate-y-0.5"
+                            >
+                              おしらせ
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setAsking(null)}
+                              className="min-h-9 flex-1 rounded-[12px] border-2 border-ink bg-white px-1 text-xs font-black text-ink active:translate-y-0.5"
+                            >
+                              やめる
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReportFailed(false);
+                            setAsking(p.id);
+                          }}
+                          className="min-h-9 self-start rounded-[12px] px-1.5 text-xs font-black text-ink-muted underline"
+                        >
+                          つうほう
+                        </button>
+                      ))}
                   </div>
                 </div>
               </article>

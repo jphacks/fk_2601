@@ -11,10 +11,23 @@ import { ErrorNotice } from "@/components/ui";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
 import { StampCards } from "@/components/StampCards";
-import { earnedTitles, stampCounts } from "@/lib/collection";
-import { FIRST_TITLE_LABEL, STAMP_GOAL, SUBJECT_KANA, SUBJECTS, TITLE_LABEL, titleLabel } from "@/lib/constants";
+import { stampCounts } from "@/lib/collection";
 import { messageOf } from "@/lib/errors";
-import type { Subject } from "@/server/llm/schema";
+import {
+  canonicalTitle,
+  earnedTitleIds,
+  FIRST_TITLE_LABEL,
+  nextGoal,
+  TIER_LABEL,
+  TIERS,
+  TITLE_FAMILIES,
+  TITLE_GROUPS,
+  titleId,
+  titleLabel,
+  titleStats,
+  type TitleFamily,
+  type TitleStats,
+} from "@/lib/titles";
 
 type View = "cards" | "titles";
 
@@ -45,18 +58,64 @@ function TitleRow({ name, note, selected, onClick }: { name: string; note: strin
   );
 }
 
-/** まだ もらっていない しょうごう（押せないので地の色だけ。かぎと「あと ○こ」） */
-function LockedRow({ subject, left }: { subject: Subject; left: number }) {
+/**
+ * 1つの種類の しょうごう（どう・ぎん・きん）。まとまりは押せないので地の色だけ。
+ * もらった段階は押せる（線と影。えらんだものは うすい青で、押しこまれた形）。まだの段階は、かぎと 必要な数
+ */
+function FamilyCard({
+  family,
+  stats,
+  selected,
+  onPick,
+}: {
+  family: TitleFamily;
+  stats: TitleStats;
+  selected: string | null;
+  onPick: (id: string) => void;
+}) {
+  const value = family.value(stats);
+  const next = nextGoal(family, stats);
   return (
-    <div className="flex min-h-[68px] items-center gap-3 rounded-[22px] bg-cloud px-4 py-2 text-ink-sub">
-      <Icon name="lock" size={30} stroke="#6B7090" strokeWidth={2.2} />
-      <span className="flex flex-col gap-0.5">
-        <span className="text-lg font-black">{TITLE_LABEL[subject]}</span>
-        <span className="text-[13px] font-black">
-          {SUBJECT_KANA[subject]}の スタンプ あと {left}こ
-        </span>
+    <section className="flex flex-col gap-2 rounded-card bg-cloud px-3.5 pb-3.5 pt-3">
+      <div className="flex items-baseline justify-between gap-2">
+        <h4 className="text-lg font-black">{family.name}</h4>
+        <span className="shrink-0 text-[13px] font-black text-ink-sub">いま {value}</span>
+      </div>
+      <span className="text-[13px] font-black leading-[1.6] text-ink-sub">
+        {next ? `${TIER_LABEL[next.tier]}：${family.how.replace("{n}", String(family.goals[TIERS.indexOf(next.tier)]))}（あと ${next.left}）` : "きんまで ぜんぶ もらったよ！"}
       </span>
-    </div>
+      <div className="grid grid-cols-3 gap-2">
+        {TIERS.map((tier, i) => {
+          const id = titleId(family.id, tier);
+          const got = value >= family.goals[i];
+          if (!got) {
+            return (
+              <div key={tier} className="flex min-h-[64px] flex-col items-center justify-center gap-0.5 rounded-[18px] bg-white/60 text-ink-muted">
+                <Icon name="lock" size={22} stroke="#6B7090" strokeWidth={2.2} />
+                <span className="text-xs font-black">
+                  {TIER_LABEL[tier]} {family.goals[i]}
+                </span>
+              </div>
+            );
+          }
+          const on = selected === id;
+          return (
+            <button
+              key={tier}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              aria-label={titleLabel(id)}
+              onClick={() => onPick(id)}
+              className={`flex min-h-[64px] flex-col items-center justify-center gap-0.5 rounded-[18px] border-3 border-ink text-ink ${on ? "translate-y-1 bg-navi-light shadow-none" : "bg-white shadow-pop-sm active:translate-y-1 active:shadow-none"}`}
+            >
+              <Medal size={26} tier={tier} />
+              <span className="text-xs font-black">{TIER_LABEL[tier]}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -85,11 +144,13 @@ function StampContent() {
   }
 
   const counts = stampCounts(archives);
-  const earned = earnedTitles(counts);
-  const locked = SUBJECTS.filter((s) => !earned.includes(s));
+  const stats = titleStats(archives);
+  const owned = earnedTitleIds(stats).length;
+  // 前の形の称号（「math」）も、そろえた ID（「math-bronze」）でくらべる
+  const current = canonicalTitle(profile.title);
 
-  async function equip(title: Subject | null) {
-    if (!profile || profile.title === title) return;
+  async function equip(title: string | null) {
+    if (!profile || current === title) return;
     setError(null);
     try {
       await saveProfile({ nickname: profile.nickname, grade: profile.grade, title });
@@ -133,20 +194,22 @@ function StampContent() {
           </div>
           <span className="text-[15px] font-black leading-[1.6] text-ink-sub">みんなの はてなに のせると、この しょうごうが でるよ</span>
 
-          <span className="mt-2 font-pop text-lg">しょうごうを えらぶ</span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="font-pop text-lg">しょうごうを えらぶ</span>
+            <span className="text-[15px] font-black text-ink-sub">
+              もっている {owned} / {TITLE_FAMILIES.length * TIERS.length}
+            </span>
+          </div>
           <div role="radiogroup" aria-label="しょうごうを えらぶ" className="flex flex-col gap-3">
-            <TitleRow name={FIRST_TITLE_LABEL} note="はじめて あそんだ ときに もらえる" selected={profile.title === null} onClick={() => void equip(null)} />
-            {earned.map((subject) => (
-              <TitleRow
-                key={subject}
-                name={TITLE_LABEL[subject]}
-                note={`${SUBJECT_KANA[subject]}の スタンプを ${STAMP_GOAL}こ あつめた`}
-                selected={profile.title === subject}
-                onClick={() => void equip(subject)}
-              />
-            ))}
-            {locked.map((subject) => (
-              <LockedRow key={subject} subject={subject} left={STAMP_GOAL - counts[subject]} />
+            <TitleRow name={FIRST_TITLE_LABEL} note="はじめて あそんだ ときに もらえる" selected={current === null} onClick={() => void equip(null)} />
+            {/* まとまりごとに見出しをつける（見出しは押せないので、文字だけ） */}
+            {TITLE_GROUPS.map((group) => (
+              <div key={group.id} className="flex flex-col gap-3">
+                <h3 className="mt-2 font-pop text-base font-normal text-ink-sub">{group.name}</h3>
+                {TITLE_FAMILIES.filter((f) => f.group === group.id).map((family) => (
+                  <FamilyCard key={family.id} family={family} stats={stats} selected={current} onPick={(id) => void equip(id)} />
+                ))}
+              </div>
             ))}
           </div>
           {error && (

@@ -14,7 +14,8 @@ export type Profile = {
   nickname: string;
   grade: number;
   /** 切り替えて使う称号（その分類のスタンプが貯まると選べる） */
-  title: Subject | null;
+  /** つけている称号の ID（src/lib/titles.ts。「math-gold」など。前の形の「math」なども読める）。null は はじめの称号 */
+  title: string | null;
   /** 問いの出し方：先に3択を出すか、自分で書く入力欄を出すか */
   firstMode: FirstMode;
   /**
@@ -33,6 +34,11 @@ export type ArchiveRecord = {
   question: Question;
   guess: Guess;
   rating: Rating;
+  /**
+   * 記録のもと。ないときや "own" は、自分で囲んで作った問い。"played" は、ほかの人の問いで遊んだもの
+   * （学習の進み具合の点数には数えない。src/lib/progress.ts）。ほかの人の問いで遊ぶ機能は、まだない
+   */
+  origin?: "own" | "played";
   /** 切り抜き画像（JPEG の data URL） */
   image: string;
   /**
@@ -50,6 +56,23 @@ export type Membership = {
   role: GroupRole;
 };
 
+/** グループのメンバー（管理画面で、管理者だけが見る）。username（ログイン ID）がないのは、#129 より前に入った記録 */
+export type GroupMember = {
+  uid: string;
+  username: string | null;
+  role: GroupRole;
+  joinedAt: number | null;
+};
+
+/**
+ * グループの設定。autoJoinUntil は自分で入れる期限（ミリ秒。null は期限が入っていない）。
+ * open は、読んだときに自分で入れたか（Firebase 版は期限の前のときだけ。ローカル版は止めるまで期限なしで入れる）
+ */
+export type GroupSettings = {
+  autoJoinUntil: number | null;
+  open: boolean;
+};
+
 /**
  * グループに見せる問い（切り抜き画像・問い・称号だけ。ユーザー名・ニックネーム・位置情報は入れない）。
  * 同じ人の投稿をひも付けられないよう、持ち主も入れない（Firebase 版では、本人の記録だけ読める groups/{id}/owners に分けて持つ）
@@ -61,5 +84,5 @@ export type GroupPost = {
   text: string;
   subject: Subject;
   topic: string;
-  title: Subject | null;
+  title: string | null;
 };

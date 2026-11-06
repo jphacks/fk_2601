@@ -1,4 +1,4 @@
-import { STAMP_GOAL, SUBJECTS } from "./constants";
+import { SUBJECTS } from "./constants";
 import type { ArchiveRecord } from "./types";
 import type { Subject } from "@/server/llm/schema";
 
@@ -7,11 +7,6 @@ export function stampCounts(archives: ArchiveRecord[]): Record<Subject, number> 
   const counts: Record<Subject, number> = { math: 0, science: 0, info: 0 };
   for (const a of archives) counts[a.question.subject] += 1;
   return counts;
-}
-
-/** スタンプが目標の数に届いて、称号を得ている分類 */
-export function earnedTitles(counts: Record<Subject, number>): Subject[] {
-  return SUBJECTS.filter((s) => counts[s] >= STAMP_GOAL);
 }
 
 /** 図鑑を「分類 → 単元」で分ける */

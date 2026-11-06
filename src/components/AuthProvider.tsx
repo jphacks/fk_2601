@@ -156,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 入れなくても登録は止めない（みんなの はてなが見られないだけ）
       if (!profile) {
         try {
-          await backend.joinAutoGroups(user.uid);
+          await backend.joinAutoGroups(user.uid, user.username);
           setMemberships(await backend.listMemberships(user.uid));
         } catch {
           // 何もしない
