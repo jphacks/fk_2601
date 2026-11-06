@@ -22,7 +22,8 @@ import {
   type TeacherClass,
   type TeacherRole,
 } from "@/lib/teacherDemo";
-import { useTeacher, type CastMode } from "./TeacherProvider";
+import { CastFrame, CastIcon, castSize, ClassNameRuby } from "./CastFrame";
+import { useTeacher } from "./TeacherProvider";
 
 // クラスの設定（授業時間・参加コードと先生）。見本は docs/design/teachers/screens/15〜18、仕様は docs/06-school-expansion.md 5.1・5.2・5.6
 // 操作の結果はこの画面と TeacherProvider の中だけに反映し、読み込み直すとはじめに戻る（デモのデータ）
@@ -609,26 +610,6 @@ function NoteLine({ note }: { note: Note }) {
   );
 }
 
-function CastIcon({ size }: { size: number }) {
-  return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="12" rx="1.5" />
-      <path d="M8 20h8" />
-      <path d="M12 16v4" />
-    </svg>
-  );
-}
-
-function BoardIcon({ size }: { size: number }) {
-  return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="4" width="20" height="13" rx="1" />
-      <path d="M5 20h14" />
-      <path d="M15 20v-3" />
-    </svg>
-  );
-}
-
 function JoinCodeCard({ klass }: { klass: TeacherClass }) {
   const { updateClass } = useTeacher();
   const [note, setNote] = useState<Note>(null);
@@ -927,125 +908,38 @@ function ConfirmDialog({ title, items, confirmLabel, danger = false, onCancel, o
 }
 
 // ---- 参加コードを教室に映す（見本 17・18） ----
-// 子どもが読むので、子どもの画面の文字の決まり（ひらがな・22px 以上の漢字にふりがな）に合わせる
-
-const CLASS_NAME_RUBY: Record<string, string> = { 年: "ねん", 組: "くみ" };
-
-function ClassNameRuby({ name }: { name: string }) {
-  return (
-    <>
-      {[...name].map((ch, i) =>
-        CLASS_NAME_RUBY[ch] ? (
-          <ruby key={i}>
-            {ch}
-            <rt className="text-[0.42em] tracking-normal">{CLASS_NAME_RUBY[ch]}</rt>
-          </ruby>
-        ) : (
-          ch
-        ),
-      )}
-    </>
-  );
-}
-
-const CAST_MODES: { id: CastMode; label: string; Icon: typeof CastIcon }[] = [
-  { id: "monitor", label: "モニター", Icon: CastIcon },
-  { id: "board", label: "黒板", Icon: BoardIcon },
-];
 
 function JoinCodeCast({ klass, onClose }: { klass: TeacherClass; onClose: () => void }) {
-  const { castMode: mode, setCastMode } = useTeacher();
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = ref.current;
-    if (dialog && !dialog.open) dialog.showModal();
-  }, []);
-
-  const monitor = mode === "monitor";
-  const line = monitor ? "border border-[rgba(244,241,232,0.38)]" : "border-2 border-t-cast-fg";
-  const weight = monitor ? "font-semibold" : "font-black";
-
   return (
-    <dialog
-      ref={ref}
-      aria-label="参加コードを教室に映す"
+    <CastFrame
+      label="参加コードを教室に映す"
+      title={
+        <>
+          <ClassNameRuby name={klass.name} />に はいろう
+        </>
+      }
+      info={`${klass.schoolYear} ・ 参加コード ・ ${klass.joinOpen ? "受付中" : "受付を止めています"}`}
       onClose={onClose}
-      className={`fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none overflow-hidden border-0 p-0 ${monitor ? "bg-t-proj-board font-t-chalk text-t-proj-chalk" : "bg-t-cast-bg font-t-cast text-t-cast-fg"}`}
     >
-      <div className="relative flex h-full flex-col px-[4vw] pt-10 pb-[calc(36px+4vh)]">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <div className="flex items-center gap-[18px]">
-            <span className={`inline-flex size-16 shrink-0 items-center justify-center rounded-full ${monitor ? "bg-t-proj-chalk" : "bg-t-cast-fg"}`}>
-              <Image src="/navi/navi-smile.png" alt="" width={54} height={54} className="size-[54px]" />
-            </span>
-            <span className="flex flex-col gap-1.5">
-              <span className={`text-[32px] tracking-[0.04em] ${weight}`}>
-                <ClassNameRuby name={klass.name} />に はいろう
-              </span>
-              <span className={`font-t-body text-base ${monitor ? "text-t-proj-sub" : "font-bold"}`}>
-                {klass.schoolYear} ・ 参加コード ・ {klass.joinOpen ? "受付中" : "受付を止めています"}
-              </span>
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-4 font-t-body">
-            <div role="group" aria-label="映す先" className={`flex items-center gap-1 rounded-xl p-1 ${line}`}>
-              <span className={`px-2 text-[13px] font-bold ${monitor ? "text-[#E4ECE7]" : ""}`}>映す先</span>
-              {CAST_MODES.map(({ id, label, Icon }) => {
-                const on = id === mode;
-                const color = on ? (monitor ? "bg-t-proj-yellow text-t-text" : "bg-t-cast-yellow text-black") : monitor ? "text-[#E4ECE7]" : "text-t-cast-fg";
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => setCastMode(id)}
-                    className={`inline-flex h-10 items-center gap-1.5 rounded-lg px-3.5 text-sm font-bold pointer-coarse:h-11 ${color}`}
-                  >
-                    <Icon size={18} />
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-            <button
-              type="button"
-              onClick={() => ref.current?.close()}
-              className={`inline-flex h-12 items-center gap-2 rounded-[10px] px-4 text-[15px] font-bold ${line} ${monitor ? "text-[#E4ECE7]" : ""}`}
-            >
-              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-                <path d="M6 6l12 12" />
-                <path d="M18 6L6 18" />
-              </svg>
-              とじる
-            </button>
-          </div>
-        </div>
-
+      {(t) => (
         <div className="flex flex-1 flex-col items-center justify-center gap-[5vh] text-center">
-          <p className={`text-[length:clamp(24px,2.5vw,40px)] tracking-[0.04em] ${weight}`}>「せってい」で この コードを いれてね</p>
-          <div className={`rounded-[28px] px-[4.5vw] py-[4.5vh] ${monitor ? "border-4 border-dashed border-t-proj-yellow" : "border-[6px] border-t-cast-fg"}`}>
+          <p className={`tracking-[0.04em] ${t.weight} ${t.chalk}`} style={{ fontSize: castSize(40) }}>
+            「せってい」で この コードを いれてね
+          </p>
+          <div className={`rounded-[28px] px-[4.5vw] py-[4.5vh] ${t.monitor ? "border-4 border-dashed border-t-proj-yellow" : "border-[6px] border-t-cast-fg"}`}>
             {/* 見まちがえにくいよう、コードだけは BIZ UDPゴシックで出す（README「参加コードを映す」） */}
-            <span
-              className={`-mr-[0.1em] block font-t-body text-[length:min(10.5vw,19vh)] leading-none font-bold tracking-[0.1em] whitespace-nowrap tabular-nums ${monitor ? "text-t-proj-yellow" : "text-t-cast-yellow"}`}
-            >
+            <span className={`-mr-[0.1em] block font-t-body leading-none font-bold tracking-[0.1em] whitespace-nowrap tabular-nums ${t.accentText}`} style={{ fontSize: castSize(168) }}>
               {klass.joinCode}
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <Image src="/navi/navi-think.png" alt="" width={88} height={88} className="size-[clamp(56px,5.5vw,88px)]" />
-            <span className={`text-[length:clamp(20px,2vw,32px)] ${monitor ? "font-semibold text-t-proj-sub" : "font-black"}`}>せんせいが たしかめたら、 はいれるよ</span>
+            <Image src="/navi/navi-think.png" alt="" width={88} height={88} style={{ width: castSize(88), height: castSize(88) }} />
+            <span className={`${t.weight} ${t.monitor ? "text-t-proj-sub" : ""}`} style={{ fontSize: castSize(32) }}>
+              せんせいが たしかめたら、 はいれるよ
+            </span>
           </div>
         </div>
-
-        {/* チョーク受けの絵は、モニターだけ（黒板には本物がある） */}
-        {monitor && (
-          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-9 border-t-[6px] border-[#4A3524] bg-[#5C432D]">
-            <span className="absolute top-1.5 right-[220px] h-3 w-[60px] -rotate-[4deg] rounded bg-t-proj-chalk" />
-            <span className="absolute top-2 right-[140px] h-3 w-[52px] rotate-[3deg] rounded bg-t-proj-yellow" />
-            <span className="absolute top-1.5 right-[72px] h-3 w-11 -rotate-2 rounded bg-t-proj-pink" />
-          </div>
-        )}
-      </div>
-    </dialog>
+      )}
+    </CastFrame>
   );
 }

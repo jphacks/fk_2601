@@ -7,7 +7,7 @@ import { SceneThumb } from "./SceneThumb";
 import { useTeacher } from "./TeacherProvider";
 
 // はてな（クラスに共有・授業中の記録）。見本は docs/design/teachers/screens/03〜05、仕様は docs/06-school-expansion.md 5.2・5.4
-// 操作の結果はこの画面の中だけに反映し、読み込み直すとはじめに戻る（デモのデータ）
+// 操作の結果はこの画面の中（クラスから外したものは TeacherProvider）だけに反映し、読み込み直すとはじめに戻る（デモのデータ）
 // 子どもどうしを比べないよう、人ごとの件数の並びや、予想の当たり外れの割合は出さない（5.5）
 
 // 大きさは組み合わせごとに決める。タブレットでは押せるものを 44px 以上にし、入力欄の文字を 16px にする（MembersScreen と同じ）
@@ -48,7 +48,7 @@ function Count({ children, tone = "board" }: { children: React.ReactNode; tone?:
   );
 }
 
-function HatenaCard({ item, onAskRemove }: { item: Item; onAskRemove: (item: Item) => void }) {
+function HatenaCard({ item, castHref, onAskRemove }: { item: Item; castHref: string; onAskRemove: (item: Item) => void }) {
   return (
     <article className="flex flex-col overflow-hidden rounded-xl border border-[#E3E9E6] bg-white">
       <div className="relative">
@@ -71,7 +71,7 @@ function HatenaCard({ item, onAskRemove }: { item: Item; onAskRemove: (item: Ite
         {item.shared ? (
           <span className="mt-auto flex items-center justify-between gap-1.5 pt-1">
             <Link
-              href="/teacher/cast"
+              href={castHref}
               className="inline-flex h-8 items-center gap-[5px] rounded-tbtn border border-t-chalk-line bg-t-chalk-soft px-2.5 text-xs font-bold whitespace-nowrap text-t-chalk-text pointer-coarse:h-11"
             >
               <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -155,11 +155,11 @@ function RemoveDialog({ item, onCancel, onConfirm }: { item: Item | null; onCanc
 }
 
 function Hatena({ klass }: { klass: TeacherClass }) {
+  const { updateClass } = useTeacher();
   const [tab, setTab] = useState<Tab>("shared");
   const [field, setField] = useState<FieldFilter>("all");
   const [unit, setUnit] = useState<string | null>(null);
   const [memberId, setMemberId] = useState("all");
-  const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [removing, setRemoving] = useState<Item | null>(null);
 
   const members = useMemo(() => [...klass.members].sort((a, b) => (a.no ?? 99) - (b.no ?? 99)), [klass]);
@@ -168,11 +168,11 @@ function Hatena({ klass }: { klass: TeacherClass }) {
     const items: Item[] = [];
     for (const s of klass.shared) {
       const m = klass.members.find((x) => x.id === s.memberId);
-      if (!m || removedIds.includes(s.id)) continue;
+      if (!m) continue;
       items.push({ ...DEMO_RECORDS[s.record], id: s.id, memberId: m.id, at: s.at, who: `${m.user}（${m.name}）`, isNew: s.isNew, shared: true });
     }
     return items.sort(byNewest);
-  }, [klass, removedIds]);
+  }, [klass]);
 
   // 授業中の記録は、メンバーの個別ページと同じもの（一人につき新しい3件まで）を出す
   const recordItems = useMemo(
@@ -209,8 +209,17 @@ function Hatena({ klass }: { klass: TeacherClass }) {
     setUnit(null);
   };
 
+  // 教室に映すときは、いま しぼりこんでいる はてなを、選んだものから順に映す
+  const castHref = (item: Item) => {
+    const q = new URLSearchParams({ post: item.id });
+    if (field !== "all") q.set("field", field);
+    if (currentUnit !== null) q.set("unit", currentUnit);
+    return `/teacher/cast?${q}`;
+  };
+
   const confirmRemove = () => {
-    if (removing) setRemovedIds((prev) => [...prev, removing.id]);
+    // 外した投稿は、教室に映す画面にも出さない（TeacherProvider に覚える）
+    if (removing) updateClass(klass.id, (c) => ({ ...c, shared: c.shared.filter((x) => x.id !== removing.id) }));
     setRemoving(null);
   };
 
@@ -318,7 +327,7 @@ function Hatena({ klass }: { klass: TeacherClass }) {
           {items.length > 0 ? (
             <div className="grid min-h-0 flex-1 auto-rows-max grid-cols-[repeat(auto-fill,minmax(224px,1fr))] content-start gap-3.5 overflow-auto px-[18px] py-4 max-[1100px]:overflow-visible">
               {items.map((item) => (
-                <HatenaCard key={item.id} item={item} onAskRemove={setRemoving} />
+                <HatenaCard key={item.id} item={item} castHref={castHref(item)} onAskRemove={setRemoving} />
               ))}
             </div>
           ) : (
