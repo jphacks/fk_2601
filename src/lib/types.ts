@@ -38,11 +38,12 @@ export type ArchiveRecord = {
   publicId: string | null;
 };
 
-/** 匿名で公開する問い（切り抜き画像・問い・称号だけ。ユーザー名・位置情報は入れない） */
+/**
+ * 匿名で公開する問い（切り抜き画像・問い・称号だけ。ユーザー名・位置情報は入れない）。
+ * 同じ人の投稿をひも付けられないよう、持ち主も入れない（Firebase 版では、だれも読めない publicOwners に分けて持つ）
+ */
 export type PublicPost = {
   id: string;
-  /** 本人だけが消せるようにするための ID（画面には出さない） */
-  ownerUid: string;
   createdAt: number;
   image: string;
   text: string;

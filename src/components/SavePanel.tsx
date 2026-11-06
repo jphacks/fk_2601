@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { stampCounts } from "@/lib/collection";
-import { STAMP_GOAL, SUBJECT_KANA, TITLE_LABEL } from "@/lib/constants";
+import { PUBLIC_SHARING_PAUSED, STAMP_GOAL, SUBJECT_KANA, TITLE_LABEL } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
@@ -73,7 +73,7 @@ export function SavePanel({
     setBusy(true);
     setError(null);
     try {
-      await add({ question, guess, rating, image, publish });
+      await add({ question, guess, rating, image, publish: publish && !PUBLIC_SHARING_PAUSED });
       markSaved();
     } catch (e) {
       setError(messageOf(e));
@@ -109,13 +109,15 @@ export function SavePanel({
           <CollectCard question={question} image={image} summary={summary} rating={rating} />
         </Spotlight>
 
-        <label className="flex cursor-pointer items-start gap-3 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm active:translate-y-1 active:shadow-none">
-          <input type="checkbox" checked={publish} onChange={(e) => setPublish(e.target.checked)} className="mt-1 size-6 shrink-0 accent-[var(--color-pink)]" />
-          <span className="text-[19px] font-black leading-[1.6]">
-            みんなにも みせる
-            <span className="block text-sm font-bold text-pink-dark">なまえは でないよ。かこんだ しゃしんと はてなだけ みえるよ。</span>
-          </span>
-        </label>
+        {!PUBLIC_SHARING_PAUSED && (
+          <label className="flex cursor-pointer items-start gap-3 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm active:translate-y-1 active:shadow-none">
+            <input type="checkbox" checked={publish} onChange={(e) => setPublish(e.target.checked)} className="mt-1 size-6 shrink-0 accent-[var(--color-pink)]" />
+            <span className="text-[19px] font-black leading-[1.6]">
+              みんなにも みせる
+              <span className="block text-sm font-bold text-pink-dark">なまえは でないよ。かこんだ しゃしんと はてなだけ みえるよ。</span>
+            </span>
+          </label>
+        )}
 
         {/* ナビも いっしょに よろこぶ（のこった空白を うめる） */}
         <div className="mt-auto">

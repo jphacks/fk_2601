@@ -36,10 +36,9 @@ export function ArchiveProvider({ children }: { children: React.ReactNode }) {
   return <ArchiveState key={profile?.id ?? "none"}>{children}</ArchiveState>;
 }
 
-function publicPost(uid: string, profile: Profile, record: ArchiveRecord): PublicPost {
+function publicPost(profile: Profile, record: ArchiveRecord): PublicPost {
   return {
     id: record.id,
-    ownerUid: uid,
     createdAt: record.createdAt,
     image: record.image,
     text: record.question.text,
@@ -54,6 +53,27 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">(profile && user ? "loading" : "ready");
   const [archives, setArchives] = useState<ArchiveRecord[]>([]);
 
+  // 公開データがもうない（管理者が消した・公開に失敗した）のに、公開中の印が残っているものは、印を外す。
+  // 失敗しても ずかんは そのまま見せる（次に読み込んだときに また確かめる）
+  const clearGonePublic = useCallback(
+    async (list: ArchiveRecord[]) => {
+      if (!user || !profile) return;
+      const published = list.flatMap((a) => (a.publicId ? [a.publicId] : []));
+      if (published.length === 0) return;
+      try {
+        const gone = new Set(await backend.missingPublic(published));
+        const fixed = list.filter((a) => a.publicId && gone.has(a.publicId)).map((a) => ({ ...a, publicId: null }));
+        if (fixed.length === 0) return;
+        await Promise.all(fixed.map((r) => backend.saveArchive(user.uid, profile.id, r)));
+        const byId = new Map(fixed.map((r) => [r.id, r]));
+        setArchives((prev) => prev.map((a) => byId.get(a.id) ?? a));
+      } catch {
+        // 何もしない
+      }
+    },
+    [backend, user, profile],
+  );
+
   const reload = useCallback(async (): Promise<ArchiveRecord[] | null> => {
     if (!user || !profile) return [];
     setStatus("loading");
@@ -61,12 +81,13 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
       const list = await backend.listArchives(user.uid, profile.id);
       setArchives(list);
       setStatus("ready");
+      void clearGonePublic(list);
       return list;
     } catch {
       setStatus("error");
       return null;
     }
-  }, [backend, user, profile]);
+  }, [backend, user, profile, clearGonePublic]);
 
   useEffect(() => {
     if (!user || !profile) return;
@@ -77,12 +98,13 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
         if (cancelled) return;
         setArchives(list);
         setStatus("ready");
+        void clearGonePublic(list);
       })
       .catch(() => !cancelled && setStatus("error"));
     return () => {
       cancelled = true;
     };
-  }, [backend, user, profile]);
+  }, [backend, user, profile, clearGonePublic]);
 
   const add = useCallback<ArchiveContext["add"]>(
     async ({ question, guess, rating, image, publish }) => {
@@ -102,7 +124,7 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
       setArchives((prev) => [record, ...prev]);
       if (publish) {
         try {
-          await backend.savePublic(publicPost(user.uid, profile, record));
+          await backend.savePublic(user.uid, publicPost(profile, record));
         } catch {
           throw new UserFacingError("ずかんには のこせたけど、みんなには みせられなかったよ");
         }

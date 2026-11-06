@@ -131,12 +131,18 @@ export const localBackend: Backend = {
     return readJson<PublicPost[]>(KEY_PUBLIC, []).sort((a, b) => b.createdAt - a.createdAt);
   },
 
-  async savePublic(post) {
+  // ローカル版はこのブラウザの中だけなので、持ち主は持たない
+  async savePublic(_uid, post) {
     const all = readJson<PublicPost[]>(KEY_PUBLIC, []).filter((p) => p.id !== post.id);
     writeJson(KEY_PUBLIC, [...all, post]);
   },
 
   async deletePublic(id) {
     writeJson(KEY_PUBLIC, readJson<PublicPost[]>(KEY_PUBLIC, []).filter((p) => p.id !== id));
+  },
+
+  async missingPublic(ids) {
+    const existing = new Set(readJson<PublicPost[]>(KEY_PUBLIC, []).map((p) => p.id));
+    return ids.filter((id) => !existing.has(id));
   },
 };

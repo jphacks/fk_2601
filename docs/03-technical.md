@@ -168,8 +168,9 @@ Firestore:
          └ archives/{archiveId}     id, createdAt, grade, question（5.2 の問い 1 つ分）,
                                     guess（予想）, rating（"pita" | "oshii" | "ohazure"）,
                                     image（切り抜きの data URL）, publicId（公開中なら public の ID）
-  public/{postId}                   id, ownerUid, createdAt, image, text, subject, topic, title
-                                    （ユーザー名・ニックネーム・位置情報は入れない）
+  public/{postId}                   id, createdAt, image, text, subject, topic, title
+                                    （ユーザー名・ニックネーム・位置情報・持ち主は入れない）
+  publicOwners/{postId}             uid（公開した問いの持ち主。だれも読めない。本人が消せるようにするためだけに持つ）
 ```
 - 開発用のローカル版（`NEXT_PUBLIC_BACKEND=local`）は、同じ形をブラウザの localStorage に保存する（`src/lib/backend/local.ts`）
 - あそびかたの説明を見おわったか（`docs/02-spec.md` 4.2）は、プロフィールの `guideSeenAt` に持つ（2026-11-06 に決めた）
@@ -178,7 +179,16 @@ Firestore:
   - 「とばす」「とじる」「ホームを みる」「やってみる！」「とばして はじめる」の どれでも、いまの時刻を入れる（`AuthProvider` の `markGuideSeen`）。保存に失敗しても説明は閉じる（次に ホームを開いたときに また出る）
   - プロフィールに持つので、いまの `firestore.rules` のまま本人だけが読み書きでき、ローカル版も同じ形で保存される。いまは1アカウントに1プロフィールなので、アカウントごとに一度だけ出る（`docs/06-school-expansion.md` 4.2）。プロフィールの切り替え（MVP 以降）を作ったときは、子どもごとに一度だけ出ることになる
 - 画像の大きさ：Firestore の1件は 1MiB まで。base64 にすると元の約1.33倍になるので、JPEG の品質を調整して 1件が 1MiB 未満に収まるようにする
-- アクセス制御：Firestore のセキュリティルールで、`users/{uid}` の下は uid が自分のときだけ読み書きできるようにする。`public` はログインした人が読めて、書けるのは投稿した本人だけ。作るときは、項目の種類・型・文字数（問題文 400 文字、題材 100 文字まで）・画像（切り抜きの JPEG で 650,000 文字まで）をルールで確かめる。`ownerUid` を公開データから外す方法は【未決】（外すと、「きみの はてな」の表示と本人の削除に別の仕組みが要る）。不適切な投稿を消す手段：【未決】
+- アクセス制御：Firestore のセキュリティルールで、`users/{uid}` の下は uid が自分のときだけ読み書きできるようにする。`public` はログインした人が読めて、消せるのは投稿した本人だけ。新しい公開は止めている（`docs/02-spec.md` 15章）ので、ルールで作るのを断る。再開するときは、項目の種類・型・文字数（問題文 400 文字、題材 100 文字まで）・画像（切り抜きの JPEG で 650,000 文字まで）を確かめる `validPost` を使う。不適切な投稿を消す手段：【未決】
+- 公開データの持ち主（2026-11-06 に決めた）：同じ人の投稿をひも付けられないよう、`public` には持ち主を入れない
+  - 持ち主の uid は `publicOwners/{postId}` に分ける。だれも読めない（本人も読まない）
+  - 公開するときは `public` と `publicOwners` を同じバッチで書く（`src/lib/backend/firebase.ts` の `savePublic`）。ルールで、`publicOwners` の uid が本人で、まだない投稿のときだけ作れる（ほかの人の投稿の持ち主になれない）
+  - 消すときも同じバッチで消す（`deletePublic`）。`public` を消せるのは、`publicOwners` の uid が本人のとき。`publicOwners` だけを消して投稿を残すことはできない。もうない投稿を消す操作は通す（管理者が投稿を消したあとも、ずかんの「けす」「みんなに みせるのを やめる」が失敗しないように）
+  - 「きみの はてな」の印は、自分のずかんで公開中のもの（アーカイブの `publicId`）と照らして出す（`src/app/others/page.tsx`）
+  - ずかんを読み込んだとき、`publicId` があるのに公開データがもうないもの（管理者が消した・公開に失敗した）は、`publicId` を `null` に戻して保存する（`ArchiveProvider` の `clearGonePublic`。2026-11-06 に決めた）。管理者として本人のデータは書きかえない。確かめるのに失敗しても、ずかんはそのまま見せる
+  - この変更より前の投稿には `ownerUid` が入ったまま残る。その投稿は、`ownerUid` が本人なら今までどおり消せる。前の投稿を書きかえる（`ownerUid` を外して `publicOwners` を作る）かどうかは【未決】（本番のデータを変えるので、人間の許可を取ってから行う）
+  - いまは新しい公開を止めている（`docs/02-spec.md` 15章）。上の書き方は、再開するとき（グループの共有 #120 で同じ考え方を使うとき）のためのもの
+  - ローカル版は1つのブラウザの中だけなので、持ち主を持たない
 - 削除：個別・一括で削除できる（Firestore のドキュメントを消す）
 - 学校版（未実装）で変更：授業時間中に保存したものは、担当クラスの先生が読める。クラス・友達グループの共有を足し、`public` はやめる（データの案は `docs/06-school-expansion.md` 10.2）
 
