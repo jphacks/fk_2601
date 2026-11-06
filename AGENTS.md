@@ -43,7 +43,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
     └── server/           # サーバーだけで動く処理。llm/（prompts・schema・client・validate・mock・builtin（AI なしの見本の問い））と auth.ts（ID トークンの確認）
 ```
 - はじめての人：`/login`（ようこそ → ログイン ID → パスワード）→ `/profile`（ニックネーム → 学年 → じゅんび できたよ）→ `/`（あそびかたの説明を1回だけ重ねる。`docs/02-spec.md` 4章）
-- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。`/join`（参加コードでグループに入る）は「せってい」から開く。先生用の管理画面（見本）は `/teacher` から（子どもの画面に入口を出さない。架空のデータだけで動く：`docs/03-technical.md` 10章）。グループの管理（投稿を消す・メンバーの管理。本番のデータ）は `/teacher/groups/{グループ}`（クラスの切り替えの「グループ」から。`docs/03-technical.md` 6章）。画面ごとの決まりは `docs/02-spec.md` 1章
+- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。`/join`（参加コードでグループに入る）は「せってい」から開く。先生用の管理画面（見本）は `/teacher` から（子どもの画面に入口を出さない。架空のデータだけで動く：`docs/03-technical.md` 10章）。グループの管理（きょう・はてな・ミッション・メンバーと参加コード。本番のデータ）は `/teacher/groups/{グループ}`（クラスの切り替えの「グループ」から。`docs/03-technical.md` 6章）。画面ごとの決まりは `docs/02-spec.md` 1章
 
 ## セットアップ・コマンド
 | 用途 | コマンド |

@@ -12,6 +12,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getCountFromServer,
   getDoc,
   getDocFromServer,
   getDocs,
@@ -271,6 +272,12 @@ export const firebaseBackend: Backend = {
       : query(posts, where("createdAt", "<", options.before), orderBy("createdAt", "desc"), limit(GROUP_POSTS_PAGE));
     const snapshot = await getDocs(page);
     return snapshot.docs.map((d) => d.data() as GroupPost);
+  },
+
+  // 数だけをサーバーで数える（投稿の画像を読まない）
+  async countGroupPostsSince(groupId, since) {
+    const snapshot = await getCountFromServer(query(collection(db(), "groups", groupId, "posts"), where("createdAt", ">=", since)));
+    return snapshot.data().count;
   },
 
   async getGroupPost(groupId, id) {

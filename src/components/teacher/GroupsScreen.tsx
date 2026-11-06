@@ -342,7 +342,7 @@ function GroupPosts({ groupId }: { groupId: GroupId }) {
   );
 }
 
-/** グループの投稿（/teacher/groups/{グループ}）。groupId が null（/teacher/groups）なら、はじめのグループへ移る */
+/** グループの はてな（/teacher/groups/{グループ}/hatena）。groupId が null（/teacher/groups）なら、はじめのグループへ移る */
 export function GroupsScreen({ groupId }: { groupId: string | null }) {
   return (
     <GroupAdminPage
