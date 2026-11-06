@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { requestQuestions } from "@/lib/api";
+import { ASKED_MAX } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import type { Crop, Photo } from "@/lib/image";
 import { buildGenerationContext } from "@/lib/progress";
@@ -86,7 +87,8 @@ function QuizState({ children }: { children: React.ReactNode }) {
       const body = {
         image: nextCrop.base64,
         ...context,
-        asked: [...context.asked, ...seen.current],
+        // 作り直しで見た問いも足す。サーバーの上限（200件）をこえないよう、新しい方を残す
+        asked: [...context.asked, ...seen.current].slice(-ASKED_MAX),
         ...(scene ? { scene } : {}),
       };
       // 見本の絵のときだけ、AI が使えなかったら、AI を呼ばずに見本の問いに切り替える（1回だけ。自動リトライではない）
