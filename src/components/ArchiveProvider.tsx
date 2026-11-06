@@ -36,10 +36,9 @@ export function ArchiveProvider({ children }: { children: React.ReactNode }) {
   return <ArchiveState key={profile?.id ?? "none"}>{children}</ArchiveState>;
 }
 
-function publicPost(uid: string, profile: Profile, record: ArchiveRecord): PublicPost {
+function publicPost(profile: Profile, record: ArchiveRecord): PublicPost {
   return {
     id: record.id,
-    ownerUid: uid,
     createdAt: record.createdAt,
     image: record.image,
     text: record.question.text,
@@ -102,7 +101,7 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
       setArchives((prev) => [record, ...prev]);
       if (publish) {
         try {
-          await backend.savePublic(publicPost(user.uid, profile, record));
+          await backend.savePublic(user.uid, publicPost(profile, record));
         } catch {
           throw new UserFacingError("ずかんには のこせたけど、みんなには みせられなかったよ");
         }

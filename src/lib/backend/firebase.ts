@@ -132,11 +132,18 @@ export const firebaseBackend: Backend = {
     return snapshot.docs.map((d) => d.data() as PublicPost);
   },
 
-  async savePublic(post) {
-    await setDoc(doc(db(), "public", post.id), JSON.parse(JSON.stringify(post)));
+  // 持ち主はだれも読めない publicOwners に分け、公開データと同じバッチで書く・消す（firestore.rules）
+  async savePublic(uid, post) {
+    const batch = writeBatch(db());
+    batch.set(doc(db(), "public", post.id), JSON.parse(JSON.stringify(post)));
+    batch.set(doc(db(), "publicOwners", post.id), { uid });
+    await batch.commit();
   },
 
   async deletePublic(id) {
-    await deleteDoc(doc(db(), "public", id));
+    const batch = writeBatch(db());
+    batch.delete(doc(db(), "public", id));
+    batch.delete(doc(db(), "publicOwners", id));
+    await batch.commit();
   },
 };
