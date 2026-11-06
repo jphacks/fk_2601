@@ -1,4 +1,4 @@
-import { UserFacingError } from "@/lib/errors";
+import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import type { ArchiveRecord, AuthUser, Profile, PublicPost } from "@/lib/types";
 import { usernameToLocalId, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
@@ -70,7 +70,7 @@ export const localBackend: Backend = {
     const username = validateUsername(rawUsername);
     validatePassword(password);
     const users = readJson<Record<string, AuthUser>>(KEY_USERS, {});
-    if (users[username]) throw new UserFacingError("その ログイン ID は もう つかわれているよ。ちがう ID に してね");
+    if (users[username]) throw new UsernameTakenError();
     const user: AuthUser = { uid: `local-${usernameToLocalId(username)}`, username };
     writeJson(KEY_USERS, { ...users, [username]: user });
     writeJson(KEY_SESSION, user);

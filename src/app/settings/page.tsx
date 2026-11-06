@@ -8,7 +8,7 @@ import { Gate } from "@/components/Gate";
 import { Icon, Medal } from "@/components/Icons";
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui";
-import { titleLabel } from "@/lib/constants";
+import { GUIDE_AGAIN, titleLabel } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import type { FirstMode } from "@/lib/types";
 
@@ -71,6 +71,20 @@ function SettingsContent() {
         <span className="text-[17px] font-black">しょうごう</span>
         <span className="ml-auto rounded-xl bg-purple px-2.5 py-0.5 text-sm font-black text-white">{titleLabel(profile.title)}</span>
         <Icon name="next" size={20} strokeWidth={3} />
+      </Link>
+
+      {/* あそびかたの説明を、1枚目から もういちど出す（docs/design/first/screens/10） */}
+      <Link
+        href={GUIDE_AGAIN}
+        className="flex h-[62px] items-center gap-2.5 rounded-[22px] border-3 border-ink bg-white px-4 shadow-pop-sm active:translate-y-1 active:shadow-none"
+      >
+        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0">
+          <circle cx="12" cy="12" r="10" fill="#4A5AE8" stroke="#22223A" strokeWidth="1.8" />
+          <path d="M9.3 9.4a2.8 2.8 0 0 1 5.4 1c0 1.8-2.7 2.3-2.7 3.9" fill="none" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" />
+          <circle cx="12" cy="17.3" r="1.3" fill="#FFFFFF" />
+        </svg>
+        <span className="text-[17px] font-black">あそびかたを もういちど みる</span>
+        <Icon name="next" size={20} strokeWidth={3} className="ml-auto" />
       </Link>
 
       {error && (

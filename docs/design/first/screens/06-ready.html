@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>じゅんび できたよ｜はじめまして 見本</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../../screen.css">
+<style>
+.navi{animation:navi-puni 2.6s ease-in-out infinite;transform-origin:50% 92%}
+.navi-react{animation:navi-pop .6s cubic-bezier(.3,1.6,.5,1) both,navi-puni 2.6s .6s ease-in-out infinite;transform-origin:50% 92%}
+@keyframes navi-puni{0%,100%{transform:translateY(0) scale(1.03,.97)}50%{transform:translateY(-4px) scale(.98,1.03)}}
+@keyframes navi-pop{0%{transform:translateY(24px) scale(.4);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+.sheet{animation:sheet-up .45s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes sheet-up{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.navi,.navi-react,.sheet{animation:none}}
+.off{opacity:.4;pointer-events:none}
+</style>
+</head>
+<body>
+<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: var(--color-white); font-family: var(--font-body); color: var(--color-ink); display: flex; flex-direction: column; gap: 16px">
+  <svg aria-hidden="true" width="390" height="844" viewBox="0 0 390 844" style="position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none"><circle cx="34" cy="40" r="8" fill="#FFC83D"></circle><path d="M352 30l14 5-11 10z" fill="#FF6F9C"></path><rect x="300" y="128" width="12" height="12" rx="2" fill="#24C3A0" transform="rotate(25 306 134)"></rect><path d="M300 96q8-10 16 0t16 0" fill="none" stroke="#8B5CF6" stroke-width="4" stroke-linecap="round"></path><circle cx="370" cy="330" r="6" fill="#4A5AE8"></circle><path d="M40 150l4 9 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#FFC83D"></path></svg>
+
+  <div role="progressbar" aria-label="とうろく" aria-valuemin="0" aria-valuemax="4" aria-valuenow="4" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 20px 0 0"><span style="height: 12px; border-radius: 6px; background: var(--color-mint)"></span><span style="height: 12px; border-radius: 6px; background: var(--color-mint)"></span><span style="height: 12px; border-radius: 6px; background: var(--color-mint)"></span><span style="height: 12px; border-radius: 6px; background: var(--color-mint)"></span></div>
+
+  <div style="margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center">
+    <img class="navi-react" src="../../assets/navi/navi-smile.png" alt="ナビ（にこにこ）" style="width: 168px; height: 168px">
+    <h1 style="margin: 0; font-family: var(--font-pop); font-weight: 400; font-size: 32px; line-height: 1.4">じゅんび できたよ！</h1>
+    <span style="font-family: var(--font-pop); font-size: 20px; line-height: 1.6; color: var(--color-navi-dark)">かこって はてなを<br>みつけちゃおう！</span>
+  </div>
+
+  <div style="margin-top: auto; padding: 14px 18px; border-radius: 24px; background: var(--color-navi-light); display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="font-family: var(--font-pop); font-size: 26px">そら</span>
+      <span style="padding: 2px 10px; border-radius: 12px; background: var(--color-navi); color: var(--color-white); font-size: 15px; font-weight: 900">5ねんせい</span>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 14px; background: var(--color-white)">
+      <span style="font-size: 14px; font-weight: 900; color: var(--color-ink-sub)">ログイン ID</span>
+      <span style="font-family: var(--font-pop); font-size: 20px">sora2026</span>
+    </div>
+    <span style="display: flex; gap: 8px; font-size: 15px; font-weight: 900; color: var(--color-yellow-dark); line-height: 1.5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6E4D00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>ID と パスワードは おうちの ひとと メモしてね</span>
+  </div>
+
+  <a href="07-guide-flow.html" style="margin-top: auto; margin-bottom: 6px; height: 72px; flex-shrink: 0; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 26px; background: var(--color-navi); box-shadow: var(--shadow-pop); color: var(--color-white); font-family: var(--font-pop); font-size: 24px; display: flex; align-items: center; justify-content: center; text-decoration: none">あそびかたを みる！</a>
+  <a href="../../screens/04-home.html" style="margin-bottom: 6px; height: 60px; flex-shrink: 0; box-sizing: border-box; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); color: var(--color-ink); font-size: 18px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none">とばして はじめる</a>
+</div>
+<script src="../../screen.js"></script>
+</body>
+</html>

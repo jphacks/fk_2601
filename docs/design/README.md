@@ -2,7 +2,7 @@
 
 画面の見た目・色・部品のルールをまとめた見本です。**アプリのコードではありません。**
 アプリ（Next.js + Tailwind CSS）を作るときに、見た目と動きをそろえるための参照として使ってください。
-これは子どもの画面の見本です。先生用の管理画面を作るときは、`docs/design/teachers/README.md` の見本を使ってください。
+これは子どもの画面の見本です。先生用の管理画面を作るときは、`docs/design/teachers/README.md` の見本を使ってください。はじめて使う子どもの登録と あそびかたの説明は、`docs/design/first/README.md` の見本にあります（色・線・影・文字の決まりは、この README と同じ）。
 
 ## 見かた
 - `design/index.html` をブラウザで開くと、全画面が一覧で見られます（Google Fonts を読むのでネット接続が必要）
@@ -19,7 +19,9 @@ design/
 ├── screen.css           # 見本の HTML だけで使う共通 CSS
 ├── screen.js            # 見本の HTML だけで使う小さな動き
 ├── assets/navi/         # ナビの7つの表情（透過 PNG・480px 四方。svg/ に同じ絵のベクター版）
-└── screens/             # 画面の見本（00〜22）
+├── screens/             # 画面の見本（00〜22）
+├── first/               # はじめまして（登録・あそびかたの説明）の見本。決まりは first/README.md
+└── teachers/            # 先生用の管理画面の見本。決まりは teachers/README.md
 ```
 
 ## コンセプト：まちの はてなを つかまえろ！

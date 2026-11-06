@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>あそびかた 1/3（あそぶ じゅんばん）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#22223A}a:hover{color:#22223A}
+rt{font-family:'Zen Maru Gothic',sans-serif;font-size:0.5em;font-weight:900;letter-spacing:0}
+input::placeholder{color:#8A8FA6}
+.navi{animation:navi-puni 2.6s ease-in-out infinite;transform-origin:50% 92%}
+.navi-react{animation:navi-pop .6s cubic-bezier(.3,1.6,.5,1) both,navi-puni 2.6s .6s ease-in-out infinite;transform-origin:50% 92%}
+@keyframes navi-puni{0%,100%{transform:translateY(0) scale(1.03,.97)}50%{transform:translateY(-4px) scale(.98,1.03)}}
+@keyframes navi-pop{0%{transform:translateY(24px) scale(.4);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+.sheet{animation:sheet-up .45s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes sheet-up{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.navi,.navi-react,.sheet{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: #FFFFFF; font-family: 'Zen Maru Gothic', sans-serif; color: #22223A; display: flex; flex-direction: column; gap: 16px">
+  <div role="img" aria-label="まちの え。いえ、き、しんごうに はてなが かくれている" style="position: relative; flex: 1 1 auto; min-height: 236px; box-sizing: border-box; border-radius: 32px; background: #E8EBFF; overflow: hidden">
+    <svg aria-hidden="true" width="336" height="230" viewBox="0 0 336 230" style="position: absolute; left: 0; bottom: 0"><circle cx="296" cy="40" r="20" fill="#FFC83D" stroke="#22223A" stroke-width="3"></circle><path d="M178 96a14 14 0 0 1 26-6 12 12 0 0 1 20 10h-46z" fill="#FFFFFF" stroke="#22223A" stroke-width="3" stroke-linejoin="round"></path><rect x="-4" y="186" width="344" height="50" fill="#9BE3C8" stroke="#22223A" stroke-width="3"></rect><path d="M16 140L50 110L84 140Z" fill="#FF6F9C" stroke="#22223A" stroke-width="3" stroke-linejoin="round"></path><rect x="22" y="140" width="56" height="46" fill="#FFE8F0" stroke="#22223A" stroke-width="3"></rect><rect x="42" y="158" width="16" height="28" fill="#FFC83D" stroke="#22223A" stroke-width="3"></rect><rect x="112" y="152" width="10" height="34" fill="#B08968" stroke="#22223A" stroke-width="3"></rect><circle cx="117" cy="138" r="24" fill="#24C3A0" stroke="#22223A" stroke-width="3"></circle><rect x="164" y="128" width="8" height="58" fill="#B7BCCD" stroke="#22223A" stroke-width="3"></rect><rect x="140" y="110" width="56" height="24" rx="12" fill="#3B3F52" stroke="#22223A" stroke-width="3"></rect><circle cx="154" cy="122" r="6" fill="#5B6074"></circle><circle cx="168" cy="122" r="6" fill="#5B6074"></circle><circle cx="182" cy="122" r="6" fill="#F0444F"></circle><circle cx="64" cy="92" r="13" fill="#FFFFFF" stroke="#22223A" stroke-width="2.5"></circle><text x="64" y="98" text-anchor="middle" font-family="Mochiy Pop One, sans-serif" font-size="15" fill="#8B5CF6">?</text><circle cx="136" cy="96" r="13" fill="#FFFFFF" stroke="#22223A" stroke-width="2.5"></circle><text x="136" y="102" text-anchor="middle" font-family="Mochiy Pop One, sans-serif" font-size="15" fill="#FF6F9C">?</text></svg>
+    <div style="position: absolute; left: 18px; top: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px">
+      <span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 21px">こんにちは、そら！</span>
+      <span style="padding: 3px 12px; border-radius: 12px; background: #8B5CF6; color: #FFFFFF; font-size: 14px; font-weight: 900">エンジニアレベル</span>
+    </div>
+    <img class="navi" src="/_blob/e5fb04ff8816f64ea5f5347773eca9bc" alt="ナビ（にこにこ）" style="position: absolute; right: 2px; bottom: 36px; width: 124px; height: 124px">
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 24px; background: #FFF1C2">
+    <span style="width: 46px; height: 46px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="#FFC83D" stroke="#22223A" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"></path></svg>
+    </span>
+    <div style="flex-grow: 1; display: flex; flex-direction: column">
+      <span style="font-size: 14px; font-weight: 900">きょうの おだい</span>
+      <span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 19px">まるい ものを さがそう！</span>
+    </div>
+  </div>
+
+  <a href="PopCamera.dc.html" style="height: 92px; flex-shrink: 0; box-sizing: border-box; border: 3px solid #22223A; border-radius: 30px; background: #4A5AE8; box-shadow: 0 7px 0 #22223A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 12px; text-decoration: none">
+    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="4"></circle></svg>
+    <span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 25px">はてなを さがす！</span>
+  </a>
+  <a href="PopKakomu.dc.html" style="height: 56px; flex-shrink: 0; box-sizing: border-box; border: 3px solid #22223A; border-radius: 22px; background: #FFFFFF; box-shadow: 0 4px 0 #22223A; color: #22223A; font-size: 19px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22223A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="M4 17l5-5 4 4 3-3 4 4"></path></svg>
+    アルバムから えらぶ
+  </a>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+    <div style="padding: 8px 10px; border-radius: 16px; background: #E8EBFF; display: flex; flex-direction: column; gap: 4px">
+      <span style="font-size: 13px; font-weight: 900; color: #2F3CB8">さんすう 3/5</span>
+      <span style="height: 8px; border-radius: 4px; background: #FFFFFF; overflow: hidden; display: block"><span style="display: block; width: 60%; height: 8px; background: #4A5AE8"></span></span>
+    </div>
+    <div style="padding: 8px 10px; border-radius: 16px; background: #DDF7F0; display: flex; flex-direction: column; gap: 4px">
+      <span style="font-size: 13px; font-weight: 900; color: #0F7A63">りか 1/5</span>
+      <span style="height: 8px; border-radius: 4px; background: #FFFFFF; overflow: hidden; display: block"><span style="display: block; width: 20%; height: 8px; background: #24C3A0"></span></span>
+    </div>
+    <div style="padding: 8px 10px; border-radius: 16px; background: #F0E9FF; display: flex; flex-direction: column; gap: 4px">
+      <span style="font-size: 13px; font-weight: 900; color: #6A3FD6">じょうほう 5/5</span>
+      <span style="height: 8px; border-radius: 4px; background: #FFFFFF; overflow: hidden; display: block"><span style="display: block; width: 100%; height: 8px; background: #8B5CF6"></span></span>
+    </div>
+  </div>
+
+  <nav aria-label="メニュー" style="margin: auto -24px -24px; padding-top: 18px; height: 102px; flex-shrink: 0; box-sizing: border-box; background: linear-gradient(#22223A, #22223A) 0 18px / 100% 3px no-repeat, linear-gradient(#FFFFFF, #FFFFFF) 0 18px / 100% 100% no-repeat; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr))">
+    <a href="PopZukan.dc.html" style="padding-top: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #6B7090; font-size: 14px; font-weight: 700"><span style="width: 56px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"></path><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"></path></svg></span>ずかん</a>
+    <a href="PopStamp.dc.html" style="padding-top: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #6B7090; font-size: 14px; font-weight: 700"><span style="width: 56px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5.5" r="2.5"></circle><path d="M10.5 8v4M13.5 8v4"></path><path d="M5 16a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2H5z"></path><path d="M5 21.5h14"></path></svg></span>スタンプ</a>
+    <a href="PopHome.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; text-decoration: none"><span style="margin-top: -14px; width: 76px; height: 76px; flex-shrink: 0; box-sizing: border-box; border: 3px solid #22223A; border-radius: 50%; background: #4A5AE8; box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 7px #FFC83D; color: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 900"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-5h4v5"></path></svg>ホーム</span></a>
+    <a href="PopMinna.dc.html" style="padding-top: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #6B7090; font-size: 14px; font-weight: 700"><span style="width: 56px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M16.5 14.2c2.9.3 5 2.5 5 5.8"></path></svg></span>みんな</a>
+    <a href="PopSettings.dc.html" style="padding-top: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #6B7090; font-size: 14px; font-weight: 700"><span style="width: 56px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg></span>せってい</a>
+  </nav>
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; background: rgba(34, 34, 58, 0.74)"></div>
+  <div style="position: absolute; left: 24px; right: 24px; top: 24px; z-index: 3; display: flex; align-items: center; justify-content: space-between">
+    <div role="progressbar" aria-label="あそびかた" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" style="display: flex; gap: 8px"><span style="width: 28px; height: 12px; border-radius: 6px; background: #FFFFFF"></span><span style="width: 12px; height: 12px; border-radius: 6px; background: rgba(255, 255, 255, 0.4)"></span><span style="width: 12px; height: 12px; border-radius: 6px; background: rgba(255, 255, 255, 0.4)"></span></div>
+    <a href="PopHome.dc.html" style="height: 44px; padding: 0 18px; box-sizing: border-box; border: 3px solid #22223A; border-radius: 22px; background: #FFFFFF; box-shadow: 0 3px 0 #22223A; color: #22223A; font-size: 16px; font-weight: 900; display: flex; align-items: center; text-decoration: none">とばす</a>
+  </div>
+  <div class="sheet" style="position: absolute; left: 16px; right: 16px; top: 88px; bottom: 24px; z-index: 3; box-sizing: border-box; padding: 18px 20px 20px; border-radius: 32px; background: #FFFFFF; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <img class="navi-react" src="/_blob/e5fb04ff8816f64ea5f5347773eca9bc" alt="ナビ（にこにこ）" style="width: 72px; height: 72px; flex-shrink: 0">
+      <span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 22px; line-height: 1.5">あそびかたは<br>この じゅんばん！</span>
+    </div>
+    <ol style="position: relative; list-style: none; margin: auto 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+      <span aria-hidden="true" style="position: absolute; left: 20px; top: 22px; bottom: 22px; border-left: 4px dotted #C9CCDA"></span>
+      <li style="position: relative; display: flex; align-items: center; gap: 12px"><span style="position: relative; width: 44px; height: 44px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; background: #4A5AE8; color: #FFFFFF; font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">1</span><span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; line-height: 1.4">さがす</span><span style="font-size: 14px; font-weight: 900; color: #4A4E6A; line-height: 1.4">カメラで まちを とる</span></span><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A4E6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg></li>
+      <li style="position: relative; display: flex; align-items: center; gap: 12px"><span style="position: relative; width: 44px; height: 44px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; background: #FFC83D; color: #22223A; font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">2</span><span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; line-height: 1.4">かこむ</span><span style="font-size: 14px; font-weight: 900; color: #4A4E6A; line-height: 1.4">きに なる ところを ゆびで ぐるっと</span></span><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A4E6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M10 5c6-2 11 1 11 6s-5 7-10 7S3 15 3 11c0-2.5 2-4.5 5-5.5 1-.3 1.6-1.2 1.4-2.5"></path></svg></li>
+      <li style="position: relative; display: flex; align-items: center; gap: 12px"><span style="position: relative; width: 44px; height: 44px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; background: #FF8A3D; color: #22223A; font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">3</span><span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; line-height: 1.4">えらぶ</span><span style="font-size: 14px; font-weight: 900; color: #4A4E6A; line-height: 1.4">でてきた はてなを 1つ えらぶ</span></span><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A4E6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><rect x="3" y="4" width="18" height="5" rx="2"></rect><rect x="3" y="11" width="18" height="5" rx="2"></rect><path d="M7 20h10"></path></svg></li>
+      <li style="position: relative; display: flex; align-items: center; gap: 12px"><span style="position: relative; width: 44px; height: 44px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; background: #FF6F9C; color: #22223A; font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">4</span><span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; line-height: 1.4">せーの！</span><span style="font-size: 14px; font-weight: 900; color: #4A4E6A; line-height: 1.4">こたえを よそうする</span></span><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A4E6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M12 3v3M5.6 5.6l2 2M3 12h3M18.4 5.6l-2 2M21 12h-3"></path><circle cx="12" cy="14" r="5"></circle></svg></li>
+      <li style="position: relative; display: flex; align-items: center; gap: 12px"><span style="position: relative; width: 44px; height: 44px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; background: #4A5AE8; color: #FFFFFF; font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">5</span><span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; line-height: 1.4">こたえあわせ</span><span style="font-size: 14px; font-weight: 900; color: #4A4E6A; line-height: 1.4">ぴたり？ おしい？ おおはずれ？</span></span><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A4E6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="8"></circle><path d="M8 12.5l3 3 5-6"></path></svg></li>
+      <li style="position: relative; display: flex; align-items: center; gap: 12px"><span style="position: relative; width: 44px; height: 44px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; background: #24C3A0; color: #22223A; font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">6</span><span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; line-height: 1.4">もしも</span><span style="font-size: 14px; font-weight: 900; color: #4A4E6A; line-height: 1.4">きまりを かえて もういちど</span></span><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A4E6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"></path><path d="M18 3v4h-4M6 21v-4h4"></path></svg></li>
+      <li style="position: relative; display: flex; align-items: center; gap: 12px"><span style="position: relative; width: 44px; height: 44px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; background: #8B5CF6; color: #FFFFFF; font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">7</span><span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 18px; line-height: 1.4">のこす</span><span style="font-size: 14px; font-weight: 900; color: #4A4E6A; line-height: 1.4">ずかんに のこして スタンプ ゲット</span></span><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A4E6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"></path><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"></path></svg></li>
+    </ol>
+    <a href="GuideNav.dc.html" style="margin-bottom: 6px; height: 72px; flex-shrink: 0; box-sizing: border-box; border: 3px solid #22223A; border-radius: 26px; background: #4A5AE8; box-shadow: 0 6px 0 #22223A; color: #FFFFFF; font-family: 'Mochiy Pop One', sans-serif; font-size: 24px; display: flex; align-items: center; justify-content: center; text-decoration: none">つぎへ</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

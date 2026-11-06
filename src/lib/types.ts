@@ -16,6 +16,11 @@ export type Profile = {
   title: Subject | null;
   /** 問いの出し方：先に3択を出すか、自分で書く入力欄を出すか */
   firstMode: FirstMode;
+  /**
+   * あそびかたの説明を見おわった（とばした）時刻。null は まだ見ていない（はじめての登録で null にする）。
+   * この値がない前からのプロフィールと /demo は、見おわったとして扱う（docs/03-technical.md 6章）
+   */
+  guideSeenAt?: number | null;
   createdAt: number;
 };
 

@@ -152,7 +152,7 @@ src/
 | データ | 主な項目 | 保存先 |
 |---|---|---|
 | アカウント | ユーザー名（メール形式に変換したもの）・パスワード | Firebase Authentication（パスワードはアプリで扱わない） |
-| プロフィール | ニックネーム・学年 | Firestore |
+| プロフィール | ニックネーム・学年・あそびかたの説明を見おわった時刻 | Firestore |
 | アーカイブ | 問い・式・変数・予想・結果・解説・出典・分類 | Firestore |
 | 切り抜き画像 | JPEG（base64） | Firestore（アーカイブと同じドキュメント） |
 | 出題済み | 対象×分野（単元） | アーカイブから取り出す（別に保存しない） |
@@ -164,7 +164,7 @@ src/
 Firestore:
   users/{uid}
     └ profiles/{profileId}          id, nickname, grade, title（使っている称号の分類 or null）,
-         │                          firstMode（"choices" | "custom"）, createdAt
+         │                          firstMode（"choices" | "custom"）, guideSeenAt, createdAt
          └ archives/{archiveId}     id, createdAt, grade, question（5.2 の問い 1 つ分）,
                                     guess（予想）, rating（"pita" | "oshii" | "ohazure"）,
                                     image（切り抜きの data URL）, publicId（公開中なら public の ID）
@@ -172,6 +172,11 @@ Firestore:
                                     （ユーザー名・ニックネーム・位置情報は入れない）
 ```
 - 開発用のローカル版（`NEXT_PUBLIC_BACKEND=local`）は、同じ形をブラウザの localStorage に保存する（`src/lib/backend/local.ts`）
+- あそびかたの説明を見おわったか（`docs/02-spec.md` 4.2）は、プロフィールの `guideSeenAt` に持つ（2026-11-06 に決めた）
+  - 値：見おわった（とばした）時刻（ミリ秒）。はじめての登録でプロフィールを作るときは `null`（まだ見ていない）にする
+  - `guideSeenAt` が `null` のときだけ、ホームで説明を出す。項目がないプロフィール（この機能より前に作ったもの・`/demo` の見本のプロフィール）は、見おわったとして扱い、出さない
+  - 「とばす」「とじる」「ホームを みる」「やってみる！」「とばして はじめる」の どれでも、いまの時刻を入れる（`AuthProvider` の `markGuideSeen`）。保存に失敗しても説明は閉じる（次に ホームを開いたときに また出る）
+  - プロフィールに持つので、いまの `firestore.rules` のまま本人だけが読み書きでき、ローカル版も同じ形で保存される。いまは1アカウントに1プロフィールなので、アカウントごとに一度だけ出る（`docs/06-school-expansion.md` 4.2）。プロフィールの切り替え（MVP 以降）を作ったときは、子どもごとに一度だけ出ることになる
 - 画像の大きさ：Firestore の1件は 1MiB まで。base64 にすると元の約1.33倍になるので、JPEG の品質を調整して 1件が 1MiB 未満に収まるようにする
 - アクセス制御：Firestore のセキュリティルールで、`users/{uid}` の下は uid が自分のときだけ読み書きできるようにする。`public` はログインした人が読めて、書けるのは投稿した本人だけ。作るときは、項目の種類・型・文字数（問題文 400 文字、題材 100 文字まで）・画像（切り抜きの JPEG で 650,000 文字まで）をルールで確かめる。`ownerUid` を公開データから外す方法は【未決】（外すと、「きみの はてな」の表示と本人の削除に別の仕組みが要る）。不適切な投稿を消す手段：【未決】
 - 削除：個別・一括で削除できる（Firestore のドキュメントを消す）

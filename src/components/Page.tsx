@@ -32,6 +32,7 @@ export function Page({
   back,
   onBack,
   tab,
+  tabRaised = false,
   icon,
   bg = "bg-white",
   children,
@@ -42,6 +43,8 @@ export function Page({
   /** タイトルの前に置く小さな絵 */
   icon?: ReactNode;
   tab?: Tab;
+  /** 下のナビを、あそびかたの説明の暗い幕の上に持ち上げる */
+  tabRaised?: boolean;
   /** 画面の地の色（ずかんだけ、えらんだ分類で うすく変える） */
   bg?: string;
   children: ReactNode;
@@ -62,7 +65,7 @@ export function Page({
         )}
         {children}
       </div>
-      {tab && <TabBar current={tab} />}
+      {tab && <TabBar current={tab} raised={tabRaised} />}
     </main>
   );
 }

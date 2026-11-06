@@ -23,6 +23,8 @@ type AppContext = {
   signOut: () => Promise<void>;
   /** プロフィールがなければ作り、あれば更新する */
   saveProfile: (input: ProfileInput) => Promise<Profile>;
+  /** あそびかたの説明を見おわった（とばした）ことを残す。残せなくても説明は閉じる（次に また出るだけ） */
+  markGuideSeen: () => Promise<void>;
 };
 
 const Context = createContext<AppContext | null>(null);
@@ -106,6 +108,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         grade: input.grade,
         title: null,
         firstMode: "choices",
+        // はじめての登録なので、あそびかたの説明を まだ見ていない
+        guideSeenAt: null,
         createdAt: Date.now(),
       };
       const next: Profile = { ...base, ...input };
@@ -116,9 +120,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [backend, user, profile],
   );
 
+  const markGuideSeen = useCallback(async () => {
+    if (!profile) return;
+    try {
+      await saveProfile({ nickname: profile.nickname, grade: profile.grade, guideSeenAt: Date.now() });
+    } catch {
+      // 残せなかったときは、次に ホームを開いたときに もういちど出る（説明を閉じられないより よい）
+    }
+  }, [profile, saveProfile]);
+
   const value = useMemo<AppContext>(
-    () => ({ backend, status, profileFailed, retryProfiles, user, profile, signUp, signIn, signOut, saveProfile }),
-    [backend, status, profileFailed, retryProfiles, user, profile, signUp, signIn, signOut, saveProfile],
+    () => ({ backend, status, profileFailed, retryProfiles, user, profile, signUp, signIn, signOut, saveProfile, markGuideSeen }),
+    [backend, status, profileFailed, retryProfiles, user, profile, signUp, signIn, signOut, saveProfile, markGuideSeen],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
