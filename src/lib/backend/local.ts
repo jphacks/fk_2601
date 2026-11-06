@@ -1,5 +1,6 @@
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import { GROUPS, type GroupId } from "@/lib/constants";
+import { newJoinCode } from "@/lib/joinCode";
 import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
 import { usernameToLocalId, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
@@ -15,6 +16,10 @@ const groupsKey = (uid: string) => `local:groups:${uid}`;
 const groupPostsKey = (groupId: GroupId) => `local:groupPosts:${groupId}`;
 const groupReportsKey = (groupId: GroupId) => `local:groupReports:${groupId}`;
 const groupSettingsKey = (groupId: GroupId) => `local:groupSettings:${groupId}`;
+// 参加コード（#137）：コード → { groupId, open }。グループのいまのコードは groupJoinCodeKey に持つ
+const KEY_JOIN_CODES = "local:joinCodes";
+const groupJoinCodeKey = (groupId: GroupId) => `local:groupJoinCode:${groupId}`;
+type LocalJoinCodes = Record<string, { groupId: GroupId; open: boolean }>;
 
 type LocalGroups = Partial<Record<GroupId, GroupRole>>;
 
@@ -186,6 +191,38 @@ export const localBackend: Backend = {
 
   async stopAutoJoin(groupId) {
     writeJson(groupSettingsKey(groupId), { autoJoinUntil: Date.now() });
+  },
+
+  async getJoinCode(groupId) {
+    const code = readJson<string | null>(groupJoinCodeKey(groupId), null);
+    const entry = code ? readJson<LocalJoinCodes>(KEY_JOIN_CODES, {})[code] : undefined;
+    return code && entry ? { code, open: entry.open } : null;
+  },
+
+  async createJoinCode(groupId) {
+    const codes = readJson<LocalJoinCodes>(KEY_JOIN_CODES, {});
+    const before = readJson<string | null>(groupJoinCodeKey(groupId), null);
+    if (before) delete codes[before];
+    const code = newJoinCode();
+    codes[code] = { groupId, open: true };
+    writeJson(KEY_JOIN_CODES, codes);
+    writeJson(groupJoinCodeKey(groupId), code);
+    return { code, open: true };
+  },
+
+  async setJoinCodeOpen(code, open) {
+    const codes = readJson<LocalJoinCodes>(KEY_JOIN_CODES, {});
+    if (codes[code]) writeJson(KEY_JOIN_CODES, { ...codes, [code]: { ...codes[code], open } });
+  },
+
+  async joinWithCode(uid, _username, code) {
+    const entry = readJson<LocalJoinCodes>(KEY_JOIN_CODES, {})[code];
+    if (!entry) throw new UserFacingError("その コードの グループは みつからないよ。もういちど たしかめてね");
+    if (!entry.open) throw new UserFacingError("いまは その グループに はいれないよ。おとなの ひとに きいてね");
+    const groups = readJson<LocalGroups>(groupsKey(uid), {});
+    if (groups[entry.groupId]) return { groupId: entry.groupId, already: true };
+    writeJson(groupsKey(uid), { ...groups, [entry.groupId]: "member" });
+    return { groupId: entry.groupId, already: false };
   },
 
   async getGroupSettings(groupId): Promise<GroupSettings> {

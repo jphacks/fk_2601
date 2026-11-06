@@ -8,7 +8,7 @@ import { Gate } from "@/components/Gate";
 import { Icon, Medal } from "@/components/Icons";
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui";
-import { GUIDE_AGAIN, titleLabel } from "@/lib/constants";
+import { GUIDE_AGAIN, groupOf, titleLabel } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import type { FirstMode } from "@/lib/types";
 
@@ -18,7 +18,7 @@ const OPTIONS: { value: FirstMode; label: string }[] = [
 ];
 
 function SettingsContent() {
-  const { profile, saveProfile, signOut } = useApp();
+  const { profile, saveProfile, signOut, memberships } = useApp();
   const [error, setError] = useState<string | null>(null);
   if (!profile) return null;
 
@@ -71,6 +71,21 @@ function SettingsContent() {
         <span className="text-[17px] font-black">しょうごう</span>
         <span className="ml-auto rounded-xl bg-purple px-2.5 py-0.5 text-sm font-black text-white">{titleLabel(profile.title)}</span>
         <Icon name="next" size={20} strokeWidth={3} />
+      </Link>
+
+      {/* 参加コードでグループに入る（#137） */}
+      <Link
+        href="/join"
+        className="flex min-h-[62px] items-center gap-2.5 rounded-[22px] border-3 border-ink bg-white px-4 py-2 shadow-pop-sm active:translate-y-1 active:shadow-none"
+      >
+        <Icon name="people" size={28} strokeWidth={2.2} />
+        <span className="flex flex-col">
+          <span className="text-[17px] font-black">グループに はいる</span>
+          {memberships && memberships.length > 0 && (
+            <span className="text-sm font-bold text-ink-sub">いま：{memberships.map((m) => groupOf(m.groupId).kana).join("・")}</span>
+          )}
+        </span>
+        <Icon name="next" size={20} strokeWidth={3} className="ml-auto" />
       </Link>
 
       {/* あそびかたの説明を、1枚目から もういちど出す（docs/design/first/screens/10） */}

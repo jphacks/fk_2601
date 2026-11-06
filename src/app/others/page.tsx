@@ -10,7 +10,7 @@ import { Page } from "@/components/Page";
 import { SUBJECT_STYLE } from "@/components/QuestionCard";
 import { kanaOf } from "@/lib/ruby";
 import { RubyText } from "@/components/RubyText";
-import { ErrorNotice, Say } from "@/components/ui";
+import { ErrorNotice, LinkButton, Say } from "@/components/ui";
 import { groupOf, titleLabel, type GroupId } from "@/lib/constants";
 import type { GroupPost } from "@/lib/types";
 
@@ -113,6 +113,11 @@ function OthersContent() {
         <p className="rounded-card bg-pink-light px-4 py-3 text-lg font-black leading-[1.7]">
           まだ どの グループにも はいっていないよ。グループに はいると、なかまの はてなが みられるよ。
         </p>
+      )}
+      {memberships?.length === 0 && (
+        <LinkButton href="/join" variant="sub">
+          コードで グループに はいる
+        </LinkButton>
       )}
 
       {failed && (

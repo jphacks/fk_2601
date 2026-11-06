@@ -1,5 +1,5 @@
 import type { GroupId } from "@/lib/constants";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, GroupRole, GroupSettings, JoinCode, Membership, Profile } from "@/lib/types";
 
 /** 認証とデータの保存。Firebase 版と、Firebase なしで動かす開発用のローカル版がある */
 export interface Backend {
@@ -38,6 +38,17 @@ export interface Backend {
   stopAutoJoin(groupId: GroupId): Promise<void>;
   /** グループの設定（メンバーなら読める） */
   getGroupSettings(groupId: GroupId): Promise<GroupSettings>;
+  /** 参加コード（#137）。いまのコード（まだ作っていなければ null）。管理者だけ */
+  getJoinCode(groupId: GroupId): Promise<JoinCode | null>;
+  /** 新しいコードを作る（前のコードは使えなくなる）。受付中にする。管理者だけ */
+  createJoinCode(groupId: GroupId): Promise<JoinCode>;
+  /** 受付を止める・再開する。管理者だけ */
+  setJoinCodeOpen(code: string, open: boolean): Promise<void>;
+  /**
+   * 参加コードでグループに入る（そろえたコードを渡す）。入ったグループを返す。
+   * もう入っていたら already。コードがない・受付を止めているときは、子どもに分かる文の UserFacingError
+   */
+  joinWithCode(uid: string, username: string, code: string): Promise<{ groupId: GroupId; already: boolean }>;
   /** グループに見せた問い（新しい順）。読めるのはグループのメンバーだけ */
   listGroupPosts(groupId: GroupId): Promise<GroupPost[]>;
   /** グループに見せる。uid は持ち主（投稿には入れず、本人だけが消せるようにするために別に持つ） */
