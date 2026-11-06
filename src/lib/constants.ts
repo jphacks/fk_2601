@@ -35,9 +35,20 @@ export const GUIDE_AGAIN = `/?${GUIDE_PARAM}=1`;
 export const ASKED_MAX = 200;
 export const ASKED_FROM_ARCHIVE = 150;
 
-// 「みんなの はてな」（全員への匿名公開）を止めている。グループの共有（#120）ができるまで、
-// 新しく公開できず、/others は準備中の表示にする（firestore.rules でも新しい公開を断る。docs/02-spec.md 15章）
-export const PUBLIC_SHARING_PAUSED = true;
+// 「みんなの はてな」で はてなを見せあうグループ（docs/02-spec.md 15章、docs/03-technical.md 6章）。
+// グループそのもの（groups/{id}）とメンバー・管理者は Firestore に人が作る。ここは画面に出す名前だけを持つ。
+// name は 22px 以上の文字で使う（ふりがなの記法つき）。kana は小さい文字で使う
+// autoJoin：新しく登録した人を自動で入れる（入れる期限は Firestore の groups/{id} の autoJoinUntil。firestore.rules で確かめる）
+export const GROUPS = [
+  { id: "jphacks", name: "JPHACKS", kana: "JPHACKS", autoJoin: true },
+  { id: "csennkai", name: "C{専会|せんかい}", kana: "Cせんかい", autoJoin: false },
+  { id: "c3", name: "C3", kana: "C3", autoJoin: false },
+] as const;
+export type GroupId = (typeof GROUPS)[number]["id"];
+
+export function groupOf(id: GroupId) {
+  return GROUPS.find((g) => g.id === id) ?? GROUPS[0];
+}
 
 // 称号を得るのに必要な個数。未決（docs/02-spec.md 16章）なので仮の値
 export const STAMP_GOAL = 5;
