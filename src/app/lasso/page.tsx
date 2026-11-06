@@ -76,7 +76,8 @@ function LassoContent() {
           とりなおす
         </LinkButton>
       </div>
-      <div className="mt-auto">
+      {/* 写真が縦に長くても、スクロールなしで「OK！」が見えるよう、画面の下にとめる（囲む場所は変えない） */}
+      <div className="sticky bottom-0 z-10 mt-auto -mx-6 bg-gradient-to-t from-white from-70% to-transparent px-6 pb-[30px] pt-6 -mb-[30px]">
         <Button onClick={confirm} disabled={!points || busy}>
           {busy ? "まってね…" : "OK！"}
         </Button>

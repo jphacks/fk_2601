@@ -12,6 +12,10 @@ type ProfileInput = Partial<Omit<Profile, "id" | "createdAt">> & { nickname: str
 type AppContext = {
   backend: Backend;
   status: Status;
+  /** プロフィールの読み込みに失敗したか（はじめての登録の画面へ進ませないため） */
+  profileFailed: boolean;
+  /** プロフィールの読み込みをやり直す */
+  retryProfiles: () => Promise<void>;
   user: AuthUser | null;
   profile: Profile | null;
   signUp: (username: string, password: string) => Promise<void>;
@@ -39,26 +43,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profileFailed, setProfileFailed] = useState(false);
 
   useEffect(() => {
     return backend.subscribeAuth(async (next) => {
       if (!next) {
         setUser(null);
         setProfiles([]);
+        setProfileFailed(false);
         setStatus("out");
         return;
       }
       let loaded: Profile[] = [];
+      let failed = false;
       try {
         loaded = await backend.listProfiles(next.uid);
       } catch {
-        loaded = [];
+        failed = true;
       }
       setUser(next);
       setProfiles(loaded);
+      setProfileFailed(failed);
       setStatus("in");
     });
   }, [backend]);
+
+  const retryProfiles = useCallback(async () => {
+    if (!user) return;
+    try {
+      setProfiles(await backend.listProfiles(user.uid));
+      setProfileFailed(false);
+    } catch {
+      setProfileFailed(true);
+    }
+  }, [backend, user]);
 
   // 切り替え画面は MVP 以降。いまは最初のプロフィールを使う
   const profile = profiles[0] ?? null;
@@ -99,8 +117,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<AppContext>(
-    () => ({ backend, status, user, profile, signUp, signIn, signOut, saveProfile }),
-    [backend, status, user, profile, signUp, signIn, signOut, saveProfile],
+    () => ({ backend, status, profileFailed, retryProfiles, user, profile, signUp, signIn, signOut, saveProfile }),
+    [backend, status, profileFailed, retryProfiles, user, profile, signUp, signIn, signOut, saveProfile],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

@@ -26,6 +26,11 @@ export const SUBJECTS: Subject[] = ["math", "science", "info"];
 // （とりなおし・「もっと さがす！」から来たときは出さない）
 export const CAPTURE_WITH_PROMISE = "/capture?yakusoku=1";
 
+// 問いを作るときに送る、出題済みの「対象×単元」の上限（サーバーの受けつけは 200 件まで。src/server/llm/request.ts）。
+// ずかんが増えても超えないよう、新しいものから ASKED_FROM_ARCHIVE 件だけ送り、のこりは作り直しで見た問いにあてる
+export const ASKED_MAX = 200;
+export const ASKED_FROM_ARCHIVE = 150;
+
 // 称号を得るのに必要な個数。未決（docs/02-spec.md 16章）なので仮の値
 export const STAMP_GOAL = 5;
 

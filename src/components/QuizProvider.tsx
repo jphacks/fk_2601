@@ -2,11 +2,13 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { requestQuestions } from "@/lib/api";
-import { messageOf } from "@/lib/errors";
+import { ASKED_MAX } from "@/lib/constants";
+import { messageOf, UserFacingError } from "@/lib/errors";
 import type { Crop, Photo } from "@/lib/image";
 import { buildGenerationContext } from "@/lib/progress";
 import type { Guess } from "@/lib/rating";
 import type { SceneKey } from "@/lib/scenes";
+import type { ArchiveRecord } from "@/lib/types";
 import type { QuestionsResponse } from "@/server/llm/generate";
 import type { Question } from "@/server/llm/schema";
 import { useApp } from "./AuthProvider";
@@ -59,7 +61,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
 
 function QuizState({ children }: { children: React.ReactNode }) {
   const { backend, profile } = useApp();
-  const { archives } = useArchive();
+  const { archives, status: archiveStatus, reload } = useArchive();
   const [photo, setPhotoState] = useState<Photo | null>(null);
   const [scene, setSceneState] = useState<SceneKey | null>(null);
   const [photoFrom, setPhotoFrom] = useState("/");
@@ -74,6 +76,10 @@ function QuizState({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     archivesRef.current = archives;
   }, [archives]);
+  const archiveStatusRef = useRef(archiveStatus);
+  useEffect(() => {
+    archiveStatusRef.current = archiveStatus;
+  }, [archiveStatus]);
   // 作り直すときに、いま出ている問いと同じ対象×単元を避けるため、見たものを覚えておく
   const seen = useRef<{ target: string; topic: string }[]>([]);
 
@@ -82,18 +88,25 @@ function QuizState({ children }: { children: React.ReactNode }) {
       if (!profile) return;
       const id = ++latest.current;
       setGeneration({ status: "loading" });
-      const context = buildGenerationContext(profile, archivesRef.current.map((a) => a.question));
-      const body = {
-        image: nextCrop.base64,
-        ...context,
-        asked: [...context.asked, ...seen.current],
-        ...(scene ? { scene } : {}),
-      };
-      // 見本の絵のときだけ、AI が使えなかったら、AI を呼ばずに見本の問いに切り替える（1回だけ。自動リトライではない）
-      requestQuestions(backend, body)
-        .catch((error) => {
-          if (!scene) throw error;
-          return requestQuestions(backend, { ...body, fallback: true });
+      // ずかんの読み込みに失敗したままだと、出題済みの組み合わせが空で送られてしまう。先に読みなおして、だめなら問いを作らない
+      const loaded: Promise<ArchiveRecord[] | null> =
+        archiveStatusRef.current === "error" ? reload() : Promise.resolve(archivesRef.current);
+      loaded
+        .then((list) => {
+          if (!list) throw new UserFacingError("ずかんを よみこめなかったよ。ネットに つながっているか みて、もういちど ためしてね");
+          const context = buildGenerationContext(profile, list.map((a) => a.question));
+          const body = {
+            image: nextCrop.base64,
+            ...context,
+            // 作り直しで見た問いも足す。サーバーの上限（200件）をこえないよう、新しい方を残す
+            asked: [...context.asked, ...seen.current].slice(-ASKED_MAX),
+            ...(scene ? { scene } : {}),
+          };
+          // 見本の絵のときだけ、AI が使えなかったら、AI を呼ばずに見本の問いに切り替える（1回だけ。自動リトライではない）
+          return requestQuestions(backend, body).catch((error) => {
+            if (!scene) throw error;
+            return requestQuestions(backend, { ...body, fallback: true });
+          });
         })
         .then((data) => {
           if (id !== latest.current) return;
@@ -105,7 +118,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
           setGeneration({ status: "error", message: messageOf(error) });
         });
     },
-    [backend, profile, scene],
+    [backend, profile, scene, reload],
   );
 
   const setPhoto = useCallback((next: Photo, from: string, nextScene?: SceneKey) => {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Icon } from "@/components/Icons";
 import { todaysMission } from "@/lib/missions";
-import { DEMO_CLASSES, DEMO_HOLIDAYS, DEMO_NOW, DEMO_TODAY, type TeacherClass } from "@/lib/teacherDemo";
+import { DEMO_CLASSES, DEMO_HOLIDAYS, DEMO_NOW, DEMO_TODAY, kanjiIn, MISSION_EXAMPLE as EXAMPLE, MISSION_MAX_LENGTH as MAX_LENGTH, type TeacherClass } from "@/lib/teacherDemo";
+import { HomeMissionCard } from "./HomeMissionCard";
 import { useTeacher } from "./TeacherProvider";
 
 // ミッション（今週・これまで・出す）。見本は docs/design/teachers/screens/12、仕様は docs/06-school-expansion.md 5.3
@@ -16,8 +16,6 @@ const PRIMARY = "border-t-board bg-t-board text-white";
 const SUB = "border-t-field-line bg-white text-t-board";
 const PILL = "inline-flex h-[22px] items-center justify-center justify-self-start rounded-full px-[9px] text-[11px] font-bold whitespace-nowrap";
 
-const MAX_LENGTH = 30;
-const EXAMPLE = "うんどうじょうで まるい ものを さがそう";
 const DOW = ["日", "月", "火", "水", "木", "金", "土"];
 // 前の週から、2週先まで見られる
 const WEEK_MIN = -1;
@@ -52,11 +50,6 @@ function weekLabel(days: Date[]) {
   return `${labelOf(first)} 〜 ${tail}`;
 }
 
-// 漢字（くり返しの「々」も）を、出てきた順に1つずつ
-function kanjiIn(text: string) {
-  return [...new Set(text.match(/[㐀-䶿一-鿿豈-﫿々]/g) ?? [])];
-}
-
 const initialPlans = (): Plans =>
   Object.fromEntries(DEMO_CLASSES.map((c) => [c.id, Object.fromEntries(Object.entries(c.missionPlans).map(([k, m]) => [k, m.text]))]));
 
@@ -82,21 +75,12 @@ function ClearBar({ cleared, total, label }: { cleared: number; total: number; l
   );
 }
 
-// 子どものホームの「きょうの おだい」と同じ見た目（src/app/page.tsx）。ホームそのものは変えない
 function ChildPreview({ text, isApp }: { text: string; isApp: boolean }) {
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-[13px] font-bold">子どもの ホームでの 見え方</span>
       <div className="rounded-tcard bg-t-ground p-3">
-        <div className="flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-3 font-body text-ink">
-          <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-white">
-            <Icon name="star" size={26} fill="#FFC83D" stroke="#22223A" strokeWidth={2} />
-          </span>
-          <span className="flex min-w-0 grow flex-col">
-            <span className="text-sm font-black">きょうの おだい</span>
-            <span className="font-pop text-[19px] leading-snug [overflow-wrap:anywhere]">{text}</span>
-          </span>
-        </div>
+        <HomeMissionCard text={text} />
       </div>
       {isApp && <span className="text-xs text-t-text-sub">文を入れないときは、この日のアプリのお題が出ます。</span>}
     </div>

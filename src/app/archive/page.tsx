@@ -9,7 +9,7 @@ import { Loading } from "@/components/Loading";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
 import { SUBJECT_STYLE } from "@/components/QuestionCard";
-import { Button } from "@/components/ui";
+import { Button, ErrorNotice } from "@/components/ui";
 import { stampCounts } from "@/lib/collection";
 import { SUBJECT_KANA, SUBJECTS } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
@@ -77,7 +77,7 @@ const ALL = "";
 
 function ArchiveContent() {
   const { profile } = useApp();
-  const { status, archives, remove } = useArchive();
+  const { status, archives, remove, reload } = useArchive();
   // えらぶまでは、いちばん新しい はてなの分類をひらく（ずかんを読みこむ前は まだ分からないので、えらんだ分類だけを持つ）
   const [chosen, setSubject] = useState<Subject | null>(null);
   const [unit, setUnit] = useState(ALL);
@@ -91,6 +91,14 @@ function ArchiveContent() {
     return (
       <Page tab="zukan">
         <Loading message="ずかんを ひらいているよ" />
+      </Page>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <Page tab="zukan">
+        <ErrorNotice onRetry={() => void reload()}>ずかんを よみこめなかったよ。ネットに つながっているか みて、もういちど ためしてね</ErrorNotice>
       </Page>
     );
   }
