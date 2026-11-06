@@ -33,4 +33,8 @@ export interface Backend {
   deleteGroupPost(groupId: GroupId, id: string): Promise<void>;
   /** 渡した ID のうち、投稿がもうないもの（管理者が消したなど） */
   missingGroupPosts(groupId: GroupId, ids: string[]): Promise<string[]>;
+  /** グループの投稿を通報する（メンバーなら、だれでも。同じ人が同じ投稿を2回通報しても、1件にしかならない） */
+  reportGroupPost(uid: string, groupId: GroupId, postId: string): Promise<void>;
+  /** 通報された数（投稿の ID ごと）。読めるのはグループの管理者だけ */
+  listGroupReports(groupId: GroupId): Promise<Record<string, number>>;
 }

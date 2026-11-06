@@ -93,6 +93,21 @@ service cloud.firestore {
         allow update: if false;
       }
 
+      // 通報：メンバーなら、グループにある投稿を通報できる（reports/{投稿の ID}__{自分の uid}。同じ人の2回目は作れない）。
+      // 読める・消せるのは管理者だけ（通報した人は、ほかのメンバーに見えない）
+      match /reports/{reportId} {
+        allow read: if isAdmin(groupId);
+        allow create: if isMember(groupId)
+          && request.resource.data.keys().hasOnly(['postId', 'createdAt'])
+          && request.resource.data.keys().hasAll(['postId', 'createdAt'])
+          && request.resource.data.postId is string && request.resource.data.postId.size() <= 64
+          && reportId == request.resource.data.postId + '__' + request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && exists(postDoc(groupId, request.resource.data.postId));
+        allow delete: if isAdmin(groupId);
+        allow update: if false;
+      }
+
       // 投稿の持ち主（本人が消せるようにするためだけの記録）。だれも読めない（管理者も読めない）。
       // 作れるのは、まだない投稿を同じバッチで作るときだけ（ほかの人の投稿の持ち主になれない）。
       // 消すのは投稿と同じバッチ（投稿が残ったまま、持ち主の記録だけを消せない）

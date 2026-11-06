@@ -28,14 +28,17 @@ function Notice({ children }: { children: React.ReactNode }) {
   return <div className="rounded-tcard border border-t-line bg-t-surface p-5 text-sm leading-[1.8] text-t-text-2">{children}</div>;
 }
 
-function PostCard({ post, onAskDelete }: { post: GroupPost; onAskDelete: (post: GroupPost) => void }) {
+function PostCard({ post, reports, onAskDelete }: { post: GroupPost; reports: number; onAskDelete: (post: GroupPost) => void }) {
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl border border-[#E3E9E6] bg-white">
+    <article className={`flex flex-col overflow-hidden rounded-xl border bg-white ${reports > 0 ? "border-t-danger-line" : "border-[#E3E9E6]"}`}>
       <div className="flex h-[140px] items-center justify-center bg-t-ground">
         {/* eslint-disable-next-line @next/next/no-img-element -- グループに見せた切り抜き（data URL） */}
         <img src={post.image} alt="" className="size-full object-contain" />
       </div>
       <div className="flex flex-1 flex-col gap-1.5 px-3 pt-2.5 pb-3">
+        {reports > 0 && (
+          <span className="self-start rounded-md border border-t-danger-line px-2 py-0.5 text-[11px] font-bold text-t-danger">通報 {reports}件</span>
+        )}
         <span className="inline-flex items-center gap-1.5 text-[11px] text-t-text-2">
           <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${FIELD_COLOR[post.subject]}`} />
           {SUBJECT_LABEL[post.subject]}
@@ -128,6 +131,8 @@ function DeleteDialog({
 function GroupPosts({ groupId }: { groupId: GroupId }) {
   const { backend } = useApp();
   const [posts, setPosts] = useState<GroupPost[] | null>(null);
+  // 通報された数（投稿の ID ごと）。読めなかったときは空にして、投稿の表示はそのまま続ける
+  const [reports, setReports] = useState<Record<string, number>>({});
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [deleting, setDeleting] = useState<GroupPost | null>(null);
@@ -140,10 +145,17 @@ function GroupPosts({ groupId }: { groupId: GroupId }) {
       .listGroupPosts(groupId)
       .then((list) => !cancelled && setPosts(list))
       .catch(() => !cancelled && setFailed(true));
+    backend
+      .listGroupReports(groupId)
+      .then((counts) => !cancelled && setReports(counts))
+      .catch(() => !cancelled && setReports({}));
     return () => {
       cancelled = true;
     };
   }, [backend, groupId, attempt]);
+
+  // 通報された投稿を先に（通報の多い順）、そのあとは新しい順
+  const sorted = posts ? [...posts].sort((a, b) => (reports[b.id] ?? 0) - (reports[a.id] ?? 0) || b.createdAt - a.createdAt) : null;
 
   function reload() {
     setFailed(false);
@@ -169,7 +181,7 @@ function GroupPosts({ groupId }: { groupId: GroupId }) {
     <section aria-label={`${groupName(groupId)}の投稿`} className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3">
         <p className="flex-[1_1_420px] text-xs leading-[1.7] text-t-text-2">
-          新しい順に30件まで出します。消すと、次の投稿が出てきます。投稿には、だれが出したかは入っていません。
+          新しい順に30件まで出します。通報された投稿は、先頭に出ます（通報した人は、管理者にも分かりません）。消すと、次の投稿が出てきます。投稿には、だれが出したかは入っていません。
         </p>
         <button type="button" onClick={reload} className={`${BTN_BASE} ${SIZE_40} ${SUB}`}>
           読み込み直す
@@ -183,12 +195,13 @@ function GroupPosts({ groupId }: { groupId: GroupId }) {
       )}
       {!failed && posts === null && <Notice>読み込んでいます…</Notice>}
       {posts?.length === 0 && <Notice>まだ投稿はありません。</Notice>}
-      {posts && posts.length > 0 && (
+      {sorted && sorted.length > 0 && (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
-          {posts.map((p) => (
+          {sorted.map((p) => (
             <PostCard
               key={p.id}
               post={p}
+              reports={reports[p.id] ?? 0}
               onAskDelete={(post) => {
                 setDeleteError(null);
                 setDeleting(post);

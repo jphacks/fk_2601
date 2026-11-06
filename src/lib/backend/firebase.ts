@@ -174,6 +174,27 @@ export const firebaseBackend: Backend = {
     await batch.commit();
   },
 
+  // 通報は reports/{投稿の ID}__{通報した人の uid}。同じ人の2回目は ID が同じなので、ルールが断る（成功として扱う）。
+  // 通報した人を管理者にも見せたくないので、uid は ID の中だけ（読めるのは管理者だけ。firestore.rules）
+  async reportGroupPost(uid, groupId, postId) {
+    try {
+      await setDoc(doc(db(), "groups", groupId, "reports", `${postId}__${uid}`), { postId, createdAt: serverTimestamp() });
+    } catch (error) {
+      if ((error as { code?: string }).code !== "permission-denied") throw error;
+      // もう通報ずみ（ルールが2回目を断った）か、投稿がもうない。どちらも、子どもには「つうほうしたよ」で よい
+    }
+  },
+
+  async listGroupReports(groupId) {
+    const snapshot = await getDocs(collection(db(), "groups", groupId, "reports"));
+    const counts: Record<string, number> = {};
+    for (const d of snapshot.docs) {
+      const postId = String(d.data().postId ?? "");
+      if (postId) counts[postId] = (counts[postId] ?? 0) + 1;
+    }
+    return counts;
+  },
+
   // 端末に残った古い写しで「ない」と判断しないよう、サーバーに聞く
   async missingGroupPosts(groupId, ids) {
     const snapshots = await Promise.all(ids.map((id) => getDocFromServer(doc(db(), "groups", groupId, "posts", id))));
