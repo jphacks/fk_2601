@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { APP_NAME } from "@/lib/constants";
-import { DEMO_CLASSES, DEMO_TEACHER } from "@/lib/teacherDemo";
+import { classUntilNow, DEMO_TEACHER } from "@/lib/teacherDemo";
 import { useTeacher } from "./TeacherProvider";
 
 const NAV = [
@@ -29,7 +29,7 @@ const CONTROL_HEIGHT = "h-9 pointer-coarse:h-11";
 
 // クラスの切りかえ：見た目は見本のボタンのまま、選ぶところは端末の標準の選択肢を使う
 function ClassSwitcher() {
-  const { currentClass, selectClass } = useTeacher();
+  const { classes, currentClass, selectClass } = useTeacher();
   return (
     <label
       className={`relative inline-flex ${CONTROL_HEIGHT} cursor-pointer items-center gap-2 rounded-tbtn border border-white/30 px-2.5 text-sm font-bold whitespace-nowrap text-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-white`}
@@ -45,7 +45,7 @@ function ClassSwitcher() {
         onChange={(e) => selectClass(e.target.value)}
         className="absolute inset-0 cursor-pointer text-base text-t-text opacity-0"
       >
-        {DEMO_CLASSES.map((c) => (
+        {classes.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}（{c.schoolYear}・{c.role}）
           </option>
@@ -58,7 +58,7 @@ function ClassSwitcher() {
 // いま何が見えるかを、いつも出す（docs/06-school-expansion.md 5.2）
 function SessionStatus() {
   const { currentClass } = useTeacher();
-  const until = currentClass.classUntil;
+  const until = classUntilNow(currentClass.hours);
   const inClass = until !== null;
   return (
     <Link

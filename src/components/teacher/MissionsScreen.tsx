@@ -94,6 +94,7 @@ function Editor({ date, klass, plans, onSubmit, onClear }: {
   onSubmit: (text: string, classIds: string[]) => void;
   onClear: (classIds: string[]) => void;
 }) {
+  const { classes } = useTeacher(); // 役割の表示は、クラスの設定で担任を渡したあとの値にする
   const key = keyOf(date);
   const planned = plans[klass.id]?.[key] ?? "";
   const [text, setText] = useState(planned);
@@ -163,7 +164,7 @@ function Editor({ date, klass, plans, onSubmit, onClear }: {
 
       <fieldset className="flex flex-wrap items-center gap-2">
         <legend className="mb-1.5 text-[13px] font-bold">出すクラス</legend>
-        {DEMO_CLASSES.map((c) => {
+        {classes.map((c) => {
           const on = classIds.includes(c.id);
           return (
             <label
