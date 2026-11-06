@@ -38,7 +38,30 @@ export type TeacherClass = {
   pending: DemoPending[];
   shared: DemoShared[];
   missionPlans: Record<string, DemoMission>; // 先生が出したミッション（キーは「M/D」）
+  twoWeeks: DemoTwoWeeks; // きょうの画面の「この2週間」（きょうの授業中の分は memberRecords から数える）
 };
+
+// きょうより前の13日の、日ごとの件数（docs/06-school-expansion.md 5.5）。合計・割合・グラフは画面でここから計算する（数がずれないように）
+export type DemoDayCount = { day: string; fields: Record<DemoField, number>; out: number }; // fields は授業中の分、out は授業の外の分
+export type DemoTwoWeeks = {
+  days: DemoDayCount[];
+  users: number; // 使った子どもの人数（授業の外も入れる）
+  units: Record<string, number>; // 授業中に保存した単元ごとの件数（よく出るものだけ）
+};
+
+// 見本の数を短く書く：[日付, 算数, 理科, 情報, 授業の外]
+function twoWeekDays(rows: [string, number, number, number, number][]): DemoDayCount[] {
+  return rows.map(([day, math, sci, info, out]) => ({ day, fields: { 算数: math, 理科: sci, 情報: info }, out }));
+}
+
+// ミッションの文の決まり（docs/06-school-expansion.md 5.3）。ミッションの画面と、きょうの画面で使う
+export const MISSION_MAX_LENGTH = 30;
+export const MISSION_EXAMPLE = "うんどうじょうで まるい ものを さがそう";
+
+// 漢字（くり返しの「々」も）を、出てきた順に1つずつ
+export function kanjiIn(text: string) {
+  return [...new Set(text.match(/[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF々]/g) ?? [])];
+}
 
 // 先生が出したミッション（docs/06-school-expansion.md 5.3）。クリアは、その日に ずかんへ保存した人数（これからの日は null）
 export type DemoMission = { text: string; cleared: number | null };
@@ -199,6 +222,25 @@ export const DEMO_CLASSES: TeacherClass[] = [
       "11/4": { text: "きょうしつで ながい ものを さがそう", cleared: 5 },
       "11/6": { text: "かいだんで かずを かぞえよう", cleared: null },
     },
+    twoWeeks: {
+      days: twoWeekDays([
+        ["10/22", 6, 4, 3, 5],
+        ["10/23", 5, 4, 2, 6],
+        ["10/24", 0, 0, 0, 7],
+        ["10/25", 0, 0, 0, 9],
+        ["10/26", 6, 5, 3, 3],
+        ["10/27", 5, 3, 3, 4],
+        ["10/28", 7, 5, 4, 6],
+        ["10/29", 6, 4, 4, 5],
+        ["10/30", 6, 4, 3, 4],
+        ["10/31", 0, 0, 0, 6],
+        ["11/1", 0, 0, 0, 5],
+        ["11/2", 4, 4, 2, 3],
+        ["11/3", 0, 0, 0, 1],
+      ]),
+      users: 13,
+      units: { 体積: 14, 割合: 12, もののとけ方: 11, 場合の数: 10, 平均: 9, データの表し方: 9, プログラミング: 8 },
+    },
   },
   {
     id: "5-1",
@@ -224,6 +266,25 @@ export const DEMO_CLASSES: TeacherClass[] = [
       "11/2": { text: "きゅうしょくで かずを かぞえよう", cleared: 3 },
       "11/4": { text: "きょうしつで ながい ものを さがそう", cleared: 1 },
       "11/6": { text: "かいだんで かずを かぞえよう", cleared: null },
+    },
+    twoWeeks: {
+      days: twoWeekDays([
+        ["10/22", 2, 1, 1, 2],
+        ["10/23", 1, 2, 0, 1],
+        ["10/24", 0, 0, 0, 2],
+        ["10/25", 0, 0, 0, 1],
+        ["10/26", 2, 1, 1, 1],
+        ["10/27", 1, 1, 1, 0],
+        ["10/28", 2, 2, 1, 2],
+        ["10/29", 1, 1, 0, 1],
+        ["10/30", 2, 1, 1, 1],
+        ["10/31", 0, 0, 0, 1],
+        ["11/1", 0, 0, 0, 2],
+        ["11/2", 1, 1, 1, 1],
+        ["11/3", 0, 0, 0, 0],
+      ]),
+      users: 4,
+      units: { 体積: 5, 割合: 4, もののとけ方: 4, データの表し方: 3 },
     },
   },
 ];

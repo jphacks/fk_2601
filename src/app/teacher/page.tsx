@@ -1,5 +1,5 @@
-import { TeacherPlaceholder } from "@/components/teacher/TeacherPlaceholder";
+import { TodayScreen } from "@/components/teacher/TodayScreen";
 
 export default function TeacherTodayPage() {
-  return <TeacherPlaceholder title="きょう" description="やること（参加の確認・あしたのミッション）と、クラス全体の利用状況を出します。" />;
+  return <TodayScreen />;
 }
