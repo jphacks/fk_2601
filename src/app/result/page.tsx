@@ -66,7 +66,7 @@ function ResultContent() {
       ? evaluation.rating === "pita"
         ? "せいかい！"
         : "ざんねん…"
-      : `きみ ${describeGuess(guess, unit)} → こたえ ${formatNumber(evaluation.actual ?? 0)}${unitKana(unit)}`;
+      : `きみ ${describeGuess(guess, unit, profile?.grade)} → こたえ ${formatNumber(evaluation.actual ?? 0, profile?.grade)}${unitKana(unit)}`;
 
   if (step === "shoutai") {
     return (

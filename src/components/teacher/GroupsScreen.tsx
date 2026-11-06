@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
-import { groupOf, SUBJECT_LABEL, titleLabel, type GroupId } from "@/lib/constants";
+import { SUBJECT_LABEL, titleLabel, type GroupId } from "@/lib/constants";
 import { stripRuby } from "@/lib/ruby";
 import type { GroupPost } from "@/lib/types";
 import type { Subject } from "@/server/llm/schema";
+import { GroupAdminPage, groupLabel } from "./GroupAdmin";
 
 // グループの管理（#120）。見本（デモ）ではなく、本物の Firestore のデータを扱う。
 // 管理者（groups/{id}/members/{uid} の role が "admin"）だけが、グループの投稿を消せる（firestore.rules で確かめる）。
@@ -17,8 +17,7 @@ const SIZE_40 = "h-10 px-3.5 pointer-coarse:h-11";
 const SUB = "border-t-board bg-white text-t-board";
 const FIELD_COLOR: Record<Subject, string> = { math: "bg-t-math", science: "bg-t-sci", info: "bg-t-info" };
 
-// 管理者が読む画面なので、ふりがなの記法は外して漢字で出す（docs/design/teachers/README.md「文字」）
-const groupName = (id: GroupId) => stripRuby(groupOf(id).name);
+const groupName = groupLabel;
 
 function formatAt(ms: number) {
   return new Date(ms).toLocaleString("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -223,71 +222,15 @@ function GroupPosts({ groupId }: { groupId: GroupId }) {
   );
 }
 
-export function GroupsScreen() {
-  const { status, user, memberships, membershipsFailed, reloadMemberships } = useApp();
-  const [picked, setPicked] = useState<GroupId | null>(null);
-  const admin = memberships?.filter((m) => m.role === "admin") ?? [];
-  const groupId = admin.find((m) => m.groupId === picked)?.groupId ?? admin[0]?.groupId ?? null;
-
-  const tabClass = (on: boolean) =>
-    `inline-flex h-[34px] items-center gap-1.5 rounded-md px-3 text-[13px] whitespace-nowrap pointer-coarse:h-11 ${on ? "bg-white font-bold text-t-text" : "text-t-text-2"}`;
-
-  let body: React.ReactNode;
-  if (status === "loading" || (status === "in" && memberships === null && !membershipsFailed)) {
-    body = <Notice>読み込んでいます…</Notice>;
-  } else if (status === "out" || !user) {
-    body = (
-      <Notice>
-        管理者のアカウントでログインしてください（子どもの画面と同じログインです）。
-        <Link href="/login" className="ml-2 font-bold text-t-board underline">
-          ログインへ
-        </Link>
-      </Notice>
-    );
-  } else if (membershipsFailed) {
-    body = (
-      <Notice>
-        グループを読み込めませんでした。
-        <button type="button" onClick={() => void reloadMemberships()} className="ml-2 font-bold text-t-board underline">
-          もう一度試す
-        </button>
-      </Notice>
-    );
-  } else if (!groupId) {
-    body = (
-      <Notice>
-        このアカウント（{user.username}）は、どのグループの管理者にもなっていません。管理者は Firebase のコンソールで、
-        <code className="mx-1 rounded bg-t-ground px-1">groups/{"{グループ}"}/members/{"{uid}"}</code>
-        の role を admin にします（docs/03-technical.md 6章）。
-      </Notice>
-    );
-  } else {
-    body = (
-      <>
-        {admin.length > 1 && (
-          <div role="tablist" aria-label="グループ" className="flex max-w-full flex-wrap gap-[3px] self-start rounded-[9px] bg-[#E6ECE9] p-[3px]">
-            {admin.map((m) => (
-              <button key={m.groupId} type="button" role="tab" aria-selected={m.groupId === groupId} onClick={() => setPicked(m.groupId)} className={tabClass(m.groupId === groupId)}>
-                {groupName(m.groupId)}
-              </button>
-            ))}
-          </div>
-        )}
-        <GroupPosts key={groupId} groupId={groupId} />
-      </>
-    );
-  }
-
+/** グループの投稿（/teacher/groups/{グループ}）。groupId が null（/teacher/groups）なら、はじめのグループへ移る */
+export function GroupsScreen({ groupId }: { groupId: string | null }) {
   return (
-    <main className="mx-auto flex min-h-0 w-full max-w-[1400px] flex-1 flex-col gap-3.5 px-6 pt-4 pb-5 max-[640px]:px-4">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <h1 className="text-[22px] font-bold tracking-[0.02em]">グループの管理</h1>
-        <p className="flex-[1_1_420px] text-xs leading-[1.7] text-t-text-2">
-          「みんなの はてな」でグループのメンバーに見えている投稿です。不適切な投稿（顔・名札・住所が写っているなど）を見つけたら消してください。
-          この画面は見本ではなく、本番のデータを扱います。
-        </p>
-      </div>
-      {body}
-    </main>
+    <GroupAdminPage
+      groupId={groupId}
+      title={(id) => `${groupName(id)} の投稿`}
+      description="「みんなの はてな」でグループのメンバーに見えている投稿です。不適切な投稿（顔・名札・住所が写っているなど）を見つけたら消してください。この画面は見本ではなく、本番のデータを扱います。"
+    >
+      {(id) => <GroupPosts key={id} groupId={id} />}
+    </GroupAdminPage>
   );
 }

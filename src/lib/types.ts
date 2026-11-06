@@ -33,6 +33,11 @@ export type ArchiveRecord = {
   question: Question;
   guess: Guess;
   rating: Rating;
+  /**
+   * 記録のもと。ないときや "own" は、自分で囲んで作った問い。"played" は、ほかの人の問いで遊んだもの
+   * （学習の進み具合の点数には数えない。src/lib/progress.ts）。ほかの人の問いで遊ぶ機能は、まだない
+   */
+  origin?: "own" | "played";
   /** 切り抜き画像（JPEG の data URL） */
   image: string;
   /**
@@ -48,6 +53,23 @@ export type GroupRole = "member" | "admin";
 export type Membership = {
   groupId: GroupId;
   role: GroupRole;
+};
+
+/** グループのメンバー（管理画面で、管理者だけが見る）。username（ログイン ID）がないのは、#129 より前に入った記録 */
+export type GroupMember = {
+  uid: string;
+  username: string | null;
+  role: GroupRole;
+  joinedAt: number | null;
+};
+
+/**
+ * グループの設定。autoJoinUntil は自分で入れる期限（ミリ秒。null は期限が入っていない）。
+ * open は、読んだときに自分で入れたか（Firebase 版は期限の前のときだけ。ローカル版は止めるまで期限なしで入れる）
+ */
+export type GroupSettings = {
+  autoJoinUntil: number | null;
+  open: boolean;
 };
 
 /**

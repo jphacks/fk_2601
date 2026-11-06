@@ -1,6 +1,6 @@
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import { GROUPS, type GroupId } from "@/lib/constants";
-import type { ArchiveRecord, AuthUser, GroupPost, GroupRole, Membership, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
 import { usernameToLocalId, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -14,6 +14,19 @@ const archivesKey = (uid: string, profileId: string) => `local:archives:${uid}:$
 const groupsKey = (uid: string) => `local:groups:${uid}`;
 const groupPostsKey = (groupId: GroupId) => `local:groupPosts:${groupId}`;
 const groupReportsKey = (groupId: GroupId) => `local:groupReports:${groupId}`;
+const groupSettingsKey = (groupId: GroupId) => `local:groupSettings:${groupId}`;
+
+type LocalGroups = Partial<Record<GroupId, GroupRole>>;
+
+// 自動で入る期限：ローカル版は、止めるまで期限なしで入れる（止めると、止めた時刻が入る）
+function stoppedAt(groupId: GroupId): number | null {
+  return readJson<{ autoJoinUntil: number | null }>(groupSettingsKey(groupId), { autoJoinUntil: null }).autoJoinUntil;
+}
+
+function autoJoinOpen(groupId: GroupId): boolean {
+  const until = stoppedAt(groupId);
+  return until === null || Date.now() < until;
+}
 
 export function readJson<T>(key: string, fallback: T): T {
   try {
@@ -50,7 +63,7 @@ export function seedLocalUser(user: AuthUser, profile: Profile): void {
 
 function autoJoined(groups: Partial<Record<GroupId, GroupRole>>): Partial<Record<GroupId, GroupRole>> {
   const next = { ...groups };
-  for (const g of GROUPS) if (g.autoJoin && !next[g.id]) next[g.id] = "member";
+  for (const g of GROUPS) if (g.autoJoin && !next[g.id] && autoJoinOpen(g.id)) next[g.id] = "member";
   return next;
 }
 
@@ -147,8 +160,36 @@ export const localBackend: Backend = {
     });
   },
 
+  // ローカル版はログイン ID を別に持たない（メンバーの一覧は、このブラウザのユーザーから作る）
   async joinAutoGroups(uid) {
     writeJson(groupsKey(uid), autoJoined(readJson(groupsKey(uid), {})));
+  },
+
+  async listMembers(groupId) {
+    return Object.values(readJson<Record<string, AuthUser>>(KEY_USERS, {})).flatMap((u): GroupMember[] => {
+      const role = readJson<LocalGroups>(groupsKey(u.uid), {})[groupId];
+      return role ? [{ uid: u.uid, username: u.username, role, joinedAt: null }] : [];
+    });
+  },
+
+  async setMemberRole(groupId, uid, role) {
+    const groups = readJson<LocalGroups>(groupsKey(uid), {});
+    if (!groups[groupId]) throw new UserFacingError("もう グループに いません");
+    writeJson(groupsKey(uid), { ...groups, [groupId]: role });
+  },
+
+  async removeMember(groupId, uid) {
+    const groups = readJson<LocalGroups>(groupsKey(uid), {});
+    delete groups[groupId];
+    writeJson(groupsKey(uid), groups);
+  },
+
+  async stopAutoJoin(groupId) {
+    writeJson(groupSettingsKey(groupId), { autoJoinUntil: Date.now() });
+  },
+
+  async getGroupSettings(groupId): Promise<GroupSettings> {
+    return { autoJoinUntil: stoppedAt(groupId), open: autoJoinOpen(groupId) };
   },
 
   async listGroupPosts(groupId) {

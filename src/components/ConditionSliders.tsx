@@ -8,7 +8,7 @@ import { kanaOf, unitKana, unitRuby } from "@/lib/ruby";
 import type { Question } from "@/server/llm/schema";
 import { CountUp } from "./CountUp";
 import { Icon } from "./Icons";
-import { ratioRuby } from "./ResultSummary";
+import { ratioWith } from "./ResultSummary";
 import { RubyText } from "./RubyText";
 
 const THUMB = 44;
@@ -60,7 +60,7 @@ export function ConditionSliders({
   // 比べる問いは、大きいほうが小さいほうの何倍か
   const onLine = (v: number) => (question.type === "compare" ? Math.max(v, 1 / v) : v);
   const parts = current !== null && question.type === "estimate" ? refParts(question, current) : null;
-  const shown = current === null ? "" : formatNumber(onLine(current));
+  const shown = current === null ? "" : formatNumber(onLine(current), grade);
   const top = original !== null && current !== null ? Math.max(onLine(original), onLine(current)) : 1;
   const pct = (v: number) => Math.max(2, Math.min(100, (onLine(v) / top) * 100));
 
@@ -99,9 +99,9 @@ export function ConditionSliders({
               />
             </div>
             <div className="flex justify-between px-3.5 font-pop text-sm text-ink-sub" aria-hidden>
-              <span>{formatNumber(v.min)}</span>
-              {moved && <span className="text-ink-muted">もとは {formatNumber(v.value)}</span>}
-              <span>{formatNumber(v.max)}</span>
+              <span>{formatNumber(v.min, grade)}</span>
+              {moved && <span className="text-ink-muted">もとは {formatNumber(v.value, grade)}</span>}
+              <span>{formatNumber(v.max, grade)}</span>
             </div>
             {moved && (
               <button type="button" onClick={() => onChange({ ...values, [v.name]: v.value })} className="self-start text-sm font-black text-navi-dark underline">
@@ -117,10 +117,10 @@ export function ConditionSliders({
           <p className="text-lg font-black">この じょうけんでは けいさん できないよ</p>
         ) : question.type === "compare" ? (
           <p key={bumped} className="animate-bump text-center text-[20px] font-black leading-[1.75]">
-            <RubyText kana text={`${current >= 1 ? question.compare?.a ?? "A" : question.compare?.b ?? "B"} は ${current >= 1 ? question.compare?.b ?? "B" : question.compare?.a ?? "A"} の `} />
-            <b className="font-pop text-navi">
-              <RubyText kana text={ratioRuby(onLine(current))} />
-            </b>
+            <RubyText
+              kana
+              text={`${current >= 1 ? question.compare?.a ?? "A" : question.compare?.b ?? "B"} は ${ratioWith(current >= 1 ? question.compare?.b ?? "B" : question.compare?.a ?? "A", onLine(current), grade)}`}
+            />
           </p>
         ) : (
           <>
@@ -138,12 +138,12 @@ export function ConditionSliders({
         {changed && original !== null && current !== null && original > 0 && Math.abs(ratio - 1) > 1e-4 && (
           <span className={`mt-1 rounded-[18px] px-4 py-0.5 font-pop text-lg ${ratio > 1 ? "bg-yellow" : "bg-white text-navi-dark"}`}>
             {ratio > 1 ? "▲ " : "▼ "}
-            もとの <RubyText kana text={ratioRuby(ratio)} />
+            <RubyText kana text={ratioWith("もと", ratio, grade)} />
           </span>
         )}
         {parts && (
           <p className="mt-2 text-center text-[17px] font-black leading-[1.7]">
-            {kanaOf(parts.label)} {formatNumber(parts.value)}
+            {kanaOf(parts.label)} {formatNumber(parts.value, grade)}
             {unitKana(parts.unit)}
             {parts.suffix}
           </p>
@@ -153,7 +153,7 @@ export function ConditionSliders({
       {current !== null && original !== null && (
         <div
           role="img"
-          aria-label={`さっきは ${formatNumber(onLine(original))}${unit}、いまは ${shown}${unit}`}
+          aria-label={`さっきは ${formatNumber(onLine(original), grade)}${unit}、いまは ${shown}${unit}`}
           className="grid grid-cols-[56px_minmax(0,1fr)_minmax(72px,auto)] items-center gap-2"
         >
           {/* 数の列は、長い数（「1おく2350まん」など）に合わせて広がる。2つのぼうの長さは そろえたまま */}
@@ -161,7 +161,7 @@ export function ConditionSliders({
           <span className="block h-[22px] overflow-hidden rounded-[11px] bg-cloud">
             <span className="block h-full bg-[#C9CFFF] transition-[width] duration-300" style={{ width: `${pct(original)}%` }} />
           </span>
-          <span className="whitespace-nowrap text-right font-pop text-[15px] text-ink-sub">{formatNumber(onLine(original))}</span>
+          <span className="whitespace-nowrap text-right font-pop text-[15px] text-ink-sub">{formatNumber(onLine(original), grade)}</span>
           <span className="text-[15px] font-black">いま</span>
           <span className="block h-[22px] overflow-hidden rounded-[11px] bg-cloud">
             <span className="block h-full bg-navi transition-[width] duration-300" style={{ width: `${pct(current)}%` }} />
