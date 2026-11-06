@@ -33,17 +33,17 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 .
 ├── AGENTS.md / CLAUDE.md / GEMINI.md   # この指示書（ルールは AGENTS.md に書く。他は @AGENTS.md を読み込むだけ）
 ├── docs/                 # 仕様の正（Source of Truth）。下の「参照先」を参照。docs/design/ は見た目の見本（アプリのコードではない。はじめての登録と あそびかたの説明は docs/design/first/、先生用の管理画面は docs/design/teachers/）。docs/images/ は README に載せる画面の画像
-├── firestore.rules       # Firestore のセキュリティルール（本人だけが読み書きできる。公開の持ち主は publicOwners に分ける）
+├── firestore.rules       # Firestore のセキュリティルール（本人だけが読み書きできる。グループの投稿はメンバーだけが読め、持ち主は owners に分ける）
 ├── public/navi/          # ナビの7つの表情とスタンプ（stamp-*）の画像（docs/design/assets/navi/ と同じもの）
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
 └── src/
     ├── app/              # 画面（Next.js の App Router）と API（app/api/questions）
-    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx・Icons.tsx。Signup.tsx は はじめての登録の部品、Guide.tsx は ホームに重ねる あそびかたの説明。teacher/ は先生用の管理画面の部品
+    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx・Icons.tsx。Signup.tsx は はじめての登録の部品、Guide.tsx は ホームに重ねる あそびかたの説明。teacher/ は先生用の管理画面の部品（GroupsScreen.tsx だけは本番のデータを扱う グループの管理）
     ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み。習っていない漢字は ひらがなにする）、kanji.ts（学年別漢字配当表）、scenes.ts（見本の絵）、demo.ts（ピッチ用のデモ版：`/demo` で始まる。AI を呼ばず、ペットボトルの問いを出す。`docs/03-technical.md` 10章）、teacherDemo.ts（管理画面の見本で使う架空のクラス・メンバー・授業中の記録・クラスに共有された投稿・ミッション・この2週間の件数・授業時間・参加コード・一緒に見る先生・教室に映すときの子ども向けの文と3択）など
     └── server/           # サーバーだけで動く処理。llm/（prompts・schema・client・validate・mock・builtin（AI なしの見本の問い））と auth.ts（ID トークンの確認）
 ```
 - はじめての人：`/login`（ようこそ → ログイン ID → パスワード）→ `/profile`（ニックネーム → 学年 → じゅんび できたよ）→ `/`（あそびかたの説明を1回だけ重ねる。`docs/02-spec.md` 4章）
-- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。先生用の管理画面（見本）は `/teacher` から（子どもの画面に入口を出さない。架空のデータだけで動く：`docs/03-technical.md` 10章）。画面ごとの決まりは `docs/02-spec.md` 1章
+- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。先生用の管理画面（見本）は `/teacher` から（子どもの画面に入口を出さない。架空のデータだけで動く：`docs/03-technical.md` 10章）。グループの管理（管理者が投稿を消す。本番のデータ）は `/teacher/groups`（`docs/03-technical.md` 6章）。画面ごとの決まりは `docs/02-spec.md` 1章
 
 ## セットアップ・コマンド
 | 用途 | コマンド |
@@ -81,7 +81,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 - 学習の進み具合の測り方と、問いへの反映のしかた
 - 比較型の問いの式と答えの持ち方
 - 収集要素の細部（称号に必要な個数、保存方法）
-- 匿名公開の詳細と、不適切な投稿を消す手段
+- 通報の手段（不適切な投稿は、いまはグループの管理者が消す）
 - ユーザー名の長さの上限
 - 学校導入・共有機能の未決事項（`docs/06-school-expansion.md` 12章）
 - 細部は各ドキュメントの【未決】を参照
@@ -116,10 +116,10 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 
 ### 個人情報・データ
 - 認証やパスワードの保存を自作しない。採用するサービス・ライブラリの機能を使う
-- アーカイブ（写真・問い・予想・結果）は本人しか読み書きできないようにする。匿名公開に出すのは切り抜き画像・問い・称号だけで、ユーザー名・位置情報は含めない
+- アーカイブ（写真・問い・予想・結果）は本人しか読み書きできないようにする。グループ（「みんなの はてな」）に見せるのは切り抜き画像・問い・称号だけで、ユーザー名・ニックネーム・位置情報・持ち主は含めない
 - 集める個人情報は最小限にする。`docs/` に書かれていない項目を勝手に増やさない
 - ログに画像データ・パスワード・トークン・API キーを出力しない
-- 学校版では上の決まりの一部を変える（本名・学校のメールアドレスを扱う、授業時間中に保存したものは担当クラスの先生が読める、匿名公開をやめてクラス・友達グループの共有にする、先生の管理画面は大人向けの見た目と文字にする。`docs/06-school-expansion.md`）。その機能の Issue で実装するとき以外は、上の決まりのまま扱う。本名・メールアドレスは LLM に送らない
+- 学校版では上の決まりの一部を変える（本名・学校のメールアドレスを扱う、授業時間中に保存したものは担当クラスの先生が読める、グループの共有をクラス・友達グループの共有に広げる、先生の管理画面は大人向けの見た目と文字にする。`docs/06-school-expansion.md`）。その機能の Issue で実装するとき以外は、上の決まりのまま扱う。本名・メールアドレスは LLM に送らない
 
 ### ドキュメント
 - ディレクトリ構成や仕様を変えたら、同じ作業の中で `AGENTS.md` と該当する `docs/` を更新する
