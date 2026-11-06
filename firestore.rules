@@ -65,21 +65,34 @@ service cloud.firestore {
         && (d.title == null || d.title in subjects);
     }
 
+    // グループの文書：autoJoinUntil（自分で入れる期限）。読めるのはメンバー。作る・消すのはコンソールから。
+    // 管理者は、まだ入れるあいだに、期限を いまにする（自動で入るのを止める）ことだけができる（延ばす・入れなおすのはコンソールから）
     match /groups/{groupId} {
       allow read: if isMember(groupId);
-      allow write: if false;
+      allow update: if isAdmin(groupId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['autoJoinUntil'])
+        && request.resource.data.autoJoinUntil == request.time
+        && resource.data.get('autoJoinUntil', null) is timestamp
+        && request.time < resource.data.autoJoinUntil;
+      allow create, delete: if false;
 
-      // メンバー：role（'member' か 'admin'）・joinedAt。読めるのは本人と管理者。
-      // 自分で作れるのは、期限の前に 'member' として入るときだけ（管理者にはなれない）。変える・抜けるのはコンソールから
+      // メンバー：role（'member' か 'admin'）・joinedAt・username（ログイン ID。#129 より前の記録にはない）。読めるのは本人と管理者。
+      // 自分で作れるのは、期限の前に 'member' として入るときだけ（管理者にはなれない）。
+      // username を入れるときは、ID トークンの名前（ログイン ID）と同じでなければならない（ほかの人の名前を名乗れない）。
+      // 役割を変える・外すのは管理者だけ。自分の役割は変えられず、自分は外せない（管理者がいなくなるのを防ぐ）
       match /members/{uid} {
         allow read: if request.auth != null && (request.auth.uid == uid || isAdmin(groupId));
         allow create: if request.auth != null && request.auth.uid == uid
-          && request.resource.data.keys().hasOnly(['role', 'joinedAt'])
+          && request.resource.data.keys().hasOnly(['role', 'joinedAt', 'username'])
           && request.resource.data.keys().hasAll(['role', 'joinedAt'])
           && request.resource.data.role == 'member'
           && request.resource.data.joinedAt == request.time
+          && (!('username' in request.resource.data) || request.resource.data.username == request.auth.token.name)
           && autoJoinOpen(groupId);
-        allow update, delete: if false;
+        allow update: if isAdmin(groupId) && request.auth.uid != uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role'])
+          && request.resource.data.role in ['member', 'admin'];
+        allow delete: if isAdmin(groupId) && request.auth.uid != uid;
       }
 
       // 投稿：読めるのはメンバーだけ。作れるのはメンバーの本人だけで、持ち主の記録（owners）を同じバッチで書く。
