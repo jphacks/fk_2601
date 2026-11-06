@@ -37,7 +37,15 @@ export type TeacherClass = {
   members: DemoMember[];
   pending: DemoPending[];
   shared: DemoShared[];
+  missionPlans: Record<string, DemoMission>; // 先生が出したミッション（キーは「M/D」）
 };
+
+// 先生が出したミッション（docs/06-school-expansion.md 5.3）。クリアは、その日に ずかんへ保存した人数（これからの日は null）
+export type DemoMission = { text: string; cleared: number | null };
+
+// 見本の「いま」の時刻と、見本の期間の祝日（キーは「M/D」。見本の日付はすべて 2026年）
+export const DEMO_NOW = "10:40";
+export const DEMO_HOLIDAYS: Record<string, string> = { "11/3": "文化の日" };
 
 // クラスに共有された投稿（docs/06-school-expansion.md 7.1・7.2）。共有は授業時間によらないので、時刻は授業の外のこともある
 export type DemoShared = {
@@ -181,6 +189,16 @@ export const DEMO_CLASSES: TeacherClass[] = [
       { id: "s8", memberId: "m7", record: 4, at: "10/23 11:20", isNew: false },
       { id: "s9", memberId: "m2", record: 3, at: "10/22 14:30", isNew: false },
     ],
+    missionPlans: {
+      "10/21": { text: "そとで うごく ものを さがそう", cleared: 9 },
+      "10/23": { text: "がっこうの みずを つかう ばしょを さがそう", cleared: 8 },
+      "10/26": { text: "うんどうじょうで さんかくの ものを さがそう", cleared: 9 },
+      "10/28": { text: "としょしつで しかくい ものを さがそう", cleared: 10 },
+      "10/30": { text: "うんどうじょうで まるい ものを さがそう", cleared: 11 },
+      "11/2": { text: "きゅうしょくで かずを かぞえよう", cleared: 11 },
+      "11/4": { text: "きょうしつで ながい ものを さがそう", cleared: 5 },
+      "11/6": { text: "かいだんで かずを かぞえよう", cleared: null },
+    },
   },
   {
     id: "5-1",
@@ -200,5 +218,12 @@ export const DEMO_CLASSES: TeacherClass[] = [
       { id: "t1", memberId: "k2", record: 5, at: "11/2 18:15", isNew: true },
       { id: "t2", memberId: "k3", record: 3, at: "10/28 11:02", isNew: false },
     ],
+    missionPlans: {
+      "10/28": { text: "としょしつで しかくい ものを さがそう", cleared: 2 },
+      "10/30": { text: "うんどうじょうで まるい ものを さがそう", cleared: 3 },
+      "11/2": { text: "きゅうしょくで かずを かぞえよう", cleared: 3 },
+      "11/4": { text: "きょうしつで ながい ものを さがそう", cleared: 1 },
+      "11/6": { text: "かいだんで かずを かぞえよう", cleared: null },
+    },
   },
 ];
