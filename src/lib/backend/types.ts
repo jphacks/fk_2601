@@ -25,4 +25,6 @@ export interface Backend {
   /** 公開する。uid は持ち主（公開データには入れず、本人だけが消せるようにするために別に持つ） */
   savePublic(uid: string, post: PublicPost): Promise<void>;
   deletePublic(id: string): Promise<void>;
+  /** 渡した ID のうち、公開データがもうないもの（管理者が消したなど） */
+  missingPublic(ids: string[]): Promise<string[]>;
 }

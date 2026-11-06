@@ -140,4 +140,9 @@ export const localBackend: Backend = {
   async deletePublic(id) {
     writeJson(KEY_PUBLIC, readJson<PublicPost[]>(KEY_PUBLIC, []).filter((p) => p.id !== id));
   },
+
+  async missingPublic(ids) {
+    const existing = new Set(readJson<PublicPost[]>(KEY_PUBLIC, []).map((p) => p.id));
+    return ids.filter((id) => !existing.has(id));
+  },
 };

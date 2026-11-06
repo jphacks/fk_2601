@@ -12,6 +12,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocFromServer,
   getDocs,
   getFirestore,
   limit,
@@ -145,5 +146,11 @@ export const firebaseBackend: Backend = {
     batch.delete(doc(db(), "public", id));
     batch.delete(doc(db(), "publicOwners", id));
     await batch.commit();
+  },
+
+  // 端末に残った古い写しで「ない」と判断しないよう、サーバーに聞く
+  async missingPublic(ids) {
+    const snapshots = await Promise.all(ids.map((id) => getDocFromServer(doc(db(), "public", id))));
+    return snapshots.filter((s) => !s.exists()).map((s) => s.id);
   },
 };
