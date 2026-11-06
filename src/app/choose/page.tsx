@@ -28,7 +28,7 @@ const STARTERS: { text: string; color: string }[] = [
 function ChooseContent() {
   const router = useRouter();
   const { backend, profile } = useApp();
-  const { archives } = useArchive();
+  const { archives, status: archiveStatus } = useArchive();
   const { crop, scene, generation, regenerate, selectQuestion } = useQuiz();
   const [mode, setMode] = useState<FirstMode>(profile?.firstMode ?? "choices");
   const [text, setText] = useState("");
@@ -48,6 +48,11 @@ function ChooseContent() {
   async function submitCustom(event: React.FormEvent) {
     event.preventDefault();
     if (!crop || !profile) return;
+    // ずかんの読み込みに失敗したままだと、出題済みの組み合わせが空で送られてしまうので、問いを作らない
+    if (archiveStatus === "error") {
+      setError("ずかんを よみこめなかったよ。ネットに つながっているか みて、ページを ひらきなおしてね");
+      return;
+    }
     setBusy(true);
     setSorry(null);
     setError(null);

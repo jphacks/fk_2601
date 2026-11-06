@@ -13,7 +13,7 @@ import { Page } from "@/components/Page";
 import { QuestionHint, QuestionText, SUBJECT_STYLE, Eyebrow } from "@/components/QuestionCard";
 import { ResultSummary } from "@/components/ResultSummary";
 import { RubyText } from "@/components/RubyText";
-import { Button, LinkButton, Say } from "@/components/ui";
+import { Button, ErrorNotice, LinkButton, Say } from "@/components/ui";
 import { defaultScope } from "@/lib/calc";
 import { messageOf } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
@@ -25,7 +25,7 @@ function DetailContent() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const { profile } = useApp();
-  const { status, archives, remove, unpublish } = useArchive();
+  const { status, archives, remove, unpublish, reload } = useArchive();
   const record = archives.find((a) => a.id === id);
   const [values, setValues] = useState<Record<string, number> | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -46,6 +46,14 @@ function DetailContent() {
     return (
       <Page back="/archive">
         <Loading message={deleting ? "けしているよ" : "ずかんを ひらいているよ"} />
+      </Page>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <Page back="/archive">
+        <ErrorNotice onRetry={() => void reload()}>ずかんを よみこめなかったよ。ネットに つながっているか みて、もういちど ためしてね</ErrorNotice>
       </Page>
     );
   }
