@@ -13,6 +13,7 @@ const profilesKey = (uid: string) => `local:profiles:${uid}`;
 const archivesKey = (uid: string, profileId: string) => `local:archives:${uid}:${profileId}`;
 const groupsKey = (uid: string) => `local:groups:${uid}`;
 const groupPostsKey = (groupId: GroupId) => `local:groupPosts:${groupId}`;
+const groupReportsKey = (groupId: GroupId) => `local:groupReports:${groupId}`;
 const groupSettingsKey = (groupId: GroupId) => `local:groupSettings:${groupId}`;
 
 type LocalGroups = Partial<Record<GroupId, GroupRole>>;
@@ -203,6 +204,19 @@ export const localBackend: Backend = {
 
   async deleteGroupPost(groupId, id) {
     writeJson(groupPostsKey(groupId), readJson<GroupPost[]>(groupPostsKey(groupId), []).filter((p) => p.id !== id));
+  },
+
+  // ローカル版は、同じ人が同じ投稿を2回通報しても、1件にしかならない（「だれが」は、uid だけを持つ）
+  async reportGroupPost(uid, groupId, postId) {
+    const all = readJson<{ postId: string; uid: string }[]>(groupReportsKey(groupId), []);
+    if (all.some((r) => r.postId === postId && r.uid === uid)) return;
+    writeJson(groupReportsKey(groupId), [...all, { postId, uid }]);
+  },
+
+  async listGroupReports(groupId) {
+    const counts: Record<string, number> = {};
+    for (const r of readJson<{ postId: string }[]>(groupReportsKey(groupId), [])) counts[r.postId] = (counts[r.postId] ?? 0) + 1;
+    return counts;
   },
 
   async missingGroupPosts(groupId, ids) {
