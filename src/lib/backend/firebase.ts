@@ -26,8 +26,9 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
-import { GROUPS } from "@/lib/constants";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, Membership, Profile } from "@/lib/types";
+import { GROUPS, type GroupId } from "@/lib/constants";
+import { newJoinCode } from "@/lib/joinCode";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, JoinCode, Membership, Profile } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -188,6 +189,47 @@ export const firebaseBackend: Backend = {
   // ルールで、いまの時刻（サーバーの時計）にするときだけ通す
   async stopAutoJoin(groupId) {
     await updateDoc(doc(db(), "groups", groupId), { autoJoinUntil: serverTimestamp() });
+  },
+
+  async getJoinCode(groupId) {
+    const code = (await getDoc(doc(db(), "groups", groupId))).data()?.joinCode;
+    if (typeof code !== "string") return null;
+    const snapshot = await getDoc(doc(db(), "joinCodes", code));
+    return snapshot.exists() ? { code, open: snapshot.data().open === true } : null;
+  },
+
+  // 新しいコードと、グループの joinCode を同じバッチで書き、前のコードは消す（firestore.rules）
+  async createJoinCode(groupId) {
+    const before = (await getDoc(doc(db(), "groups", groupId))).data()?.joinCode;
+    const code = newJoinCode();
+    const batch = writeBatch(db());
+    batch.set(doc(db(), "joinCodes", code), { groupId, open: true, createdAt: serverTimestamp() });
+    batch.update(doc(db(), "groups", groupId), { joinCode: code });
+    if (typeof before === "string") batch.delete(doc(db(), "joinCodes", before));
+    await batch.commit();
+    return { code, open: true } satisfies JoinCode;
+  },
+
+  async setJoinCodeOpen(code, open) {
+    await updateDoc(doc(db(), "joinCodes", code), { open });
+  },
+
+  async joinWithCode(uid, username, code) {
+    const snapshot = await getDoc(doc(db(), "joinCodes", code));
+    const groupId = GROUPS.find((g) => g.id === snapshot.data()?.groupId)?.id as GroupId | undefined;
+    if (!snapshot.exists() || !groupId) throw new UserFacingError("その コードの グループは みつからないよ。もういちど たしかめてね");
+    if (snapshot.data().open !== true) throw new UserFacingError("いまは その グループに はいれないよ。おとなの ひとに きいてね");
+    const ref = doc(db(), "groups", groupId, "members", uid);
+    if ((await getDoc(ref)).exists()) return { groupId, already: true };
+    // ログイン ID は、ルールで ID トークンの名前と同じかを確かめる（joinAutoGroups と同じ）
+    await auth().currentUser?.getIdToken(true);
+    try {
+      await setDoc(ref, { role: "member", joinedAt: serverTimestamp(), username, joinCode: code });
+    } catch (error) {
+      if ((error as { code?: string }).code !== "permission-denied") throw error;
+      await setDoc(ref, { role: "member", joinedAt: serverTimestamp(), joinCode: code });
+    }
+    return { groupId, already: false };
   },
 
   async getGroupSettings(groupId) {
