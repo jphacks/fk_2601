@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useArchive } from "@/components/ArchiveProvider";
 import { useApp } from "@/components/AuthProvider";
 import { Gate } from "@/components/Gate";
 import { Icon } from "@/components/Icons";
@@ -13,7 +14,10 @@ import { titleLabel } from "@/lib/constants";
 import type { PublicPost } from "@/lib/types";
 
 function OthersContent() {
-  const { backend, user } = useApp();
+  const { backend } = useApp();
+  const { archives } = useArchive();
+  // 公開データには持ち主が入っていないので、自分のずかんで公開中のものと照らして「きみの はてな」を出す
+  const mine = useMemo(() => new Set(archives.flatMap((a) => (a.publicId ? [a.publicId] : []))), [archives]);
   const [posts, setPosts] = useState<PublicPost[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -79,7 +83,7 @@ function OthersContent() {
                     <span className="line-clamp-4 block text-base font-black leading-[1.4]">{kanaOf(p.text)}</span>
                     <div className="mt-auto flex flex-wrap items-center gap-1">
                       <span className={`rounded-[10px] px-2 py-px text-xs font-black ${s.light} ${s.dark}`}>{titleLabel(p.title)}</span>
-                      {p.ownerUid === user?.uid && <span className="text-xs font-black text-ink-muted">きみの はてな</span>}
+                      {mine.has(p.id) && <span className="text-xs font-black text-ink-muted">きみの はてな</span>}
                     </div>
                   </div>
                 </div>
