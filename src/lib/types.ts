@@ -50,6 +50,23 @@ export type Membership = {
   role: GroupRole;
 };
 
+/** グループのメンバー（管理画面で、管理者だけが見る）。username（ログイン ID）がないのは、#129 より前に入った記録 */
+export type GroupMember = {
+  uid: string;
+  username: string | null;
+  role: GroupRole;
+  joinedAt: number | null;
+};
+
+/**
+ * グループの設定。autoJoinUntil は自分で入れる期限（ミリ秒。null は期限が入っていない）。
+ * open は、読んだときに自分で入れたか（Firebase 版は期限の前のときだけ。ローカル版は止めるまで期限なしで入れる）
+ */
+export type GroupSettings = {
+  autoJoinUntil: number | null;
+  open: boolean;
+};
+
 /**
  * グループに見せる問い（切り抜き画像・問い・称号だけ。ユーザー名・ニックネーム・位置情報は入れない）。
  * 同じ人の投稿をひも付けられないよう、持ち主も入れない（Firebase 版では、だれも読めない groups/{id}/owners に分けて持つ）
