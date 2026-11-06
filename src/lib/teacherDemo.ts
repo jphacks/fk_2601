@@ -91,6 +91,8 @@ export type DemoRecord = {
   formula: string;
   scope: Record<string, number>;
   answerUnit: string;
+  // 教室に映すときの文（子どもが読むので、ひらがな・わかち書き・漢字は {漢字|よみ}）。how と why の {s} などは scope の値を入れる
+  cast: { question: string; how: string; why: string };
 };
 
 export const DEMO_TEACHER = { name: "山田 花子", initial: "山" };
@@ -202,14 +204,38 @@ export const DEMO_TODAY = "2026/11/4";
 export const TODAY_KEY = dateKey(...(DEMO_TODAY.split("/").map(Number) as [number, number, number]));
 
 export const DEMO_RECORDS: DemoRecord[] = [
-  { field: "情報", unit: "プログラミング", scene: "signal", question: "この信号は、1日に何回 切りかわる？", guess: "100回", formula: "24*60*60/s", scope: { s: 60 }, answerUnit: "回" },
-  { field: "算数", unit: "平均", scene: "gacha", question: "このガチャガチャの10種類を全部そろえるには、平均で何回まわす？", guess: "10回", formula: "n*harmonic(n)", scope: { n: 10 }, answerUnit: "回" },
-  { field: "算数", unit: "体積", scene: "ice", question: "このコップで、プールをいっぱいにするには何ばい くむ？", guess: "5,000ばい", formula: "p*1000/v", scope: { p: 360000, v: 200 }, answerUnit: "ばい" },
-  { field: "情報", unit: "データの表し方", scene: "signal", question: "この信号の3つのランプで、何通りの光り方を作れる？", guess: "3通り", formula: "2^n", scope: { n: 3 }, answerUnit: "通り" },
-  { field: "算数", unit: "場合の数", scene: "gacha", question: "3色のカプセルを3回出すと、色の出方は何通り？", guess: "9通り", formula: "c^k", scope: { c: 3, k: 3 }, answerUnit: "通り" },
-  { field: "理科", unit: "もののとけ方", scene: "ice", question: "このコップの水に、さとうは何gまで とける？", guess: "50g", formula: "v/100*204", scope: { v: 200 }, answerUnit: "g" },
-  { field: "算数", unit: "割合", scene: "gacha", question: "このガチャガチャを10回まわして、ほしい1種類が1回も出ないのは何％？", guess: "1%", formula: "(1-1/n)^k*100", scope: { n: 10, k: 10 }, answerUnit: "%" },
-  { field: "算数", unit: "割合", scene: "signal", question: "この信号が赤になっている時間は、1年で何時間？", guess: "100時間", formula: "24*365*r/c", scope: { r: 60, c: 120 }, answerUnit: "時間" },
+  {
+    field: "情報", unit: "プログラミング", scene: "signal", question: "この信号は、1日に何回 切りかわる？", guess: "100回", formula: "24*60*60/s", scope: { s: 60 }, answerUnit: "回",
+    cast: { question: "この {信号|しんごう}は、 1{日|にち}に {何|なん}かい きりかわる？", how: "24じかん × 60ぷん × 60びょう ÷ {s}びょう", why: "{s}びょうごとに かわるだけでも、 1にちでは こんなに なるんだね。" },
+  },
+  {
+    field: "算数", unit: "平均", scene: "gacha", question: "このガチャガチャの10種類を全部そろえるには、平均で何回まわす？", guess: "10回", formula: "n*harmonic(n)", scope: { n: 10 }, answerUnit: "回",
+    cast: { question: "この ガチャガチャの 10しゅるいを ぜんぶ そろえるには、 へいきんで {何|なん}かい まわす？", how: "{n} ×（1 ＋ 1/2 ＋ 1/3 ＋ … ＋ 1/{n}）", why: "のこりが すくなく なるほど、 まだ もって いない ものが でにくく なるんだね。" },
+  },
+  {
+    field: "算数", unit: "体積", scene: "ice", question: "このコップで、プールをいっぱいにするには何ばい くむ？", guess: "5,000ばい", formula: "p*1000/v", scope: { p: 360000, v: 200 }, answerUnit: "ばい",
+    cast: { question: "この コップで、 プールを いっぱいに するには {何|なん}ばい くむ？", how: "プール {p}L × 1000 ÷ コップ {v}mL", why: "プールの みずは、 コップで くむと きりが ないほど おおいんだね。" },
+  },
+  {
+    field: "情報", unit: "データの表し方", scene: "signal", question: "この信号の3つのランプで、何通りの光り方を作れる？", guess: "3通り", formula: "2^n", scope: { n: 3 }, answerUnit: "通り",
+    cast: { question: "この {信号|しんごう}の 3つの ランプで、 {何|なん}とおりの ひかりかたを つくれる？", how: "2（つく・きえる）を {n}かい かける", why: "ランプが 1こ ふえる たびに、 ひかりかたは 2ばいに なるんだね。" },
+  },
+  {
+    field: "算数", unit: "場合の数", scene: "gacha", question: "3色のカプセルを3回出すと、色の出方は何通り？", guess: "9通り", formula: "c^k", scope: { c: 3, k: 3 }, answerUnit: "通り",
+    cast: { question: "3しょくの カプセルを 3かい だすと、 いろの でかたは {何|なん}とおり？", how: "{c}とおりを {k}かい かける", why: "1かい ふえる ごとに、 でかたは {c}ばいに なるんだね。" },
+  },
+  {
+    field: "理科", unit: "もののとけ方", scene: "ice", question: "このコップの水に、さとうは何gまで とける？", guess: "50g", formula: "v/100*204", scope: { v: 200 }, answerUnit: "g",
+    cast: { question: "この コップの みずに、 さとうは {何|なん}g まで とける？", how: "{v}mL ÷ 100mL × 204g（100mL に とける りょう）", why: "さとうは、 みずに とても たくさん とけるんだね。" },
+  },
+  {
+    field: "算数", unit: "割合", scene: "gacha", question: "このガチャガチャを10回まわして、ほしい1種類が1回も出ないのは何％？", guess: "1%", formula: "(1-1/n)^k*100", scope: { n: 10, k: 10 }, answerUnit: "%",
+    cast: { question: "この ガチャガチャを 10かい まわして、 ほしい 1しゅるいが 1かいも でないのは {何|なん}％？", how: "（1 − 1/{n}）を {k}かい かけて × 100", why: "10かい まわしても、 でない ことは けっこう あるんだね。" },
+  },
+  {
+    field: "算数", unit: "割合", scene: "signal", question: "この信号が赤になっている時間は、1年で何時間？", guess: "100時間", formula: "24*365*r/c", scope: { r: 60, c: 120 }, answerUnit: "時間",
+    cast: { question: "この {信号|しんごう}が あかに なって いる じかんは、 1{年|ねん}で {何|なん}じかん？", how: "24じかん × 365にち × {r}びょう ÷ {c}びょう", why: "1かいは みじかくても、 1ねん あつめると こんなに ながいんだね。" },
+  },
 ];
 
 // 授業中の記録の日と時刻（新しい順）。出席番号ごとに recordShift 分ずつ前にずらす
@@ -247,6 +273,44 @@ export function answerText(r: DemoRecord) {
   if (!result.ok) return "—";
   const rounded = Math.round(result.value);
   return `${rounded === result.value ? "" : "約"}${rounded.toLocaleString("ja-JP")}${r.answerUnit}`;
+}
+
+// ---- 教室に映す（docs/06-school-expansion.md 5.8。見本 docs/design/teachers/screens/06〜11） ----
+
+// 映す文字は子どもが読むので、分野と単元もひらがなで出す
+export const FIELD_KANA: Record<DemoField, string> = { 算数: "さんすう", 理科: "りか", 情報: "じょうほう" };
+export const UNIT_KANA: Record<string, string> = {
+  プログラミング: "プログラミング",
+  平均: "へいきん",
+  体積: "たいせき",
+  データの表し方: "データの あらわしかた",
+  場合の数: "ばあいの かず",
+  もののとけ方: "ものの とけかた",
+  割合: "わりあい",
+};
+
+const castNumber = (n: number) => Number(n.toPrecision(12)).toLocaleString("ja-JP", { maximumFractionDigits: 2 });
+
+// how・why の {s} などに、問いのデータの値を入れる（ふりがなの {漢字|よみ} はそのまま）
+export function fillCast(text: string, scope: Record<string, number>) {
+  return text.replace(/\{([A-Za-z_]\w*)\}/g, (all, key: string) => (key in scope ? castNumber(scope[key]) : all));
+}
+
+// 答えは式から計算する（LLM や手書きの数を使わない）。整数でなければ「やく」をつけて四捨五入する
+export function castAnswer(r: DemoRecord): { value: number; text: string; approx: boolean } | null {
+  const result = calculate(r.formula, r.scope);
+  if (!result.ok) return null;
+  const rounded = Math.round(result.value);
+  return { value: result.value, text: castNumber(rounded), approx: rounded !== result.value };
+}
+
+// よそうの3択（ア・イ・ウ）：答えの 約1倍（きりのよい数）と、その 0.1倍・10倍（2026-11-06 に決めたこと。見本のとおり小さい順）
+export function castChoices(value: number): string[] {
+  if (!(value > 0)) return []; // 0 や負の数では 0.1倍・10倍が作れない（見本のデータにはない）
+  const magnitude = 10 ** Math.floor(Math.log10(Math.abs(value)));
+  const step = magnitude / 2;
+  const middle = Math.max(step, Math.round(value / step) * step);
+  return [middle / 10, middle, middle * 10].map(castNumber);
 }
 
 const mail = (local: string) => `${local}@${SCHOOL_DOMAIN}`;

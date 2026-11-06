@@ -180,7 +180,7 @@ teachers/
 
 ## アプリへの取り込み方
 1. `src/app/globals.css` で `teachers/tailwind-theme.css` を読み込む（済み）
-2. フォントは `next/font/google` で読み込み、先生の画面の中だけで使う（子どもの画面を重くしない）。`BIZ_UDPGothic`（400・700）を `--font-t-body` に割り当てる（`src/app/teacher/layout.tsx` で済み）。教室に映す画面では、`Klee_One`（600）を `--font-t-chalk` に割り当てる（`src/app/teacher/castFonts.ts`。映す画面があるページで読み込む）。`--font-t-cast` の Zen Maru Gothic は、子どもの画面のルートで読み込み済みのもの（`--nf-body`）を使う（2回読み込まない）
+2. フォントは `next/font/google` で読み込み、先生の画面の中だけで使う（子どもの画面を重くしない）。`BIZ_UDPGothic`（400・700）を `--font-t-body` に割り当てる（`src/app/teacher/layout.tsx` で済み）。教室に映す画面では、`Klee_One`（600）を `--font-t-chalk` に割り当てる（`src/app/teacher/castFonts.ts`。映す画面があるページで読み込む）。`--font-t-cast` の Zen Maru Gothic は、子どもの画面のルートで読み込み済みのもの（`--nf-body`）を使う（2回読み込まない）。映す画面の外わく（上の帯・映す先・とじる・チョーク受け）は `src/components/teacher/CastFrame.tsx` にまとめてある
 3. ナビの絵は、子どもの画面と同じ `public/navi/` のものを使う
 4. 画面は見本の HTML を見ながら、上のレシピで組み立てる（インラインスタイルの値はトークンと同じ）
 5. `assets/samples/` の絵はアプリに持ち込まない（本物は子どもが囲んだ切り抜き画像）
