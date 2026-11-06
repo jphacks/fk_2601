@@ -24,11 +24,14 @@ export function NumberLine({
   actual,
   unit,
   intro = false,
+  grade,
 }: {
   guess: number;
   actual: number;
   unit: string;
   intro?: boolean;
+  /** 学年（1・2年は、小数を整数にまるめて出す。docs/02-spec.md 2.4） */
+  grade?: number;
 }) {
   const reduced = useReducedMotion();
   const [arrived, setArrived] = useState(!intro);
@@ -51,11 +54,11 @@ export function NumberLine({
   return (
     <div
       role="img"
-      aria-label={`きみの よそう ${formatNumber(guess)}${unit}、こたえ ${formatNumber(actual)}${unit}`}
+      aria-label={`きみの よそう ${formatNumber(guess, grade)}${unit}、こたえ ${formatNumber(actual, grade)}${unit}`}
       className="relative h-[112px]"
     >
       <span className="absolute left-1 top-1 font-pop text-[13px] text-ink-sub">0</span>
-      <span className="absolute right-1 top-1 font-pop text-[13px] text-ink-sub">{formatNumber(max)}</span>
+      <span className="absolute right-1 top-1 font-pop text-[13px] text-ink-sub">{formatNumber(max, grade)}</span>
       <div className="absolute inset-x-0 top-7 h-[46px] rounded-[18px] bg-cloud" />
       <div className="absolute inset-x-3.5 top-[50px] h-0 border-t-3 border-dashed border-white" />
       <div className="absolute top-[31px] h-10 bg-zure" style={{ left: `${left}%`, width: `${width}%`, transition: move }} />
@@ -76,15 +79,15 @@ export function NumberLine({
       </span>
       {close ? (
         <div className="absolute inset-x-0 top-[82px] text-center font-pop text-base">
-          きみ {formatNumber(guess)} ・ <span className="text-navi-dark">こたえ {formatNumber(actual)}</span>
+          きみ {formatNumber(guess, grade)} ・ <span className="text-navi-dark">こたえ {formatNumber(actual, grade)}</span>
         </div>
       ) : (
         <>
           <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base" style={{ left: `clamp(75px, ${gx}%, calc(100% - 75px))` }}>
-            きみ {formatNumber(guess)}
+            きみ {formatNumber(guess, grade)}
           </div>
           <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base text-navi-dark" style={{ left: `clamp(75px, ${ax}%, calc(100% - 75px))` }}>
-            こたえ {formatNumber(actual)}
+            こたえ {formatNumber(actual, grade)}
           </div>
         </>
       )}

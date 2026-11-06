@@ -1,4 +1,5 @@
 import "server-only";
+import { TIMES_GRADE } from "@/lib/format";
 import { builtinQuestions } from "./builtin";
 import { callStructured } from "./client";
 import { mockCustom, mockQuestions } from "./mock";
@@ -52,7 +53,10 @@ export async function generateQuestions(input: QuestionsRequest): Promise<Questi
 
   if (!output.recognition.canAsk) return { recognition: output.recognition, questions: [] };
   // 見本の問い（モック）は、手で書いたものなので、問いの作りかたの検査はゆるくする
-  const questions = keepValid(output.questions, isMock());
+  // 1年生は「倍」を まだ習っていないので、ほかの問いがあるときは compare（何倍）を出さない（docs/02-spec.md 2.4）
+  const valid = keepValid(output.questions, isMock());
+  const fitGrade = input.grade < TIMES_GRADE ? valid.filter((q) => q.type !== "compare") : valid;
+  const questions = fitGrade.length > 0 ? fitGrade : valid;
   // 1つも出せないときはエラー表示にする（自動で作り直さない）
   if (questions.length === 0) throw new NoValidQuestionError();
   return { recognition: output.recognition, questions, ...("demo" in output ? { demo: true } : {}) };

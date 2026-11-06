@@ -1,6 +1,6 @@
 "use client";
 
-import { formatNumber, isApprox, numberLength, numberRuby } from "@/lib/format";
+import { FRACTION_GRADE, formatNumber, isApprox, numberLength, numberRuby, TIMES_GRADE } from "@/lib/format";
 import { describeGuess, RATING_LABEL, type Evaluation, type Guess, type Rating } from "@/lib/rating";
 import { refParts } from "@/lib/ref";
 import { unitRuby } from "@/lib/ruby";
@@ -17,13 +17,26 @@ export function ratingText(rating: Rating, type: Question["type"]): string {
   return RATING_LABEL[rating];
 }
 
-/** 倍率を、ふりがなつきの書きかたにする（「約7倍」「約20分の1」）。22px以上の文字なので、漢字にはふりがなを付ける。grade は万・億などの書き方に使う */
+/**
+ * 倍率を、ふりがなつきの書きかたにする（「約7倍」「約20分の1」）。22px以上の文字なので、漢字にはふりがなを付ける。
+ * grade を渡すと、学年に合わせる（docs/02-spec.md 2.4）：「倍」は2年、「○分の1」は3年から。それより前は「○より ずっと おおい・すくない」と言う
+ */
 export function ratioRuby(ratio: number, grade?: number): string {
   if (!Number.isFinite(ratio) || ratio <= 0) return "";
   const big = ratio >= 1;
   const v = big ? ratio : 1 / ratio;
+  if (grade !== undefined && grade < (big ? TIMES_GRADE : FRACTION_GRADE)) {
+    const much = v >= 2 ? "ずっと" : "すこし";
+    return big ? `${much} おおい` : `${much} すくない`;
+  }
   const n = numberRuby(v >= 10 ? Math.round(v) : Math.round(v * 10) / 10, grade);
   return big ? `{約|やく}${n}{倍|ばい}` : `{約|やく}${n}{分|ぶん}の1`;
+}
+
+/** 「よそうの 約5倍」「もとの 約20分の1」のように、くらべる もとを つけて言う（1年生などは「よそうより ずっと おおい」） */
+export function ratioWith(base: string, ratio: number, grade?: number): string {
+  const phrase = grade !== undefined && grade < (ratio >= 1 ? TIMES_GRADE : FRACTION_GRADE);
+  return `${base}${phrase ? "より" : "の"} ${ratioRuby(ratio, grade)}`;
 }
 
 // 評価ごとの、ナビの顔・ふきだしの地と文字の色・答えのカードの地・ひとことの札の色（赤は「ピタリ」だけに使う。見本 14〜16）
@@ -124,7 +137,9 @@ export function ResultSummary({
   const ref = type === "estimate" ? refParts(question, actual) : null;
   const ratio = actual / guessValue;
   const chipText =
-    rating === "pita" ? "ほぼ ぴったり！" : `よそうの ${ratioRuby(ratio, grade)}${rating === "ohazure" ? "！" : ""}`;
+    rating === "pita"
+      ? "ほぼ ぴったり！"
+      : `${ratioWith("よそう", ratio, grade)}${rating === "ohazure" ? "！" : ""}`;
 
   return (
     <div className="relative flex flex-col gap-4">
@@ -161,20 +176,20 @@ export function ResultSummary({
         </p>
       )}
 
-      <NumberLine guess={guessValue} actual={actual} unit={unit} intro={animate} />
+      <NumberLine guess={guessValue} actual={actual} unit={unit} intro={animate} grade={grade} />
 
       {ref && (
         <div className="flex items-center gap-3.5 rounded-card bg-mint-light px-[18px] py-3">
           <Icon name="bulb" size={34} fill="#FFC83D" stroke="#22223A" strokeWidth={1.8} />
           <span className="text-[19px] font-black leading-[1.7]">
             <RubyText kana text={ref.label} /> {isApprox(ref.value) ? "やく " : ""}
-            {formatNumber(ref.value)}
+            {formatNumber(ref.value, grade)}
             <RubyText kana text={`${unitRuby(ref.unit)}${ref.suffix}`} />
           </span>
         </div>
       )}
 
-      <p className="text-center text-sm font-black text-ink-sub">きみの よそう：{describeGuess(guess, unit)}</p>
+      <p className="text-center text-sm font-black text-ink-sub">きみの よそう：{describeGuess(guess, unit, grade)}</p>
     </div>
   );
 }
