@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useRef, useState } from "react";
 import { AlbumPicker } from "@/components/AlbumPicker";
 import { useArchive } from "@/components/ArchiveProvider";
 import { useApp } from "@/components/AuthProvider";
 import { Gate } from "@/components/Gate";
+import { Guide, GuideRing, type GuideStep } from "@/components/Guide";
 import { Icon } from "@/components/Icons";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
 import { SceneSamples } from "@/components/SceneSamples";
-import { CAPTURE_WITH_PROMISE, titleLabel } from "@/lib/constants";
+import { CAPTURE_WITH_PROMISE, GUIDE_PARAM, titleLabel } from "@/lib/constants";
 import { missionDone, todaysMission } from "@/lib/missions";
 
 /** まちの絵（見本 04）。いえ・き・しんごうに「はてな」がかくれている */
@@ -37,15 +40,31 @@ function TownArt() {
 }
 
 function HomeContent() {
-  const { profile } = useApp();
+  const { profile, markGuideSeen } = useApp();
   const { archives } = useArchive();
+  const router = useRouter();
+  const params = useSearchParams();
+  const captureRef = useRef<HTMLAnchorElement>(null);
+  const [guideStep, setGuideStep] = useState<GuideStep>(0);
+  const [guideClosed, setGuideClosed] = useState(false);
   if (!profile) return null;
 
   const done = missionDone(archives);
+  // はじめての1回（まだ見ていない）と、せっていから もういちど見るとき（docs/02-spec.md 4.2）
+  const guideOpen = !guideClosed && (profile.guideSeenAt === null || params.get(GUIDE_PARAM) === "1");
+
+  // とばす・とじる・ホームを みる・やってみる！ の どれでも、見おわったことにする
+  function closeGuide(next?: string) {
+    setGuideClosed(true);
+    void markGuideSeen();
+    if (next) router.push(next);
+    // せっていから来たときの「?guide=1」を消す（読み込み直しても もう出ないように）
+    else if (params.get(GUIDE_PARAM)) router.replace("/");
+  }
 
   return (
     <>
-      <Page tab="home">
+      <Page tab="home" tabRaised={guideOpen && guideStep === 1}>
         <section
           role="img"
           aria-label="まちの え。いえ、き、しんごうに はてなが かくれている"
@@ -75,11 +94,15 @@ function HomeContent() {
         </div>
 
         <Link
+          ref={captureRef}
           href={CAPTURE_WITH_PROMISE}
-          className="flex h-[92px] shrink-0 items-center justify-center gap-3 rounded-[30px] border-3 border-ink bg-navi font-pop text-[25px] text-white shadow-[0_7px_0_var(--color-ink)] active:translate-y-[7px] active:shadow-none"
+          className={`relative flex h-[92px] shrink-0 items-center justify-center gap-3 rounded-[30px] border-3 border-ink bg-navi font-pop text-[25px] text-white shadow-[0_7px_0_var(--color-ink)] active:translate-y-[7px] active:shadow-none ${
+            guideOpen && guideStep === 2 ? "pointer-events-none z-[45]" : ""
+          }`}
         >
           <Icon name="camera" size={42} strokeWidth={2.2} />
           はてなを さがす！
+          {guideOpen && guideStep === 2 && <GuideRing />}
         </Link>
 
         <AlbumPicker className="flex h-14 shrink-0 items-center justify-center gap-2 rounded-[22px] border-3 border-ink bg-white text-[19px] font-black text-ink shadow-pop-sm active:translate-y-1 active:shadow-none">
@@ -89,6 +112,15 @@ function HomeContent() {
 
         <SceneSamples />
       </Page>
+      {guideOpen && (
+        <Guide
+          step={guideStep}
+          onNext={() => setGuideStep((s) => (s < 2 ? ((s + 1) as GuideStep) : s))}
+          onClose={() => closeGuide()}
+          onTry={() => closeGuide(CAPTURE_WITH_PROMISE)}
+          captureRef={captureRef}
+        />
+      )}
     </>
   );
 }
@@ -96,7 +128,9 @@ function HomeContent() {
 export default function Home() {
   return (
     <Gate>
-      <HomeContent />
+      <Suspense>
+        <HomeContent />
+      </Suspense>
     </Gate>
   );
 }

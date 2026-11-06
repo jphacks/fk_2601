@@ -34,10 +34,15 @@ const BAR_BACKGROUND =
  * 下のナビ（5つ）。ずかん・スタンプ ｜ ホーム ｜ みんな・せってい。ホームだけ まんなかの大きい丸で、バーから はみ出す。
  * 上の 18px は丸がはみ出すぶんのすきまで、線と白い地は それより下だけ
  */
-export function TabBar({ current }: { current: Tab }) {
+export function TabBar({ current, raised = false }: { current: Tab; raised?: boolean }) {
   const home = current === "home";
+  // raised：あそびかたの説明で、暗い幕の上に持ち上げる（説明のあいだは押せない）
   return (
-    <nav aria-label="メニュー" className="sticky bottom-0 z-10 grid h-[102px] shrink-0 grid-cols-5 pt-[18px]" style={{ background: BAR_BACKGROUND }}>
+    <nav
+      aria-label="メニュー"
+      className={`sticky bottom-0 grid h-[102px] shrink-0 grid-cols-5 pt-[18px] ${raised ? "pointer-events-none z-[45]" : "z-10"}`}
+      style={{ background: BAR_BACKGROUND }}
+    >
       <SideTab tab={SIDE[0]} active={current === "zukan"} />
       <SideTab tab={SIDE[1]} active={current === "stamp"} />
       <Link href="/" aria-current={home ? "page" : undefined} className="flex flex-col items-center">

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>はじめまして の見本（Issue #87）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  body { margin: 0; background: var(--color-cloud); font-family: var(--font-body); color: var(--color-ink); }
+  header { padding: 32px 24px 8px; max-width: 1400px; margin: 0 auto; }
+  h1 { margin: 0; font-family: var(--font-pop); font-weight: 400; font-size: 32px; }
+  header p { margin: 8px 0 0; font-weight: 700; line-height: 1.7; color: var(--color-ink-sub); }
+  main { max-width: 1400px; margin: 0 auto; padding: 0 24px 64px; }
+  h2 { margin: 40px 0 16px; font-family: var(--font-pop); font-weight: 400; font-size: 22px; }
+  .row { display: flex; flex-wrap: wrap; gap: 28px; }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .frame { width: 195px; height: 422px; overflow: hidden; border: 3px solid var(--color-ink); border-radius: 24px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); }
+  .frame.wide { width: 410px; }
+  .frame iframe { width: 390px; height: 844px; border: 0; transform: scale(0.5); transform-origin: 0 0; }
+  .frame.wide iframe { width: 820px; }
+  figcaption { display: flex; flex-direction: column; gap: 2px; max-width: 195px; }
+  .wide + figcaption { max-width: 410px; }
+  figcaption a { font-weight: 900; color: var(--color-navi-dark); }
+  figcaption span { font-size: 13px; font-weight: 700; color: var(--color-ink-sub); }
+</style>
+</head>
+<body>
+<header>
+  <h1>はじめまして の見本</h1>
+  <p>はじめて使う人の登録と、あそびかたの説明（Issue #87・<code>docs/06-school-expansion.md</code> 4章のうち、学校なしで使える ログイン ID の方式）。<br>
+  画面をクリックすると1枚ずつ開きます。ボタンで次の画面へ進めます。決まりは <a href="README.md">README.md</a> にあります。</p>
+</header>
+<main>
+  <h2>はじめて：ナビが 1画面に 1つずつ きく</h2>
+  <div class="row">
+    <figure><div class="frame"><iframe src="screens/01-welcome.html" title="ようこそ" loading="lazy"></iframe></div><figcaption><a href="screens/01-welcome.html">01 ようこそ</a><span>「はじめる！」と「つづきから」</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/02-login-id.html" title="① ログイン ID" loading="lazy"></iframe></div><figcaption><a href="screens/02-login-id.html">02 ① ログイン ID</a><span>ニックネームとは べつ、と書く</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/03-password.html" title="② パスワード（ID を つくる）" loading="lazy"></iframe></div><figcaption><a href="screens/03-password.html">03 ② パスワード（ID を つくる）</a><span>6文字以上・2回目のちがいを その場で</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/04-nickname.html" title="③ ニックネーム" loading="lazy"></iframe></div><figcaption><a href="screens/04-nickname.html">04 ③ ニックネーム</a><span>10文字まで・ほんとうの なまえは いれない</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/05-grade.html" title="④ 学年" loading="lazy"></iframe></div><figcaption><a href="screens/05-grade.html">05 ④ 学年</a><span>選んだら押しこまれた形</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/06-ready.html" title="じゅんび できたよ" loading="lazy"></iframe></div><figcaption><a href="screens/06-ready.html">06 じゅんび できたよ</a><span>ID を見せて メモを うながす</span></figcaption></figure>
+  </div>
+  <h2>あそびかた：はじめての 1回だけ（とばせる・せっていで また みられる）</h2>
+  <div class="row">
+    <figure><div class="frame"><iframe src="screens/07-guide-flow.html" title="あそびかた 1/3" loading="lazy"></iframe></div><figcaption><a href="screens/07-guide-flow.html">07 あそびかた 1/3</a><span>あそぶ じゅんばん（7つ）</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/08-guide-nav.html" title="あそびかた 2/3" loading="lazy"></iframe></div><figcaption><a href="screens/08-guide-nav.html">08 あそびかた 2/3</a><span>下のナビの5つ</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/09-guide-capture.html" title="あそびかた 3/3" loading="lazy"></iframe></div><figcaption><a href="screens/09-guide-capture.html">09 あそびかた 3/3</a><span>「はてなを さがす！」から はじめる</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/10-settings.html" title="せってい" loading="lazy"></iframe></div><figcaption><a href="screens/10-settings.html">10 せってい</a><span>「あそびかたを もういちど みる」を足した</span></figcaption></figure>
+  </div>
+  <h2>つづきから・こまったとき</h2>
+  <div class="row">
+    <figure><div class="frame"><iframe src="screens/11-okaeri.html" title="おかえり（2回目から）" loading="lazy"></iframe></div><figcaption><a href="screens/11-okaeri.html">11 おかえり（2回目から）</a><span>ログインの そうさ だけ</span></figcaption></figure>
+    <figure><div class="frame"><iframe src="screens/12-id-taken.html" title="ID が つかわれていたとき" loading="lazy"></iframe></div><figcaption><a href="screens/12-id-taken.html">12 ID が つかわれていたとき</a><span>② から もどる。パスワードは そのまま</span></figcaption></figure>
+  </div>
+</main>
+</body>
+</html>

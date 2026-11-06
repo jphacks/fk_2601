@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>はじめまして（ようこそ）</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#22223A}a:hover{color:#22223A}
+rt{font-family:'Zen Maru Gothic',sans-serif;font-size:0.5em;font-weight:900;letter-spacing:0}
+input::placeholder{color:#8A8FA6}
+.navi{animation:navi-puni 2.6s ease-in-out infinite;transform-origin:50% 92%}
+.navi-react{animation:navi-pop .6s cubic-bezier(.3,1.6,.5,1) both,navi-puni 2.6s .6s ease-in-out infinite;transform-origin:50% 92%}
+@keyframes navi-puni{0%,100%{transform:translateY(0) scale(1.03,.97)}50%{transform:translateY(-4px) scale(.98,1.03)}}
+@keyframes navi-pop{0%{transform:translateY(24px) scale(.4);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+.sheet{animation:sheet-up .45s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes sheet-up{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.navi,.navi-react,.sheet{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; z-index: 0; isolation: isolate; overflow: hidden; width: 390px; height: 844px; box-sizing: border-box; padding: 24px; background: #FFFFFF; font-family: 'Zen Maru Gothic', sans-serif; color: #22223A; display: flex; flex-direction: column; gap: 16px">
+  <svg aria-hidden="true" width="390" height="844" viewBox="0 0 390 844" style="position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none"><circle cx="34" cy="40" r="8" fill="#FFC83D"></circle><path d="M352 30l14 5-11 10z" fill="#FF6F9C"></path><rect x="300" y="128" width="12" height="12" rx="2" fill="#24C3A0" transform="rotate(25 306 134)"></rect><path d="M300 96q8-10 16 0t16 0" fill="none" stroke="#8B5CF6" stroke-width="4" stroke-linecap="round"></path><circle cx="370" cy="330" r="6" fill="#4A5AE8"></circle><path d="M40 150l4 9 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#FFC83D"></path></svg>
+
+  <div style="margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 14px">
+    <span style="font-family: 'Mochiy Pop One', sans-serif; font-size: 24px; color: #4A4E6A">かこって</span>
+    <span style="position: relative; padding: 6px 22px; font-family: 'Mochiy Pop One', sans-serif; font-size: 46px; line-height: 1.2; color: #4A5AE8">
+      <svg aria-hidden="true" viewBox="0 0 240 90" width="240" height="90" style="position: absolute; left: calc(50% - 120px); top: calc(50% - 45px); overflow: visible"><path d="M70 12C140 2 228 14 230 44C232 76 160 86 108 84C52 82 8 72 10 46C12 24 40 14 78 10C86 9 92 7 96 3" fill="none" stroke="#FFC83D" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path><path d="M70 12C140 2 228 14 230 44C232 76 160 86 108 84C52 82 8 72 10 46C12 24 40 14 78 10C86 9 92 7 96 3" fill="none" stroke="#22223A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span style="position: relative">はてな!?</span>
+    </span>
+  </div>
+
+  <div style="margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 12px">
+    <img class="navi-react" src="/_blob/e5fb04ff8816f64ea5f5347773eca9bc" alt="ナビ（にこにこ）" style="width: 170px; height: 170px">
+    <div style="position: relative; align-self: stretch; padding: 14px 18px; border-radius: 24px; background: #E8EBFF; text-align: center">
+      <div style="position: absolute; left: calc(50% - 8px); top: -8px; width: 16px; height: 16px; background: #E8EBFF; transform: rotate(45deg)"></div>
+      <span style="position: relative; display: block; font-family: 'Mochiy Pop One', sans-serif; font-size: 30px; line-height: 1.4">はじめまして！</span>
+      <span style="position: relative; display: block; font-size: 18px; font-weight: 900; line-height: 1.6">かこって はてな!? へ ようこそ！<br>ぼくは ナビ。いっしょに あそぼう</span>
+    </div>
+    <span style="font-size: 16px; font-weight: 900; color: #4A4E6A; text-align: center; line-height: 1.6">まちで みつけた ものを かこむと、<br>はてなが でてくるよ</span>
+  </div>
+
+  <a href="HelloId.dc.html" style="margin-top: auto; margin-bottom: 6px; height: 72px; flex-shrink: 0; box-sizing: border-box; border: 3px solid #22223A; border-radius: 26px; background: #4A5AE8; box-shadow: 0 6px 0 #22223A; color: #FFFFFF; font-family: 'Mochiy Pop One', sans-serif; font-size: 24px; display: flex; align-items: center; justify-content: center; text-decoration: none">はじめる！</a>
+  <a href="HelloOkaeri.dc.html" style="margin-bottom: 6px; height: 60px; flex-shrink: 0; box-sizing: border-box; border: 3px solid #22223A; border-radius: 22px; background: #FFFFFF; box-shadow: 0 4px 0 #22223A; color: #22223A; font-size: 18px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none">つづきから（ID を もっている ひと）</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

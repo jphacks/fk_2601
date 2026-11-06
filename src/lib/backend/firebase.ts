@@ -20,7 +20,7 @@ import {
   setDoc,
   writeBatch,
 } from "firebase/firestore";
-import { UserFacingError } from "@/lib/errors";
+import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import type { ArchiveRecord, AuthUser, Profile, PublicPost } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
@@ -46,7 +46,7 @@ function toAuthUser(user: User): AuthUser {
 
 function friendly(error: unknown): never {
   const code = (error as { code?: string }).code ?? "";
-  if (code === "auth/email-already-in-use") throw new UserFacingError("その ログイン ID は もう つかわれているよ。ちがう ID に してね");
+  if (code === "auth/email-already-in-use") throw new UsernameTakenError();
   if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
     throw new UserFacingError("ログイン ID か パスワードが ちがうよ");
   }
