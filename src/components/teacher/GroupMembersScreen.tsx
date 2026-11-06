@@ -4,11 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
 import { groupOf, type GroupId } from "@/lib/constants";
 import type { GroupMember, GroupRole, GroupSettings } from "@/lib/types";
+import { JoinCodePanel } from "./JoinCodePanel";
 import { AdminNotice, BTN_BASE, ConfirmDialog, DANGER_SUB, GroupAdminPage, groupLabel, SUB } from "./GroupAdmin";
 
 // グループのメンバー（/teacher/groups/{グループ}/members。#129）。本番のデータを扱う。
 // できること：一覧（ログイン ID・役割・入った日時）、管理者にする・メンバーにもどす、グループから外す、自動で入るのを止める。
-// 自分の役割の変更と、自分を外すことはできない（firestore.rules でも断る）。メンバーを入れるのは、いまはコンソールから
+// 自分の役割の変更と、自分を外すことはできない（firestore.rules でも断る）。メンバーを入れるのは参加コード（JoinCodePanel。#137）
 
 const FIELD = "h-10 rounded-tbtn border border-t-field-line bg-white px-3 text-sm text-t-text pointer-coarse:h-11 pointer-coarse:text-base";
 const ROLE_LABEL: Record<GroupRole, string> = { admin: "管理者", member: "メンバー" };
@@ -145,7 +146,7 @@ function Members({ groupId }: { groupId: GroupId }) {
           <ul className="flex list-disc flex-col gap-2 pl-5 text-sm leading-[1.75] text-t-text-2">
             <li>「{groupLabel(groupId)}」の投稿が見られなくなり、新しく見せることもできなくなります</li>
             <li>この人がこれまでに見せた投稿は残ります（だれの投稿かは分からないので、消すときは投稿の画面から消してください）</li>
-            <li>{autoJoin ? "アプリが自動で入れるのは はじめての登録のときだけなので、外した人がアプリの操作で入りなおすことはありません" : "また入れるのは、Firebase のコンソールから行います"}</li>
+            <li>参加コードを知っていれば、また入れます。入れたくないときは、参加コードを作り直してください{autoJoin ? "（自動で入るのは はじめての登録のときだけなので、それで入りなおすことはありません）" : ""}</li>
           </ul>
         ),
       };
@@ -170,6 +171,7 @@ function Members({ groupId }: { groupId: GroupId }) {
 
   return (
     <div className="flex flex-col gap-3">
+      <JoinCodePanel groupId={groupId} />
       {autoJoin && <AutoJoinPanel groupId={groupId} settings={settings} onStop={() => ask({ kind: "stop" })} />}
 
       <div className="flex flex-wrap items-center gap-3">
@@ -179,7 +181,7 @@ function Members({ groupId }: { groupId: GroupId }) {
         </label>
         <p className="flex-[1_1_300px] text-xs leading-[1.7] text-t-text-2">
           {members ? `${members.length}人（管理者 ${adminCount}人）。` : ""}
-          メンバーを入れるのは、いまは Firebase のコンソールから行います。自分の役割は変えられず、自分は外せません。
+          メンバーは、上の参加コードで入ります。自分の役割は変えられず、自分は外せません。
         </p>
         <button type="button" onClick={reload} className={`${BTN_BASE} h-10 px-3.5 pointer-coarse:h-11 ${SUB}`}>
           読み込み直す
