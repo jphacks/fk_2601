@@ -63,6 +63,6 @@
   --font-t-cast: "Zen Maru Gothic", "BIZ UDPGothic", sans-serif;
 
   /* 角丸 */
-  --radius-t-card: 14px;
-  --radius-t-btn: 8px;
+  --radius-tcard: 14px;
+  --radius-tbtn: 8px;
 }

@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* 先生用の管理画面のテーマ（すべて t- 付き。使ったクラスの分だけ CSS に入る） */
+@import "../../docs/design/teachers/tailwind-theme.css";
 
 /* デザイン見本（docs/design/tailwind-theme.css）と同じ値。値を変えるときは docs/design の tokens.css と tailwind-theme.css も直す */
 @theme {

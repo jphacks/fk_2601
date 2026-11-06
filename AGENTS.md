@@ -38,11 +38,11 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
 └── src/
     ├── app/              # 画面（Next.js の App Router）と API（app/api/questions）
-    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx・Icons.tsx
-    ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み。習っていない漢字は ひらがなにする）、kanji.ts（学年別漢字配当表）、scenes.ts（見本の絵）、demo.ts（ピッチ用のデモ版：`/demo` で始まる。AI を呼ばず、ペットボトルの問いを出す。`docs/03-technical.md` 10章）など
+    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx・Icons.tsx。teacher/ は先生用の管理画面の部品
+    ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み。習っていない漢字は ひらがなにする）、kanji.ts（学年別漢字配当表）、scenes.ts（見本の絵）、demo.ts（ピッチ用のデモ版：`/demo` で始まる。AI を呼ばず、ペットボトルの問いを出す。`docs/03-technical.md` 10章）、teacherDemo.ts（管理画面の見本で使う架空のデータ）など
     └── server/           # サーバーだけで動く処理。llm/（prompts・schema・client・validate・mock・builtin（AI なしの見本の問い））と auth.ts（ID トークンの確認）
 ```
-- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。画面ごとの決まりは `docs/02-spec.md` 1章
+- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。先生用の管理画面（見本）は `/teacher` から（子どもの画面に入口を出さない）。画面ごとの決まりは `docs/02-spec.md` 1章
 
 ## セットアップ・コマンド
 | 用途 | コマンド |
