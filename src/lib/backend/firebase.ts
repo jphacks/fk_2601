@@ -15,6 +15,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getCountFromServer,
   getDoc,
   getDocFromServer,
   getDocs,
@@ -27,12 +28,14 @@ import {
   setDoc,
   type Timestamp,
   updateDoc,
+  where,
   writeBatch,
   where,
 } from "firebase/firestore";
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
-import { GROUPS } from "@/lib/constants";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupPost, Membership, Profile } from "@/lib/types";
+import { GROUP_POSTS_PAGE, GROUPS, type GroupId } from "@/lib/constants";
+import { newJoinCode } from "@/lib/joinCode";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, JoinCode, Membership, Profile } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -227,6 +230,71 @@ export const firebaseBackend: Backend = {
     await updateDoc(doc(db(), "groups", groupId), { autoJoinUntil: serverTimestamp() });
   },
 
+  async getGroupMission(groupId, date) {
+    const snapshot = await getDoc(doc(db(), "groups", groupId, "missions", date));
+    const text = snapshot.data()?.text;
+    return typeof text === "string" ? { groupId, date, text } : null;
+  },
+
+  async listGroupMissions(groupId, from, to) {
+    const snapshot = await getDocs(
+      query(collection(db(), "groups", groupId, "missions"), where("date", ">=", from), where("date", "<=", to), orderBy("date")),
+    );
+    return snapshot.docs.flatMap((d): GroupMission[] => {
+      const data = d.data();
+      return typeof data.text === "string" ? [{ groupId, date: d.id, text: data.text }] : [];
+    });
+  },
+
+  async saveGroupMission(groupId, date, text) {
+    await setDoc(doc(db(), "groups", groupId, "missions", date), { date, text, updatedAt: serverTimestamp() });
+  },
+
+  async deleteGroupMission(groupId, date) {
+    await deleteDoc(doc(db(), "groups", groupId, "missions", date));
+  },
+
+  async getJoinCode(groupId) {
+    const code = (await getDoc(doc(db(), "groups", groupId))).data()?.joinCode;
+    if (typeof code !== "string") return null;
+    const snapshot = await getDoc(doc(db(), "joinCodes", code));
+    return snapshot.exists() ? { code, open: snapshot.data().open === true } : null;
+  },
+
+  // 新しいコードと、グループの joinCode を同じバッチで書き、前のコードは消す（firestore.rules）
+  async createJoinCode(groupId) {
+    const before = (await getDoc(doc(db(), "groups", groupId))).data()?.joinCode;
+    const code = newJoinCode();
+    const batch = writeBatch(db());
+    batch.set(doc(db(), "joinCodes", code), { groupId, open: true, createdAt: serverTimestamp() });
+    batch.update(doc(db(), "groups", groupId), { joinCode: code });
+    if (typeof before === "string") batch.delete(doc(db(), "joinCodes", before));
+    await batch.commit();
+    return { code, open: true } satisfies JoinCode;
+  },
+
+  async setJoinCodeOpen(code, open) {
+    await updateDoc(doc(db(), "joinCodes", code), { open });
+  },
+
+  async joinWithCode(uid, username, code) {
+    const snapshot = await getDoc(doc(db(), "joinCodes", code));
+    const groupId = GROUPS.find((g) => g.id === snapshot.data()?.groupId)?.id as GroupId | undefined;
+    if (!snapshot.exists() || !groupId) throw new UserFacingError("その コードの グループは みつからないよ。もういちど たしかめてね");
+    if (snapshot.data().open !== true) throw new UserFacingError("いまは その グループに はいれないよ。おとなの ひとに きいてね");
+    const ref = doc(db(), "groups", groupId, "members", uid);
+    if ((await getDoc(ref)).exists()) return { groupId, already: true };
+    // ログイン ID は、ルールで ID トークンの名前と同じかを確かめる（joinAutoGroups と同じ）
+    await auth().currentUser?.getIdToken(true);
+    try {
+      await setDoc(ref, { role: "member", joinedAt: serverTimestamp(), username, joinCode: code });
+    } catch (error) {
+      if ((error as { code?: string }).code !== "permission-denied") throw error;
+      await setDoc(ref, { role: "member", joinedAt: serverTimestamp(), joinCode: code });
+    }
+    return { groupId, already: false };
+  },
+
   async getGroupSettings(groupId) {
     const snapshot = await getDoc(doc(db(), "groups", groupId));
     const until = (snapshot.data()?.autoJoinUntil as Timestamp | undefined)?.toMillis?.() ?? null;
@@ -234,12 +302,28 @@ export const firebaseBackend: Backend = {
     return { autoJoinUntil: until, open: until !== null && Date.now() < until };
   },
 
-  async listGroupPosts(groupId) {
-    const snapshot = await getDocs(query(collection(db(), "groups", groupId, "posts"), orderBy("createdAt", "desc"), limit(30)));
+  async listGroupPosts(groupId, options) {
+    const posts = collection(db(), "groups", groupId, "posts");
+    const page = options?.before === undefined
+      ? query(posts, orderBy("createdAt", "desc"), limit(GROUP_POSTS_PAGE))
+      : query(posts, where("createdAt", "<", options.before), orderBy("createdAt", "desc"), limit(GROUP_POSTS_PAGE));
+    const snapshot = await getDocs(page);
     return snapshot.docs.map((d) => d.data() as GroupPost);
   },
 
   // 持ち主は本人の記録だけ読める owners に分け、投稿と同じバッチで書く・消す（firestore.rules）
+  // 数だけをサーバーで数える（投稿の画像を読まない）
+  async countGroupPostsSince(groupId, since) {
+    const snapshot = await getCountFromServer(query(collection(db(), "groups", groupId, "posts"), where("createdAt", ">=", since)));
+    return snapshot.data().count;
+  },
+
+  async getGroupPost(groupId, id) {
+    const snapshot = await getDoc(doc(db(), "groups", groupId, "posts", id));
+    return snapshot.exists() ? (snapshot.data() as GroupPost) : null;
+  },
+
+  // 持ち主はだれも読めない owners に分け、投稿と同じバッチで書く・消す（firestore.rules）
   async saveGroupPost(uid, groupId, post) {
     const batch = writeBatch(db());
     batch.set(doc(db(), "groups", groupId, "posts", post.id), JSON.parse(JSON.stringify(post)));

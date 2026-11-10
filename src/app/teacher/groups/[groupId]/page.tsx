@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { GroupsScreen } from "@/components/teacher/GroupsScreen";
+import { GroupTodayScreen } from "@/components/teacher/GroupTodayScreen";
 import { APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: `グループの投稿｜${APP_NAME}`,
+  title: `グループの きょう｜${APP_NAME}`,
 };
 
-export default async function TeacherGroupPostsPage({ params }: { params: Promise<{ groupId: string }> }) {
+export default async function TeacherGroupTodayPage({ params }: { params: Promise<{ groupId: string }> }) {
   const { groupId } = await params;
-  return <GroupsScreen groupId={groupId} />;
+  return <GroupTodayScreen groupId={groupId} />;
 }

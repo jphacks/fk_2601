@@ -38,12 +38,12 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
 └── src/
     ├── app/              # 画面（Next.js の App Router）と API（app/api/questions）
-    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx・Icons.tsx。Signup.tsx は はじめての登録の部品、Guide.tsx は ホームに重ねる あそびかたの説明。teacher/ は先生用の管理画面の部品（GroupAdmin.tsx・GroupsScreen.tsx・GroupMembersScreen.tsx は本番のデータを扱う グループの管理）
-    ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み。習っていない漢字は ひらがなにする）、kanji.ts（学年別漢字配当表）、titles.ts（称号：20種類 × どう・ぎん・きん）、scenes.ts（見本の絵）、demo.ts（ピッチ用のデモ版：`/demo` で始まる。AI を呼ばず、ペットボトルの問いを出す。`docs/03-technical.md` 10章）、teacherDemo.ts（管理画面の見本で使う架空のクラス・メンバー・授業中の記録・クラスに共有された投稿・ミッション・この2週間の件数・授業時間・参加コード・一緒に見る先生・教室に映すときの子ども向けの文と3択）など
+    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx・Icons.tsx。Signup.tsx は はじめての登録の部品、Guide.tsx は ホームに重ねる あそびかたの説明、GroupMissions.tsx は グループのミッションを読む。teacher/ は先生用の管理画面の部品（Group*.tsx・JoinCodePanel.tsx は本番のデータを扱う グループの管理）
+    ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み。習っていない漢字は ひらがなにする）、kanji.ts（学年別漢字配当表）、titles.ts（称号：20種類 × どう・ぎん・きん）、scenes.ts（見本の絵）、joinCode.ts（参加コードを作る・そろえる）、demo.ts（ピッチ用のデモ版：`/demo` で始まる。AI を呼ばず、ペットボトルの問いを出す。`docs/03-technical.md` 10章）、teacherDemo.ts（管理画面の見本で使う架空のクラス・メンバー・授業中の記録・クラスに共有された投稿・ミッション・この2週間の件数・授業時間・参加コード・一緒に見る先生・教室に映すときの子ども向けの文と3択）など
     └── server/           # サーバーだけで動く処理。llm/（prompts・schema・client・validate・mock・builtin（AI なしの見本の問い））と auth.ts（ID トークンの確認）
 ```
 - はじめての人：`/login`（ようこそ → ログイン ID → パスワード）→ `/profile`（ニックネーム → 学年 → じゅんび できたよ）→ `/`（あそびかたの説明を1回だけ重ねる。`docs/02-spec.md` 4章）
-- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。先生用の管理画面（見本）は `/teacher` から（子どもの画面に入口を出さない。架空のデータだけで動く：`docs/03-technical.md` 10章）。グループの管理（投稿を消す・メンバーの管理。本番のデータ）は `/teacher/groups/{グループ}`（クラスの切り替えの「グループ」から。`docs/03-technical.md` 6章）。画面ごとの決まりは `docs/02-spec.md` 1章
+- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。`/join`（参加コードでグループに入る）は「せってい」から開く。先生用の管理画面（見本）は `/teacher` から（子どもの画面に入口を出さない。架空のデータだけで動く：`docs/03-technical.md` 10章）。グループの管理（きょう・はてな・ミッション・メンバーと参加コード。本番のデータ）は `/teacher/groups/{グループ}`（クラスの切り替えの「グループ」から。`docs/03-technical.md` 6章）。画面ごとの決まりは `docs/02-spec.md` 1章
 
 ## セットアップ・コマンド
 | 用途 | コマンド |

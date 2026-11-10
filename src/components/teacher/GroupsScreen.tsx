@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
-import { SUBJECT_LABEL, titleLabel, type GroupId } from "@/lib/constants";
+import { GROUP_POSTS_PAGE, SUBJECT_LABEL, titleLabel, type GroupId } from "@/lib/constants";
 import { stripRuby } from "@/lib/ruby";
 import type { GroupPost } from "@/lib/types";
 import type { Subject } from "@/server/llm/schema";
 import { GroupAdminPage, groupLabel } from "./GroupAdmin";
 
-// グループの管理（#120）。見本（デモ）ではなく、本物の Firestore のデータを扱う。
+// グループの はてな（#120・#138）。見本（デモ）ではなく、本物の Firestore のデータを扱う。
 // 管理者（groups/{id}/members/{uid} の role が "admin"）だけが、グループの投稿を消せる（firestore.rules で確かめる）。
 // 管理者は、子どもの画面と同じアカウントでログインする。管理者にするのは Firebase のコンソールから（docs/03-technical.md 6章）
 
@@ -127,40 +127,100 @@ function DeleteDialog({
   );
 }
 
+type FieldFilter = Subject | "all";
+const FIELDS: Subject[] = ["math", "science", "info"];
+
+/** 2つの一覧を ID で まとめる（あとのほうを優先しない。はじめに出たものを残す） */
+function mergePosts(a: GroupPost[], b: GroupPost[]): GroupPost[] {
+  const seen = new Set(a.map((p) => p.id));
+  return [...a, ...b.filter((p) => !seen.has(p.id))];
+}
+
+// グループの はてな（#120・#138）。新しい順に GROUP_POSTS_PAGE 件ずつ読み、「もっと見る」で前の分を足す。
+// 分野・単元で しぼりこむ（見本の はてなの画面と同じ形）。通報された投稿は、まだ読んでいない古いものも読みにいって先頭に出す（#85）
 function GroupPosts({ groupId }: { groupId: GroupId }) {
   const { backend } = useApp();
   const [posts, setPosts] = useState<GroupPost[] | null>(null);
+  // 「もっと見る」で続きを読む位置（新しい順に読んだ最後の投稿の時刻）。null は もう続きがない
+  const [cursor, setCursor] = useState<number | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [moreFailed, setMoreFailed] = useState(false);
   // 通報された数（投稿の ID ごと）。読めなかったときは空にして、投稿の表示はそのまま続ける
   const [reports, setReports] = useState<Record<string, number>>({});
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [field, setField] = useState<FieldFilter>("all");
+  const [unit, setUnit] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<GroupPost | null>(null);
   const [busy, setBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    backend
-      .listGroupPosts(groupId)
-      .then((list) => !cancelled && setPosts(list))
-      .catch(() => !cancelled && setFailed(true));
-    backend
-      .listGroupReports(groupId)
-      .then((counts) => !cancelled && setReports(counts))
-      .catch(() => !cancelled && setReports({}));
+    (async () => {
+      try {
+        const page = await backend.listGroupPosts(groupId);
+        if (cancelled) return;
+        setPosts(page);
+        setCursor(page.length === GROUP_POSTS_PAGE ? page[page.length - 1].createdAt : null);
+        let counts: Record<string, number> = {};
+        try {
+          counts = await backend.listGroupReports(groupId);
+        } catch {
+          // 通報が読めなくても、投稿は出す
+        }
+        if (cancelled) return;
+        setReports(counts);
+        const loaded = new Set(page.map((p) => p.id));
+        const missing = Object.keys(counts).filter((id) => !loaded.has(id));
+        const extra = (await Promise.all(missing.map((id) => backend.getGroupPost(groupId, id).catch(() => null)))).filter((p): p is GroupPost => p !== null);
+        if (!cancelled && extra.length > 0) setPosts((prev) => mergePosts(prev ?? [], extra));
+      } catch {
+        if (!cancelled) setFailed(true);
+      }
+    })();
     return () => {
       cancelled = true;
     };
   }, [backend, groupId, attempt]);
 
-  // 通報された投稿を先に（通報の多い順）、そのあとは新しい順
-  const sorted = posts ? [...posts].sort((a, b) => (reports[b.id] ?? 0) - (reports[a.id] ?? 0) || b.createdAt - a.createdAt) : null;
+  async function loadMore() {
+    if (cursor === null || loadingMore) return;
+    setLoadingMore(true);
+    setMoreFailed(false);
+    try {
+      const page = await backend.listGroupPosts(groupId, { before: cursor });
+      setPosts((prev) => mergePosts(prev ?? [], page));
+      setCursor(page.length === GROUP_POSTS_PAGE ? page[page.length - 1].createdAt : null);
+    } catch {
+      setMoreFailed(true);
+    }
+    setLoadingMore(false);
+  }
 
   function reload() {
     setFailed(false);
     setPosts(null);
+    setCursor(null);
+    setMoreFailed(false);
     setAttempt((n) => n + 1);
   }
+
+  // 分野で しぼり、その中の単元を件数の多い順にならべる
+  const inField = (posts ?? []).filter((p) => field === "all" || p.subject === field);
+  const unitCounts = new Map<string, { subject: Subject; count: number }>();
+  for (const p of inField) {
+    const name = stripRuby(p.topic) || "（単元なし）";
+    const u = unitCounts.get(name);
+    unitCounts.set(name, { subject: p.subject, count: (u?.count ?? 0) + 1 });
+  }
+  const units = [...unitCounts.entries()].sort((a, b) => b[1].count - a[1].count);
+  // 選んでいた単元が消えたとき（最後の1件を消したときなど）は「すべて」にもどす
+  const currentUnit = unit !== null && unitCounts.has(unit) ? unit : null;
+  const shown = currentUnit === null ? inField : inField.filter((p) => (stripRuby(p.topic) || "（単元なし）") === currentUnit);
+  // 通報された投稿を先に（通報の多い順）、そのあとは新しい順
+  const sorted = [...shown].sort((a, b) => (reports[b.id] ?? 0) - (reports[a.id] ?? 0) || b.createdAt - a.createdAt);
+  const reportedCount = (posts ?? []).filter((p) => (reports[p.id] ?? 0) > 0).length;
 
   async function confirmDelete() {
     if (!deleting) return;
@@ -177,10 +237,10 @@ function GroupPosts({ groupId }: { groupId: GroupId }) {
   }
 
   return (
-    <section aria-label={`${groupName(groupId)}の投稿`} className="flex flex-col gap-3">
+    <section aria-label={`${groupName(groupId)}の はてな`} className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3">
         <p className="flex-[1_1_420px] text-xs leading-[1.7] text-t-text-2">
-          新しい順に30件まで出します。通報された投稿は、先頭に出ます（通報した人は、管理者にも分かりません）。消すと、次の投稿が出てきます。投稿には、だれが出したかは入っていません。
+          新しい順に{GROUP_POSTS_PAGE}件ずつ読みます（「もっと見る」で前の分を足します）。通報された投稿は、先頭に出ます（通報した人は、管理者にも分かりません）。投稿には、だれが出したかは入っていません。
         </p>
         <button type="button" onClick={reload} className={`${BTN_BASE} ${SIZE_40} ${SUB}`}>
           読み込み直す
@@ -194,19 +254,79 @@ function GroupPosts({ groupId }: { groupId: GroupId }) {
       )}
       {!failed && posts === null && <Notice>読み込んでいます…</Notice>}
       {posts?.length === 0 && <Notice>まだ投稿はありません。</Notice>}
-      {sorted && sorted.length > 0 && (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
-          {sorted.map((p) => (
-            <PostCard
-              key={p.id}
-              post={p}
-              reports={reports[p.id] ?? 0}
-              onAskDelete={(post) => {
-                setDeleteError(null);
-                setDeleting(post);
-              }}
-            />
-          ))}
+      {posts && posts.length > 0 && (
+        <div className="grid grid-cols-[240px_minmax(0,1fr)] items-start gap-4 max-[900px]:grid-cols-1">
+          <aside aria-label="分野と単元で しぼる" className="flex flex-col gap-2.5 rounded-tcard border border-t-line bg-t-surface p-3.5">
+            <div role="group" aria-label="分野でしぼる" className="grid grid-cols-4 gap-1">
+              {(["all", ...FIELDS] as FieldFilter[]).map((f) => {
+                const on = field === f;
+                return (
+                  <button
+                    key={f}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => {
+                      setField(f);
+                      setUnit(null);
+                    }}
+                    className={`inline-flex h-8 items-center justify-center rounded-tbtn border px-1 text-xs pointer-coarse:h-11 ${on ? "border-t-board bg-t-board font-bold text-white" : "border-t-line bg-white text-t-text-2"}`}
+                  >
+                    {f === "all" ? "すべて" : SUBJECT_LABEL[f]}
+                  </button>
+                );
+              })}
+            </div>
+            <ul className="flex flex-col gap-0.5">
+              {[{ key: null as string | null, name: "すべて（新しい順）", count: inField.length, subject: null as Subject | null }, ...units.map(([name, u]) => ({ key: name, name, count: u.count, subject: u.subject }))].map((u) => {
+                const on = currentUnit === u.key;
+                return (
+                  <li key={u.key ?? "all"}>
+                    <button
+                      type="button"
+                      onClick={() => setUnit(u.key)}
+                      aria-current={on ? "true" : undefined}
+                      className={`flex min-h-10 w-full items-center gap-2.5 rounded-tbtn px-2.5 py-1.5 text-left text-sm pointer-coarse:min-h-11 ${on ? "bg-t-board-tint font-bold" : "hover:bg-t-board-soft"}`}
+                    >
+                      <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${u.subject ? FIELD_COLOR[u.subject] : "bg-t-board"}`} />
+                      <span className="min-w-0 flex-1">{u.name}</span>
+                      <span className="text-xs font-normal text-t-text-sub tabular-nums">{u.count}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="border-t border-t-line-soft pt-2 text-[11px] leading-[1.6] text-t-text-sub">
+              読み込んだ {posts.length}件{reportedCount > 0 ? `（うち通報 ${reportedCount}件）` : ""}の中で しぼります。
+            </p>
+          </aside>
+
+          <div className="flex flex-col gap-3">
+            {sorted.length === 0 ? (
+              <Notice>この分野の投稿は、読み込んだ中にはありません。</Notice>
+            ) : (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
+                {sorted.map((p) => (
+                  <PostCard
+                    key={p.id}
+                    post={p}
+                    reports={reports[p.id] ?? 0}
+                    onAskDelete={(post) => {
+                      setDeleteError(null);
+                      setDeleting(post);
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            {cursor !== null && (
+              <div className="flex flex-col items-center gap-1.5">
+                <button type="button" onClick={() => void loadMore()} disabled={loadingMore} className={`${BTN_BASE} ${SIZE_40} ${SUB}`}>
+                  {loadingMore ? "読み込んでいます…" : `もっと見る（前の${GROUP_POSTS_PAGE}件）`}
+                </button>
+                {moreFailed && <span className="text-xs font-bold text-t-danger">読み込めませんでした。もう一度押してください。</span>}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -222,12 +342,12 @@ function GroupPosts({ groupId }: { groupId: GroupId }) {
   );
 }
 
-/** グループの投稿（/teacher/groups/{グループ}）。groupId が null（/teacher/groups）なら、はじめのグループへ移る */
+/** グループの はてな（/teacher/groups/{グループ}/hatena）。groupId が null（/teacher/groups）なら、はじめのグループへ移る */
 export function GroupsScreen({ groupId }: { groupId: string | null }) {
   return (
     <GroupAdminPage
       groupId={groupId}
-      title={(id) => `${groupName(id)} の投稿`}
+      title={(id) => `${groupName(id)} の はてな`}
       description="「みんなの はてな」でグループのメンバーに見えている投稿です。不適切な投稿（顔・名札・住所が写っているなど）を見つけたら消してください。この画面は見本ではなく、本番のデータを扱います。"
     >
       {(id) => <GroupPosts key={id} groupId={id} />}

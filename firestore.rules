@@ -64,12 +64,15 @@ service cloud.firestore {
         && d.topic is string && d.topic.size() <= 100
         // 称号：はじめの称号（null）・前の形（分類の名前）・金銀銅の称号（「math-gold」など。src/lib/titles.ts）
         && (d.title == null || d.title in subjects
-          || (d.title is string && d.title.size() <= 32 && d.title.matches('^[a-z]+-(bronze|silver|gold)
+          || (d.title is string && d.title.size() <= 32 && d.title.matches('^[a-z]+-(bronze|silver|gold)$')));
     }
 
-    match /groups/{groupId} {
-      allow read: if isMember(groupId);
-      allow write: if false;
+    // ---- 参加コード（#137） ----
+    // joinCodes/{コード}：groupId・open（受付中か）・createdAt。コードを知っている人だけが、そのグループに入れる。
+    // コードは 8 文字（見まちがえやすい 0・O・1・I・L を使わない英大文字と数字）。一覧はだれも読めない（総当たりで当てられないように）
+    function joinCodeDoc(code) {
+      return /databases/$(database)/documents/joinCodes/$(code);
+    }
 
       // メンバー：role（'member' か 'admin'）・joinedAt。読めるのは本人と管理者。
       // 自分で作れるのは、期限の前に 'member' として入るときだけ（管理者にはなれない）。変えるのはコンソールから。退会のため本人は消せる
@@ -84,17 +87,36 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if request.auth != null && request.auth.uid == uid;
       }
+    // 自分で入るときに、受付中の、このグループのコードを入れているか
+    function joinCodeOk(groupId) {
+      let code = request.resource.data.get('joinCode', null);
+      return code is string
+        && exists(joinCodeDoc(code))
+        && get(joinCodeDoc(code)).data.groupId == groupId
+        && get(joinCodeDoc(code)).data.open == true;
+    }
 
-      // 投稿：読めるのはメンバーだけ。作れるのはメンバーの本人だけで、持ち主の記録（owners）を同じバッチで書く。
-      // 消せるのは持ち主と管理者。もうない投稿を消すのはゆるす（管理者が消したあとも、ずかんの操作が失敗しないように）
-      match /posts/{postId} {
-        allow read: if isMember(groupId);
-        allow create: if isMember(groupId) && validPost(postId)
-          && getAfter(ownerDoc(groupId, postId)).data.uid == request.auth.uid;
-        allow delete: if request.auth != null
-          && (resource == null || isPostOwner(groupId, postId) || isAdmin(groupId));
-        allow update: if false;
-      }
+    match /joinCodes/{code} {
+      allow get: if request.auth != null;
+      allow list: if false;
+      // 作れるのは管理者だけで、グループの文書の joinCode を同じバッチで このコードにする
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['groupId', 'open', 'createdAt'])
+        && request.resource.data.keys().hasAll(['groupId', 'open', 'createdAt'])
+        && request.resource.data.groupId is string
+        && isAdmin(request.resource.data.groupId)
+        && request.resource.data.open is bool
+        && request.resource.data.createdAt == request.time
+        && code.matches('^[A-HJKMNP-Z2-9]{8}$')
+        && getAfter(groupDoc(request.resource.data.groupId)).data.get('joinCode', null) == code;
+      // 受付を止める・再開するのは管理者だけ
+      allow update: if isAdmin(resource.data.groupId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['open'])
+        && request.resource.data.open is bool;
+      // 消せるのは管理者だけで、グループのいまのコードでなくなったもの（作り直したときの前のコード）
+      allow delete: if isAdmin(resource.data.groupId)
+        && getAfter(groupDoc(resource.data.groupId)).data.get('joinCode', null) != code;
+    }
 
       // 投稿の持ち主（本人が消せるようにするためだけの記録）。本人の記録だけ読める（退会で全投稿を消すため。管理者も他人の記録は読めない）。
       // 作れるのは、まだない投稿を同じバッチで作るときだけ（ほかの人の投稿の持ち主になれない）。
@@ -111,36 +133,43 @@ service cloud.firestore {
           && !existsAfter(postDoc(groupId, postId));
         allow update: if false;
       }
-    }
-  }
-}
-)));
-    }
-
-    // グループの文書：autoJoinUntil（自分で入れる期限）。読めるのはメンバー。作る・消すのはコンソールから。
-    // 管理者は、まだ入れるあいだに、期限を いまにする（自動で入るのを止める）ことだけができる（延ばす・入れなおすのはコンソールから）
-    match /groups/{groupId} {
-      allow read: if isMember(groupId);
-      allow update: if isAdmin(groupId)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['autoJoinUntil'])
+    // 管理者が、まだ入れるあいだに、自動で入る期限を いまにする
+    function stopsAutoJoin() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['autoJoinUntil'])
         && request.resource.data.autoJoinUntil == request.time
         && resource.data.get('autoJoinUntil', null) is timestamp
         && request.time < resource.data.autoJoinUntil;
+    }
+
+    // 管理者が、参加コードを（同じバッチで作った）新しいコードにする
+    function setsJoinCode(groupId) {
+      let code = request.resource.data.get('joinCode', null);
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joinCode'])
+        && code is string
+        && existsAfter(joinCodeDoc(code))
+        && getAfter(joinCodeDoc(code)).data.groupId == groupId;
+    }
+
+    // グループの文書：autoJoinUntil（自分で入れる期限）・joinCode（いまの参加コード。#137）。読めるのはメンバー。作る・消すのはコンソールから。
+    // 管理者は、まだ入れるあいだに期限を いまにする（自動で入るのを止める）ことと、参加コードを新しくすることだけができる（期限を延ばすのはコンソールから）
+    match /groups/{groupId} {
+      allow read: if isMember(groupId);
+      allow update: if isAdmin(groupId) && (stopsAutoJoin() || setsJoinCode(groupId));
       allow create, delete: if false;
 
       // メンバー：role（'member' か 'admin'）・joinedAt・username（ログイン ID。#129 より前の記録にはない）。読めるのは本人と管理者。
-      // 自分で作れるのは、期限の前に 'member' として入るときだけ（管理者にはなれない）。
+      // 自分で作れるのは、期限の前か、受付中の参加コード（joinCode。#137）を入れて、'member' として入るときだけ（管理者にはなれない）。
       // username を入れるときは、ID トークンの名前（ログイン ID）と同じでなければならない（ほかの人の名前を名乗れない）。
       // 役割を変える・外すのは管理者だけ。自分の役割は変えられず、自分は外せない（管理者がいなくなるのを防ぐ）
       match /members/{uid} {
         allow read: if request.auth != null && (request.auth.uid == uid || isAdmin(groupId));
         allow create: if request.auth != null && request.auth.uid == uid
-          && request.resource.data.keys().hasOnly(['role', 'joinedAt', 'username'])
+          && request.resource.data.keys().hasOnly(['role', 'joinedAt', 'username', 'joinCode'])
           && request.resource.data.keys().hasAll(['role', 'joinedAt'])
           && request.resource.data.role == 'member'
           && request.resource.data.joinedAt == request.time
           && (!('username' in request.resource.data) || request.resource.data.username == request.auth.token.name)
-          && autoJoinOpen(groupId);
+          && (autoJoinOpen(groupId) || joinCodeOk(groupId));
         allow update: if isAdmin(groupId) && request.auth.uid != uid
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role'])
           && request.resource.data.role in ['member', 'admin'];
@@ -156,6 +185,22 @@ service cloud.firestore {
         allow delete: if request.auth != null
           && (resource == null || isPostOwner(groupId, postId) || isAdmin(groupId));
         allow update: if false;
+      }
+
+      // ミッション（#139）：missions/{日付}（日本時間の「2026-11-15」）。date・text・updatedAt。読めるのはメンバー、書く・消すのは管理者。
+      // 子どもの画面に出すので、文は 1〜60 文字の ひらがな（漢字を断る）
+      match /missions/{date} {
+        allow read: if isMember(groupId);
+        allow create, update: if isAdmin(groupId)
+          && request.resource.data.keys().hasOnly(['date', 'text', 'updatedAt'])
+          && request.resource.data.keys().hasAll(['date', 'text', 'updatedAt'])
+          && date.matches('^20[0-9]{2}-[01][0-9]-[0-3][0-9]$')
+          && request.resource.data.date == date
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 60
+          && !request.resource.data.text.matches('(?s).*\\p{Han}.*')
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if isAdmin(groupId);
       }
 
       // 通報：メンバーなら、グループにある投稿を通報できる（reports/{投稿の ID}__{自分の uid}。同じ人の2回目は作れない）。
