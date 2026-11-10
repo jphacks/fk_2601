@@ -1,4 +1,4 @@
-import { CROP_MAX_EDGE, CROP_QUALITY_STEPS, IMAGE_MAX_BASE64_BYTES } from "./constants";
+import { CROP_MAX_EDGE, CROP_QUALITY_STEPS, IMAGE_MAX_BASE64_BYTES, THUMB_MAX_EDGE, THUMB_QUALITY } from "./constants";
 import { UserFacingError } from "./errors";
 
 export type Point = { x: number; y: number };
@@ -15,6 +15,20 @@ function canvasOf(width: number, height: number): [HTMLCanvasElement, CanvasRend
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new UserFacingError("しゃしんを あつかえなかったよ");
   return [canvas, ctx];
+}
+
+/** 切り抜き（data URL）から、ずかんの記録に入れる小さな画像を作る（長辺 240px の JPEG） */
+export async function makeThumb(dataUrl: string): Promise<string> {
+  const img = new Image();
+  img.src = dataUrl;
+  await img.decode();
+  const scale = Math.min(1, THUMB_MAX_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
+  const [canvas, ctx] = canvasOf(Math.max(1, Math.round(img.naturalWidth * scale)), Math.max(1, Math.round(img.naturalHeight * scale)));
+  // 切り抜きの外は白なので、すきまも白にする
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", THUMB_QUALITY);
 }
 
 function photoFromSource(source: CanvasImageSource, srcWidth: number, srcHeight: number, srcX = 0, srcY = 0): Photo {

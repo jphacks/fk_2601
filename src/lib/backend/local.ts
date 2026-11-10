@@ -172,6 +172,9 @@ export const localBackend: Backend = {
     writeJson(archivesKey(uid, profileId), [...all, record]);
   },
 
+  // ローカル版（開発・デモ用）は、ブラウザの保存場所が小さいので、大きな切り抜きは保存しない（小さな画像だけ）
+  async saveArchiveImage() {},
+
   async deleteArchive(uid, profileId, id) {
     const all = readJson<ArchiveRecord[]>(archivesKey(uid, profileId), []);
     writeJson(archivesKey(uid, profileId), all.filter((r) => r.id !== id));

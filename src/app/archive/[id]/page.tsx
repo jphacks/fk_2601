@@ -84,7 +84,7 @@ function DetailContent() {
   return (
     <Page title="はてなの きろく" back="/archive">
       <div className="flex items-center gap-4">
-        <CropCircle src={record.image} alt={stripRuby(question.target)} size={120} />
+        <CropCircle src={record.thumb ?? record.image ?? ""} alt={stripRuby(question.target)} size={120} />
         <p className="text-base font-black text-ink-sub">{formatDate(record.createdAt)} に つかまえたよ</p>
       </div>
 

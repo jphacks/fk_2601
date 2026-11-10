@@ -20,6 +20,8 @@ export interface Backend {
   /** 新しい順 */
   listArchives(uid: string, profileId: string): Promise<ArchiveRecord[]>;
   saveArchive(uid: string, profileId: string, record: ArchiveRecord): Promise<void>;
+  /** 大きな切り抜きを、記録とは別の文書に保存する（ずかんの一覧では読まない。#88） */
+  saveArchiveImage(uid: string, profileId: string, id: string, image: string): Promise<void>;
   deleteArchive(uid: string, profileId: string, id: string): Promise<void>;
   deleteAllArchives(uid: string, profileId: string): Promise<void>;
 
