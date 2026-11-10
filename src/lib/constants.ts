@@ -63,6 +63,10 @@ export { FIRST_TITLE_LABEL, titleLabel } from "./titles";
 export const CROP_MAX_EDGE = 1024;
 export const CROP_QUALITY_STEPS = [0.8, 0.7, 0.6, 0.5, 0.4];
 export const IMAGE_MAX_BASE64_BYTES = 600_000;
+// ずかんの記録に入れる小さな画像（一覧の 60px・1件の 120px の丸を、2倍の画面でも きれいに出せる大きさ）。
+// 大きな切り抜きは、別の文書に分ける（ずかんを開くたびに、全件の大きな画像を読まないため。#88）
+export const THUMB_MAX_EDGE = 240;
+export const THUMB_QUALITY = 0.7;
 
 // LLM
 export const LLM_TIMEOUT_MS = 60_000;

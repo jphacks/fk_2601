@@ -154,7 +154,7 @@ src/
 | アカウント | ユーザー名（メール形式に変換したもの）・パスワード | Firebase Authentication（パスワードはアプリで扱わない） |
 | プロフィール | ニックネーム・学年・あそびかたの説明を見おわった時刻 | Firestore |
 | アーカイブ | 問い・式・変数・予想・結果・解説・出典・分類 | Firestore |
-| 切り抜き画像 | JPEG（base64） | Firestore（アーカイブと同じドキュメント） |
+| 切り抜き画像 | JPEG（base64） | Firestore。ずかんの記録には小さな画像（長辺 240px）だけを入れ、大きな切り抜きは別のドキュメント（`archiveImages/{id}`）に分ける（2026-11-10 から。#88）。前の記録は、記録の中に大きな切り抜きを持ったまま読める |
 | 出題済み | 対象×分野（単元） | アーカイブから取り出す（別に保存しない） |
 | 収集要素 | スタンプ・称号 | アーカイブから数える（別に保存しない）。称号は20種類 × どう・ぎん・きん（`src/lib/titles.ts`・`docs/02-spec.md` 16章）。使っている称号は、プロフィールの `title`（「math-gold」などの ID） |
 | グループの投稿 | 切り抜き画像・問い・称号 | Firestore（`groups/{groupId}/posts`。位置情報・ユーザー名・ニックネームは入れない） |
@@ -167,7 +167,9 @@ Firestore:
          │                          firstMode（"choices" | "custom"）, guideSeenAt, createdAt
          └ archives/{archiveId}     id, createdAt, grade, question（5.2 の問い 1 つ分）,
                                     guess（予想）, rating（"pita" | "oshii" | "ohazure"）,
-                                    image（切り抜きの data URL）, sharedGroups（見せているグループの ID）
+                                    thumb（小さな画像の data URL。長辺 240px）, sharedGroups（見せているグループの ID）
+                                    ※ 2026-11-10 より前の記録は、thumb のかわりに image（大きな切り抜き）を持つ
+         └ archiveImages/{archiveId} image（大きな切り抜きの data URL）。ずかんの一覧では読まない。記録を消すときに いっしょに消す
   groups/{groupId}                  autoJoinUntil（自分で入れる期限。jphacks だけ）, joinCode（いまの参加コード。#137）。コンソールで作る
     ├ missions/{日付}               date（日本時間の「2026-11-15」）, text（ひらがな・60文字まで）, updatedAt（#139）
     ├ members/{uid}                 role（"member" | "admin"）, joinedAt, username（ログイン ID。#129 より前の記録にはない）,
@@ -183,6 +185,7 @@ Firestore:
   - 「とばす」「とじる」「ホームを みる」「やってみる！」「とばして はじめる」の どれでも、いまの時刻を入れる（`AuthProvider` の `markGuideSeen`）。保存に失敗しても説明は閉じる（次に ホームを開いたときに また出る）
   - プロフィールに持つので、いまの `firestore.rules` のまま本人だけが読み書きでき、ローカル版も同じ形で保存される。いまは1アカウントに1プロフィールなので、アカウントごとに一度だけ出る（`docs/06-school-expansion.md` 4.2）。プロフィールの切り替え（MVP 以降）を作ったときは、子どもごとに一度だけ出ることになる
 - 画像の大きさ：Firestore の1件は 1MiB まで。base64 にすると元の約1.33倍になるので、JPEG の品質を調整して 1件が 1MiB 未満に収まるようにする
+- ずかんの読み込み（#88）：ずかんは、ログインのたびに全件を読む。前は1件に大きな切り抜き（最大 約600KB）が入っていて、100件で最大 約60MB になった。いまは1件 約5KB（小さな画像 約4KB をふくむ）。前の記録は大きいまま（移すには人間の許可が要る。まだ移していない）。スタンプ・称号・出題済みの組み合わせは、画像を使わずに数える
 - アクセス制御：Firestore のセキュリティルール（`firestore.rules`）で、`users/{uid}` の下は uid が自分のときだけ読み書きできるようにする。グループの分は下の「グループ」のとおり。ルールに書いていないもの（やめた `public`・`publicOwners` など）は、だれも読み書きできない
 - 全員への匿名公開（`public`・`publicOwners`・「みんなにも みせる」）は、グループの共有（#120）に置きかえて、やめた（2026-11-06 に決めた）。コードとルールから消した。前の投稿は #82 で消してある。古いアーカイブに `publicId` が残っていることがあるが、使わない
 - グループ（「みんなの はてな」で はてなを見せあう。#120。2026-11-06 に決めた）

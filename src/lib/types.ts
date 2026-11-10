@@ -39,8 +39,13 @@ export type ArchiveRecord = {
    * （学習の進み具合の点数には数えない。src/lib/progress.ts）。ほかの人の問いで遊ぶ機能は、まだない
    */
   origin?: "own" | "played";
-  /** 切り抜き画像（JPEG の data URL） */
-  image: string;
+  /**
+   * ずかんに出す小さな画像（長辺 240px の JPEG の data URL）。2026-11-10 からの記録にある（#88）。
+   * 大きな切り抜きは、別の文書（archiveImages/{id}）に分けて持つ
+   */
+  thumb?: string;
+  /** 前の記録の、切り抜き画像（大きな JPEG の data URL）。新しい記録には入れない（thumb を使う） */
+  image?: string;
   /**
    * 見せているグループ（グループの投稿の ID は、この記録の id と同じ）。ないのは、どこにも見せていないもの。
    * この項目より前の記録には、全員への匿名公開（やめた）の publicId が残っていることがあるが、使わない

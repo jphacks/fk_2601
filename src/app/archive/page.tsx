@@ -44,7 +44,7 @@ function Row({ a, selecting, selected, onToggle }: { a: ArchiveRecord; selecting
         </span>
       )}
       {/* eslint-disable-next-line @next/next/no-img-element -- 保存した切り抜き（data URL） */}
-      <img src={a.image} alt={a.question.target} className="size-[60px] shrink-0 rounded-2xl bg-photo object-cover" />
+      <img src={a.thumb ?? a.image} alt={a.question.target} className="size-[60px] shrink-0 rounded-2xl bg-photo object-cover" />
       <span className="flex min-w-0 grow flex-col gap-0.5">
         <span className="line-clamp-2 text-[15px] font-black leading-[1.45]">{kanaOf(a.question.text)}</span>
         <span className={`text-[13px] font-black ${s.dark}`}>

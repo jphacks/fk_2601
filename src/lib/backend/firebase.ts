@@ -122,17 +122,28 @@ export const firebaseBackend: Backend = {
     await setDoc(doc(db(), "users", uid, "profiles", profileId, "archives", record.id), JSON.parse(JSON.stringify(record)));
   },
 
+  // 大きな切り抜きは archiveImages/{id}（記録の archives/{id} と同じ ID）。ずかんの一覧（listArchives）では読まない
+  async saveArchiveImage(uid, profileId, id, image) {
+    await setDoc(doc(db(), "users", uid, "profiles", profileId, "archiveImages", id), { image });
+  },
+
   async deleteArchive(uid, profileId, id) {
-    await deleteDoc(doc(db(), "users", uid, "profiles", profileId, "archives", id));
+    // 記録と、大きな切り抜き（ないときも失敗しない）を いっしょに消す
+    const batch = writeBatch(db());
+    batch.delete(doc(db(), "users", uid, "profiles", profileId, "archives", id));
+    batch.delete(doc(db(), "users", uid, "profiles", profileId, "archiveImages", id));
+    await batch.commit();
   },
 
   async deleteAllArchives(uid, profileId) {
-    const snapshot = await getDocs(collection(db(), "users", uid, "profiles", profileId, "archives"));
-    // 1回の書き込みは 500 件まで
-    for (let i = 0; i < snapshot.docs.length; i += 400) {
-      const batch = writeBatch(db());
-      snapshot.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
-      await batch.commit();
+    // 記録と、大きな切り抜きの両方を消す。1回の書き込みは 500 件まで
+    for (const name of ["archives", "archiveImages"]) {
+      const snapshot = await getDocs(collection(db(), "users", uid, "profiles", profileId, name));
+      for (let i = 0; i < snapshot.docs.length; i += 400) {
+        const batch = writeBatch(db());
+        snapshot.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+      }
     }
   },
 

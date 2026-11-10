@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { newId } from "@/lib/id";
+import { makeThumb } from "@/lib/image";
 import { UserFacingError } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
 import { GROUPS, type GroupId } from "@/lib/constants";
@@ -41,11 +42,11 @@ export function ArchiveProvider({ children }: { children: React.ReactNode }) {
   return <ArchiveState key={profile?.id ?? "none"}>{children}</ArchiveState>;
 }
 
-function groupPost(profile: Profile, record: ArchiveRecord): GroupPost {
+function groupPost(profile: Profile, record: ArchiveRecord, image: string): GroupPost {
   return {
     id: record.id,
     createdAt: record.createdAt,
-    image: record.image,
+    image,
     text: record.question.text,
     subject: record.question.subject,
     topic: record.question.topic,
@@ -119,6 +120,9 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
   const add = useCallback<ArchiveContext["add"]>(
     async ({ question, guess, rating, image, groups }) => {
       if (!user || !profile) throw new UserFacingError("ログインしなおしてね");
+      // ずかんの記録には小さな画像だけを入れ、大きな切り抜きは別の文書に分ける（#88）。
+      // 小さな画像が作れないときは、前のように大きな切り抜きを記録に入れる（保存は止めない）
+      const thumb = await makeThumb(image).catch(() => null);
       const record: ArchiveRecord = {
         id: newId(),
         createdAt: Date.now(),
@@ -126,15 +130,22 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
         question,
         guess,
         rating,
-        image,
+        ...(thumb ? { thumb } : { image }),
         sharedGroups: [],
       };
       await backend.saveArchive(user.uid, profile.id, record);
+      if (thumb) {
+        try {
+          await backend.saveArchiveImage(user.uid, profile.id, record.id, image);
+        } catch {
+          // 大きな切り抜きは、いまは画面で使わない（ずかんには小さな画像が出る）ので、保存できなくても続ける
+        }
+      }
       setArchives((prev) => [record, ...prev]);
       if (groups.length === 0) return { record, shareFailed: false };
 
       // 見せられたグループだけを印にのこす（1つ失敗しても、ほかのグループには見せる）
-      const post = groupPost(profile, record);
+      const post = groupPost(profile, record, image);
       const results = await Promise.allSettled(
         groups.map((g) =>
           backend.saveGroupPost(user.uid, g, post).catch((error: unknown) => {
