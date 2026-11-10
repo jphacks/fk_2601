@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
 import { GradePicker, RadioRow } from "@/components/Fields";
 import { Gate } from "@/components/Gate";
@@ -18,9 +18,59 @@ const OPTIONS: { value: FirstMode; label: string }[] = [
 ];
 
 function SettingsContent() {
-  const { profile, saveProfile, signOut, memberships } = useApp();
+  const { profile, saveProfile, signOut, backend } = useApp();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [password, setPassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const deleteLock = useRef(false);
   const [error, setError] = useState<string | null>(null);
-  if (!profile) return null;
+
+  async function deleteAccount() {
+    if (deleteLock.current) return;
+    deleteLock.current = true;
+    setDeleting(true);
+    setError(null);
+    try {
+      await backend.deleteAccount(password);
+    } catch (e) {
+      setError(messageOf(e, "ぜんぶは けせなかったよ。ネットに つながっているか みて、もういちど ためしてね"));
+    } finally {
+      setPassword("");
+      setDeleting(false);
+      deleteLock.current = false;
+    }
+  }
+
+  // プロフィールを消した後で失敗し、再読み込みした場合も退会をやり直せる。
+  if (confirmDelete || !profile) return (
+    <Page title="アカウントを けす">
+      <Say mood={error ? "sorry" : "think"}>ほんとうに けす？</Say>
+      <p className="rounded-card bg-pink-light p-4 text-base font-black leading-relaxed">
+        この アカウントの ずかんと、なかまに みせた はてな、ニックネームや がくねんを ぜんぶ けすよ。<br />
+        けしたものは もとに もどせないよ。この ログイン ID では あそべなくなるよ。
+      </p>
+      <form className="flex flex-col gap-4" onSubmit={(event) => { event.preventDefault(); void deleteAccount(); }}>
+        {backend.mode === "firebase" ? (
+          <label className="flex flex-col gap-2 text-base font-black">
+            きみの アカウントか たしかめるため、パスワードを もういちど いれてね
+            <input type="password" autoComplete="current-password" required value={password} disabled={deleting}
+              onChange={(event) => setPassword(event.target.value)}
+              className="h-[60px] w-full min-w-0 rounded-[20px] border-3 border-ink bg-white px-4 text-xl" />
+          </label>
+        ) : <p className="text-base font-black">この ブラウザに のこした データを けすよ。</p>}
+        {error && <p role="alert" className="rounded-card bg-pink-light p-4 text-base font-black text-pink-dark">{error}</p>}
+        <p role="status" className="text-base font-black">{deleting ? "けしているよ。そのまま まってね" : ""}</p>
+        <Button type="submit" variant="danger" disabled={deleting || (backend.mode === "firebase" && !password)}>
+          {deleting ? "けしているよ…" : error ? "もういちど ためす" : "ぜんぶ けす"}
+        </Button>
+        {profile && (
+          <Button variant="sub" disabled={deleting} onClick={() => { setConfirmDelete(false); setPassword(""); setError(null); }}>
+            せっていに もどる
+          </Button>
+        )}
+      </form>
+    </Page>
+  );
 
   async function update(change: { grade?: number; firstMode?: FirstMode }) {
     if (!profile) return;
@@ -108,6 +158,10 @@ function SettingsContent() {
         </p>
       )}
 
+      <Button variant="sub" onClick={() => { setError(null); setConfirmDelete(true); }}>
+        アカウントを けす
+      </Button>
+
       <Button variant="danger" onClick={() => void signOut()}>
         ログアウト
       </Button>
@@ -117,7 +171,7 @@ function SettingsContent() {
 
 export default function SettingsPage() {
   return (
-    <Gate>
+    <Gate needProfile={false}>
       <SettingsContent />
     </Gate>
   );

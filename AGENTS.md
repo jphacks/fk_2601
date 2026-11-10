@@ -33,7 +33,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 .
 ├── AGENTS.md / CLAUDE.md / GEMINI.md   # この指示書（ルールは AGENTS.md に書く。他は @AGENTS.md を読み込むだけ）
 ├── docs/                 # 仕様の正（Source of Truth）。下の「参照先」を参照。docs/design/ は見た目の見本（アプリのコードではない。はじめての登録と あそびかたの説明は docs/design/first/、先生用の管理画面は docs/design/teachers/）。docs/images/ は README に載せる画面の画像
-├── firestore.rules       # Firestore のセキュリティルール（本人だけが読み書きできる。グループの投稿はメンバーだけが読め、持ち主は owners に分ける）
+├── firestore.rules       # Firestore のセキュリティルール（本人だけが読み書きできる。グループの投稿はメンバーだけが読め、持ち主は owners に分けて本人の記録だけ読める）
 ├── public/navi/          # ナビの7つの表情とスタンプ（stamp-*）の画像（docs/design/assets/navi/ と同じもの）
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
 └── src/
@@ -113,6 +113,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 
 ### 個人情報・データ
 - 認証やパスワードの保存を自作しない。採用するサービス・ライブラリの機能を使う
+- 退会は公開中の全投稿を先に消し、全プロフィールのずかん・参加情報・プロフィール・認証アカウントの順に消す。失敗後もやり直せるよう、認証は最後まで残す（`docs/02-spec.md` 4.3）
 - アーカイブ（写真・問い・予想・結果）は本人しか読み書きできないようにする。グループ（「みんなの はてな」）に見せるのは切り抜き画像・問い・称号だけで、ユーザー名・ニックネーム・位置情報・持ち主は含めない
 - 集める個人情報は最小限にする。`docs/` に書かれていない項目を勝手に増やさない
 - ログに画像データ・パスワード・トークン・API キーを出力しない

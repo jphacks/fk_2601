@@ -1,6 +1,9 @@
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -16,6 +19,7 @@ import {
   getDoc,
   getDocFromServer,
   getDocs,
+  getDocsFromServer,
   getFirestore,
   limit,
   orderBy,
@@ -26,6 +30,7 @@ import {
   updateDoc,
   where,
   writeBatch,
+  where,
 } from "firebase/firestore";
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import { GROUP_POSTS_PAGE, GROUPS, type GroupId } from "@/lib/constants";
@@ -59,6 +64,7 @@ function friendly(error: unknown): never {
   if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
     throw new UserFacingError("ログイン ID か パスワードが ちがうよ");
   }
+  if (code === "auth/requires-recent-login") throw new UserFacingError("もういちど パスワードを いれて、ためしてね");
   if (code === "auth/weak-password") throw new UserFacingError("パスワードは 6もじ いじょうに してね");
   if (code === "auth/network-request-failed") throw new UserFacingError("ネットに つながらないよ。つながってから もういちど ためしてね");
   if (code === "auth/too-many-requests") throw new UserFacingError("なんども まちがえたので、しばらくしてから ためしてね");
@@ -97,6 +103,37 @@ export const firebaseBackend: Backend = {
 
   async signOut() {
     await firebaseSignOut(auth());
+  },
+
+  async deleteAccount(password) {
+    const user = auth().currentUser;
+    if (!user?.email) throw new UserFacingError("ログインしなおしてね");
+    try {
+      // 削除を始める前に本人確認する。別アカウントへのログインはしない。
+      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+      // sharedGroups の保存に失敗した投稿も拾う。キャッシュだけで全件と判断しない。
+      for (const group of GROUPS) {
+        const owners = await getDocsFromServer(query(collection(db(), "groups", group.id, "owners"), where("uid", "==", user.uid)));
+        // ルールで確認する文書数の上限もあるため、投稿と持ち主の1組ずつ消す。
+        for (const owner of owners.docs) await firebaseBackend.deleteGroupPost(group.id, owner.id);
+      }
+      const profiles = await getDocsFromServer(collection(db(), "users", user.uid, "profiles"));
+      for (const profile of profiles.docs) {
+        const archives = await getDocsFromServer(collection(profile.ref, "archives"));
+        for (let i = 0; i < archives.docs.length; i += 400) {
+          const batch = writeBatch(db());
+          archives.docs.slice(i, i + 400).forEach((archive) => batch.delete(archive.ref));
+          await batch.commit();
+        }
+      }
+      for (const group of GROUPS) await deleteDoc(doc(db(), "groups", group.id, "members", user.uid));
+      for (const profile of profiles.docs) await deleteDoc(profile.ref);
+      await deleteDoc(doc(db(), "users", user.uid));
+      // 最後まで認証を残す。ここで再認証を求められても、同じ操作でやり直せる。
+      await deleteUser(user);
+    } catch (error) {
+      friendly(error);
+    }
   },
 
   async getIdToken() {
@@ -274,6 +311,7 @@ export const firebaseBackend: Backend = {
     return snapshot.docs.map((d) => d.data() as GroupPost);
   },
 
+  // 持ち主は本人の記録だけ読める owners に分け、投稿と同じバッチで書く・消す（firestore.rules）
   // 数だけをサーバーで数える（投稿の画像を読まない）
   async countGroupPostsSince(groupId, since) {
     const snapshot = await getCountFromServer(query(collection(db(), "groups", groupId, "posts"), where("createdAt", ">=", since)));

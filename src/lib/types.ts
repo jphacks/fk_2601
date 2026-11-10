@@ -88,7 +88,7 @@ export type GroupSettings = {
 
 /**
  * グループに見せる問い（切り抜き画像・問い・称号だけ。ユーザー名・ニックネーム・位置情報は入れない）。
- * 同じ人の投稿をひも付けられないよう、持ち主も入れない（Firebase 版では、だれも読めない groups/{id}/owners に分けて持つ）
+ * 同じ人の投稿をひも付けられないよう、持ち主も入れない（Firebase 版では、本人の記録だけ読める groups/{id}/owners に分けて持つ）
  */
 export type GroupPost = {
   id: string;
