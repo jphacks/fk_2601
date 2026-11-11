@@ -70,6 +70,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 | MVP の範囲 | `docs/04-mvp.md`（最小構成書） |
 | 先生用の管理画面の見た目・動き | `docs/design/teachers/README.md`（デザイン見本） |
 | ブランチ・コミット・PR のルール | `docs/05-contributing.md`（git/GitHub 開発手順書） |
+| 子どもへの聞きとりの進めかた | `docs/07-kids-survey.md` |
 | 学校導入・先生の機能・クラスと友達グループの共有（構想。ハッカソンまでに運用しない） | `docs/06-school-expansion.md`（学校導入・共有機能 構想書） |
 
 - タスクは GitHub Issues で管理している（Projects は使わない）。1 Issue = 1 ブランチ。作業がどの Issue に対応するか分からない場合は確認する
