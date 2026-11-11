@@ -30,7 +30,6 @@ import {
   updateDoc,
   where,
   writeBatch,
-  where,
 } from "firebase/firestore";
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import { GROUP_POSTS_PAGE, GROUPS, type GroupId } from "@/lib/constants";
@@ -119,11 +118,14 @@ export const firebaseBackend: Backend = {
       }
       const profiles = await getDocsFromServer(collection(db(), "users", user.uid, "profiles"));
       for (const profile of profiles.docs) {
-        const archives = await getDocsFromServer(collection(profile.ref, "archives"));
-        for (let i = 0; i < archives.docs.length; i += 400) {
-          const batch = writeBatch(db());
-          archives.docs.slice(i, i + 400).forEach((archive) => batch.delete(archive.ref));
-          await batch.commit();
+        // ずかんの記録と、大きな切り抜き（archiveImages。#88）の両方を消す
+        for (const name of ["archives", "archiveImages"]) {
+          const snapshot = await getDocsFromServer(collection(profile.ref, name));
+          for (let i = 0; i < snapshot.docs.length; i += 400) {
+            const batch = writeBatch(db());
+            snapshot.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
+            await batch.commit();
+          }
         }
       }
       for (const group of GROUPS) await deleteDoc(doc(db(), "groups", group.id, "members", user.uid));

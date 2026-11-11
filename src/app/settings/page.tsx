@@ -7,7 +7,7 @@ import { GradePicker, RadioRow } from "@/components/Fields";
 import { Gate } from "@/components/Gate";
 import { Icon, Medal } from "@/components/Icons";
 import { Page } from "@/components/Page";
-import { Button } from "@/components/ui";
+import { Button, Say } from "@/components/ui";
 import { GUIDE_AGAIN, groupOf, titleLabel } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import type { FirstMode } from "@/lib/types";
@@ -18,7 +18,7 @@ const OPTIONS: { value: FirstMode; label: string }[] = [
 ];
 
 function SettingsContent() {
-  const { profile, saveProfile, signOut, backend } = useApp();
+  const { profile, saveProfile, signOut, backend, memberships } = useApp();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [password, setPassword] = useState("");
   const [deleting, setDeleting] = useState(false);
