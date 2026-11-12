@@ -44,6 +44,39 @@ function sanitizeTryIt(text: string | undefined): string {
   return UNSAFE_TRY.some((w) => plain.includes(w)) ? "" : t;
 }
 
+// 条件を動かしたときに「答えが変わった」とみなす、ずれの大きさ（1%）
+const MOVE_TOLERANCE = 0.01;
+
+/** 変数を1つずつ、スライダーのはし（min・max）に動かして、答えが変わるものがあるかを確かめる */
+function answerMoves(q: Question, answer: number): boolean {
+  const base = defaultScope(q);
+  return q.variables.some((v) =>
+    [v.min, v.max].some((value) => {
+      const result = calculate(q.formula ?? "", { ...base, [v.name]: value });
+      return result.ok && Math.abs(result.value - answer) > Math.abs(answer) * MOVE_TOLERANCE;
+    }),
+  );
+}
+
+// 問題文の数から「1回の計算で出た」とみなす、答えとのずれの大きさ（1%）
+const ONE_STEP_TOLERANCE = 0.01;
+
+/**
+ * 問題文に書いてある数そのもの、または2つの数を1回たす・ひく・かける・わるだけで、答えになるかを確かめる
+ * （「2ふくろ × 15本」のような、ただの計算の問いをはじく。docs/03-technical.md 5.3）
+ */
+function answerFromText(numbers: number[], answer: number): boolean {
+  const candidates = [...numbers];
+  numbers.forEach((a, i) =>
+    numbers.forEach((b, j) => {
+      if (i === j) return;
+      candidates.push(a + b, a - b, a * b);
+      if (b !== 0) candidates.push(a / b);
+    }),
+  );
+  return candidates.some((c) => Math.abs(c - answer) <= Math.abs(answer) * ONE_STEP_TOLERANCE);
+}
+
 /** 身近なものへの言いかえ（per / times）が、使える形かを確かめる。だめなら null にする */
 function sanitizeRef(ref: Question["ref"]): Question["ref"] {
   if (!ref) return null;
@@ -78,13 +111,17 @@ export function validateQuestion(input: Question, options: { lenient?: boolean }
   };
 
   if (q.text.trim().length === 0 || q.text.length > 400) return fail("問題文の長さが正しくありません");
+  // 問題文に書いてある数（「1日」「1回」のような 1 は数えない）
+  let numbers: number[] = [];
   if (!options.lenient) {
     // 写っているものでなければ成り立たない、短くて、条件をならべすぎない問いだけを使う
     if (input.swappable) return fail("写っているもの以外でも成り立つ問いです");
     const plain = stripRuby(q.text);
     if (plain.length > MAX_TEXT_LENGTH) return fail("問題文が長すぎます");
-    // 「1日」「1回」のような 1 は数えない。専門の大きな数（44100 など）を条件に書いた問いも出さない
-    const numbers = (plain.match(/\d+(?:\.\d+)?/g) ?? []).map(Number).filter((n) => n !== 1);
+    // 聞くことは1つだけ（「何本？ どれくらい ならぶ？」のように2つ聞かない）
+    if ((plain.match(/[？?]/g) ?? []).length > 1) return fail("問題文で2つ以上のことを聞いています");
+    // 専門の大きな数（44100 など）を条件に書いた問いも出さない
+    numbers = (plain.match(/\d+(?:\.\d+)?/g) ?? []).map(Number).filter((n) => n !== 1);
     if (numbers.length > MAX_NUMBERS_IN_TEXT) return fail("問題文に数が多すぎます");
     if (numbers.some((n) => n >= MAX_NUMBER_IN_TEXT)) return fail("問題文に大きな数が書いてあります");
   }
@@ -114,6 +151,10 @@ export function validateQuestion(input: Question, options: { lenient?: boolean }
   if (q.llmAnswer === null || Math.abs(q.llmAnswer - answer) > Math.abs(answer) * ANSWER_TOLERANCE) {
     return fail("LLM の答えと式の答えが大きくずれています");
   }
+  // 条件（スライダー）をどう動かしても答えが変わらない問い（まわり÷さしわたし など）は、「もしも」で考え直せないので出さない
+  if (!options.lenient && !answerMoves(q, answer)) return fail("条件を変えても答えが変わりません");
+  // 問題文の数を1回計算するだけで答えが出る問いは、予想する意味がないので出さない
+  if (!options.lenient && answerFromText(numbers, answer)) return fail("問題文の数から1回の計算で答えが出ます");
 
   if (q.type === "compare") {
     if (!q.compare || !q.compare.a.trim() || !q.compare.b.trim()) return fail("比べる2つの名前がありません");
