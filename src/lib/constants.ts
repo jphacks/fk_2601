@@ -53,6 +53,19 @@ export function groupOf(id: GroupId) {
   return GROUPS.find((g) => g.id === id) ?? GROUPS[0];
 }
 
+// 「みんなの はてな」で、なかまの はてなに送れるリアクション（#156。自由な文章は送れない：docs/02-spec.md 15章）。
+// id は firestore.rules の reactions と同じものにする。label は小さい文字なので ひらがな
+export const REACTIONS = [
+  { id: "sugoi", label: "すごい！" },
+  { id: "yaritai", label: "やってみたい" },
+  { id: "naruhodo", label: "なるほど" },
+] as const;
+export type ReactionId = (typeof REACTIONS)[number]["id"];
+
+export function isReactionId(value: unknown): value is ReactionId {
+  return REACTIONS.some((r) => r.id === value);
+}
+
 // スタンプカードの1まい（5こ）。分類の称号の「どう」と同じ数（src/lib/titles.ts）
 export const STAMP_GOAL = 5;
 

@@ -1,7 +1,7 @@
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
-import { GROUP_POSTS_PAGE, GROUPS, type GroupId } from "@/lib/constants";
+import { GROUP_POSTS_PAGE, GROUPS, type GroupId, type ReactionId } from "@/lib/constants";
 import { newJoinCode } from "@/lib/joinCode";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupReactions, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
 import { usernameToLocalId, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -16,6 +16,8 @@ const groupsKey = (uid: string) => `local:groups:${uid}`;
 const groupOwnersKey = (groupId: GroupId) => `local:groupOwners:${groupId}`;
 const groupPostsKey = (groupId: GroupId) => `local:groupPosts:${groupId}`;
 const groupReportsKey = (groupId: GroupId) => `local:groupReports:${groupId}`;
+const groupReactionsKey = (groupId: GroupId) => `local:groupReactions:${groupId}`;
+type LocalReaction = { postId: string; uid: string; kind: ReactionId };
 const groupSettingsKey = (groupId: GroupId) => `local:groupSettings:${groupId}`;
 // 参加コード（#137）：コード → { groupId, open }。グループのいまのコードは groupJoinCodeKey に持つ
 const KEY_JOIN_CODES = "local:joinCodes";
@@ -136,6 +138,7 @@ export const localBackend: Backend = {
       const posts = readJson<GroupPost[]>(groupPostsKey(group.id), []);
       writeJson(groupPostsKey(group.id), posts.filter((post) => owners[post.id] !== user.uid && !(ids.has(post.id) && !owners[post.id])));
       writeJson(groupOwnersKey(group.id), Object.fromEntries(Object.entries(owners).filter(([, uid]) => uid !== user.uid)));
+      writeJson(groupReactionsKey(group.id), readJson<LocalReaction[]>(groupReactionsKey(group.id), []).filter((r) => r.uid !== user.uid));
     }
     for (const key of archiveKeys) localStorage.removeItem(key);
     localStorage.removeItem(groupsKey(user.uid));
@@ -320,6 +323,26 @@ export const localBackend: Backend = {
     const counts: Record<string, number> = {};
     for (const r of readJson<{ postId: string }[]>(groupReportsKey(groupId), [])) counts[r.postId] = (counts[r.postId] ?? 0) + 1;
     return counts;
+  },
+
+  async listGroupReactions(uid, groupId, postIds) {
+    const ids = new Set(postIds);
+    const result: GroupReactions = { counts: {}, mine: {} };
+    for (const r of readJson<LocalReaction[]>(groupReactionsKey(groupId), [])) {
+      if (!ids.has(r.postId)) continue;
+      const counts = (result.counts[r.postId] ??= {});
+      counts[r.kind] = (counts[r.kind] ?? 0) + 1;
+      if (r.uid === uid) result.mine[r.postId] = r.kind;
+    }
+    return result;
+  },
+
+  // Firebase 版のルールと同じく、自分の はてなには送れない
+  async setGroupReaction(uid, groupId, postId, reaction) {
+    const others = readJson<LocalReaction[]>(groupReactionsKey(groupId), []).filter((r) => !(r.postId === postId && r.uid === uid));
+    if (reaction === null) return writeJson(groupReactionsKey(groupId), others);
+    if (readJson<Record<string, string>>(groupOwnersKey(groupId), {})[postId] === uid) throw new Error("own post");
+    writeJson(groupReactionsKey(groupId), [...others, { postId, uid, kind: reaction }]);
   },
 
   async missingGroupPosts(groupId, ids) {

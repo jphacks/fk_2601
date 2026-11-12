@@ -15,6 +15,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  documentId,
   getCountFromServer,
   getDoc,
   getDocFromServer,
@@ -32,9 +33,9 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
-import { GROUP_POSTS_PAGE, GROUPS, type GroupId } from "@/lib/constants";
+import { GROUP_POSTS_PAGE, GROUPS, isReactionId, type GroupId } from "@/lib/constants";
 import { newJoinCode } from "@/lib/joinCode";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, JoinCode, Membership, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupReactions, JoinCode, Membership, Profile } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -115,6 +116,19 @@ export const firebaseBackend: Backend = {
         const owners = await getDocsFromServer(query(collection(db(), "groups", group.id, "owners"), where("uid", "==", user.uid)));
         // ルールで確認する文書数の上限もあるため、投稿と持ち主の1組ずつ消す。
         for (const owner of owners.docs) await firebaseBackend.deleteGroupPost(group.id, owner.id);
+      }
+      // 自分のリアクション（ID が「自分の uid__投稿の ID」）。読めるのはメンバーだけなので、入っていないグループは とばす
+      for (const group of GROUPS) {
+        const ownReactions = query(
+          collection(db(), "groups", group.id, "reactions"),
+          where(documentId(), ">=", `${user.uid}__`),
+          where(documentId(), "<", `${user.uid}__\uf8ff`),
+        );
+        const reactions = await getDocsFromServer(ownReactions).catch((error: { code?: string }) => {
+          if (error.code === "permission-denied") return null;
+          throw error;
+        });
+        for (const reaction of reactions?.docs ?? []) await deleteDoc(reaction.ref);
       }
       const profiles = await getDocsFromServer(collection(db(), "users", user.uid, "profiles"));
       for (const profile of profiles.docs) {
@@ -370,6 +384,30 @@ export const firebaseBackend: Backend = {
       if (postId) counts[postId] = (counts[postId] ?? 0) + 1;
     }
     return counts;
+  },
+
+  // リアクションは reactions/{送った人の uid}__{投稿の ID}（1つの はてなに1人1つ）。項目は postId・kind・createdAt。
+  // in は30件までなので、30件ずつ読む（1回に読む投稿の数と同じ：GROUP_POSTS_PAGE）
+  async listGroupReactions(uid, groupId, postIds) {
+    const result: GroupReactions = { counts: {}, mine: {} };
+    for (let i = 0; i < postIds.length; i += 30) {
+      const snapshot = await getDocs(query(collection(db(), "groups", groupId, "reactions"), where("postId", "in", postIds.slice(i, i + 30))));
+      for (const d of snapshot.docs) {
+        const postId = String(d.data().postId ?? "");
+        const kind = d.data().kind;
+        if (!postId || !isReactionId(kind)) continue;
+        const counts = (result.counts[postId] ??= {});
+        counts[kind] = (counts[kind] ?? 0) + 1;
+        if (d.id === `${uid}__${postId}`) result.mine[postId] = kind;
+      }
+    }
+    return result;
+  },
+
+  async setGroupReaction(uid, groupId, postId, reaction) {
+    const ref = doc(db(), "groups", groupId, "reactions", `${uid}__${postId}`);
+    if (reaction === null) await deleteDoc(ref);
+    else await setDoc(ref, { postId, kind: reaction, createdAt: serverTimestamp() });
   },
 
   // 端末に残った古い写しで「ない」と判断しないよう、サーバーに聞く

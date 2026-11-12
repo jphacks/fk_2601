@@ -1,5 +1,5 @@
-import type { GroupId } from "@/lib/constants";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupRole, GroupSettings, JoinCode, Membership, Profile } from "@/lib/types";
+import type { GroupId, ReactionId } from "@/lib/constants";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupReactions, GroupRole, GroupSettings, JoinCode, Membership, Profile } from "@/lib/types";
 
 /** 認証とデータの保存。Firebase 版と、Firebase なしで動かす開発用のローカル版がある */
 export interface Backend {
@@ -77,4 +77,11 @@ export interface Backend {
   reportGroupPost(uid: string, groupId: GroupId, postId: string): Promise<void>;
   /** 通報された数（投稿の ID ごと）。読めるのはグループの管理者だけ */
   listGroupReports(groupId: GroupId): Promise<Record<string, number>>;
+  /** 渡した投稿についたリアクションの数と、自分が送ったもの（#156）。読めるのはグループのメンバーだけ */
+  listGroupReactions(uid: string, groupId: GroupId, postIds: string[]): Promise<GroupReactions>;
+  /**
+   * なかまの はてなに リアクションを送る（1つの はてなに1人1つ。送りなおすと置きかわる）。null で とりけす。
+   * 自分の はてなには送れない（持ち主が分かってしまうため。firestore.rules で断る）
+   */
+  setGroupReaction(uid: string, groupId: GroupId, postId: string, reaction: ReactionId | null): Promise<void>;
 }
