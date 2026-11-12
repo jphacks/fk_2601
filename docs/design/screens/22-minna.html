@@ -27,60 +27,50 @@
     </span>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 10px">
-    <img class="navi" src="../assets/navi/navi-think.png" alt="ナビ（はてな）" style="width: 76px; height: 76px; flex-shrink: 0">
-    <div style="position: relative; flex-grow: 1; padding: 8px 14px; border-radius: 20px; background: var(--color-navi-light); font-size: 18px; font-weight: 900; line-height: 1.6">
-      <div style="position: absolute; left: -8px; top: calc(50% - 8px); width: 16px; height: 16px; background: var(--color-navi-light); transform: rotate(45deg)"></div>
-      みんなは なにを<br>みつけたかな？
+  <!-- グループの へや（#156）：はてなが ふきだしで ならぶ。なかまは左（みんな同じ ナビの顔と称号）、自分は右。自由な文章は送れず、決まったリアクションだけ -->
+  <div style="margin: 0 -8px; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 12px; border-radius: 24px; background: color-mix(in srgb, var(--color-pink-light) 60%, transparent); display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center">
+      <img class="navi" src="../assets/navi/navi-think.png" alt="" style="width: 40px; height: 40px">
+      <span style="font-size: 14px; font-weight: 900; line-height: 1.6; color: var(--color-ink-sub)">JPHACKS の へやだよ。<br>みんなは なにを みつけたかな？</span>
+    </div>
+    <span style="align-self: center; padding: 2px 12px; border-radius: 999px; background: rgba(255,255,255,.8); font-size: 12px; font-weight: 900; color: var(--color-ink-muted)">きょう</span>
+
+    <div style="display: flex; align-items: flex-start; gap: 8px">
+      <span style="margin-top: 4px; width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: var(--color-white); display: flex; align-items: center; justify-content: center"><img src="../assets/navi/navi-smile.png" alt="" style="width: 36px; height: 36px"></span>
+      <div style="flex: 1 1 auto; min-width: 0; padding-right: 8px; display: flex; flex-direction: column; gap: 4px">
+        <span style="padding: 0 4px; font-size: 12px; font-weight: 900; color: var(--color-ink-muted)">りか マスター</span>
+        <article style="padding: 6px; border-radius: 6px 22px 22px 22px; background: var(--color-mint)">
+          <div style="border-radius: 16px; background: var(--color-white); overflow: hidden">
+            <div role="img" aria-label="きの しゃしん" style="height: 112px; background: #EAF6EF; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 120 120" width="72" height="72"><circle cx="60" cy="46" r="32" fill="#7FD1A8" stroke="#22223A" stroke-width="3"></circle><rect x="54" y="74" width="12" height="36" rx="3" fill="#B08968" stroke="#22223A" stroke-width="3"></rect></svg></div>
+            <div style="padding: 8px 12px 10px; font-size: 16px; font-weight: 900; line-height: 1.5">この きの はっぱは なんまい？</div>
+          </div>
+        </article>
+        <span style="padding: 0 4px; font-size: 12px; font-weight: 700; color: var(--color-ink-muted)">16:42</span>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px"><button type="button" style="min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px; border: 2px solid var(--color-ink); border-radius: 14px; background: var(--color-pink); box-shadow: none; transform: translateY(2px); font: inherit; font-size: 12px; font-weight: 900; color: var(--color-ink)"><span style="display: flex; align-items: center; gap: 4px"><img src="../assets/navi/navi-wow.png" alt="" style="width: 20px; height: 20px"><span>2</span></span><span style="white-space: nowrap">すごい！</span></button><button type="button" style="min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px; border: 2px solid var(--color-ink); border-radius: 14px; background: var(--color-white); box-shadow: 0 2px 0 var(--color-ink); transform: none; font: inherit; font-size: 12px; font-weight: 900; color: var(--color-ink)"><span style="display: flex; align-items: center; gap: 4px"><img src="../assets/navi/navi-effort.png" alt="" style="width: 20px; height: 20px"></span><span style="white-space: nowrap">やってみたい</span></button><button type="button" style="min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px; border: 2px solid var(--color-ink); border-radius: 14px; background: var(--color-white); box-shadow: 0 2px 0 var(--color-ink); transform: none; font: inherit; font-size: 12px; font-weight: 900; color: var(--color-ink)"><span style="display: flex; align-items: center; gap: 4px"><img src="../assets/navi/navi-think.png" alt="" style="width: 20px; height: 20px"><span>1</span></span><span style="white-space: nowrap">なるほど</span></button></div>
+        <span style="padding: 0 6px; font-size: 12px; font-weight: 900; color: var(--color-ink-muted); text-decoration: underline">つうほう</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding-left: 40px">
+      <span style="padding: 0 4px; font-size: 12px; font-weight: 900; color: var(--color-ink-muted)">きみの はてな</span>
+      <article style="width: 100%; box-sizing: border-box; padding: 6px; border-radius: 22px 6px 22px 22px; background: var(--color-navi)">
+        <div style="border-radius: 16px; background: var(--color-white); overflow: hidden">
+          <div role="img" aria-label="はしの しゃしん" style="height: 112px; background: #EEF3FA; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" viewBox="0 0 120 120" width="80" height="80"><path d="M10 78Q60 34 110 78" fill="none" stroke="#22223A" stroke-width="6" stroke-linecap="round"></path><line x1="10" y1="78" x2="110" y2="78" stroke="#22223A" stroke-width="6" stroke-linecap="round"></line><line x1="35" y1="60" x2="35" y2="78" stroke="#22223A" stroke-width="4"></line><line x1="60" y1="55" x2="60" y2="78" stroke="#22223A" stroke-width="4"></line><line x1="85" y1="60" x2="85" y2="78" stroke="#22223A" stroke-width="4"></line><path d="M6 96q14-8 28 0t28 0t28 0t28 0" fill="none" stroke="#4A9FE8" stroke-width="5" stroke-linecap="round"></path></svg></div>
+          <div style="padding: 8px 12px 10px; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 16px; font-weight: 900; line-height: 1.5">この はしを わたると なんぽ？</span>
+            <span style="align-self: flex-start; padding: 1px 8px; border-radius: 10px; background: var(--color-navi-light); color: var(--color-navi-dark); font-size: 12px; font-weight: 900">すうがく はかせ</span>
+          </div>
+        </div>
+      </article>
+      <span style="padding: 0 4px; font-size: 12px; font-weight: 700; color: var(--color-ink-muted)">17:05</span>
+      <span style="display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: var(--color-white); font-size: 12px; font-weight: 900"><img src="../assets/navi/navi-effort.png" alt="" style="width: 20px; height: 20px">やってみたい 3</span>
     </div>
   </div>
 
-  <div style="flex: 1 1 auto; max-height: 560px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 12px">
-    <article style="display: flex; flex-direction: column; padding: 6px; border-radius: 24px; background: var(--color-mint)">
-      <div style="flex: 1 1 auto; display: flex; flex-direction: column; border-radius: 18px; background: var(--color-white); overflow: hidden">
-        <div role="img" aria-label="きの しゃしん" style="flex: 1 1 auto; min-height: 96px; background: #EAF6EF;  display: flex; align-items: center; justify-content: center">
-          <svg aria-hidden="true" viewBox="0 0 120 120" width="80" height="80"><circle cx="60" cy="46" r="32" fill="#7FD1A8" stroke="#22223A" stroke-width="3"></circle><rect x="54" y="74" width="12" height="36" rx="3" fill="#B08968" stroke="#22223A" stroke-width="3"></rect></svg>
-        </div>
-        <div style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 16px; font-weight: 900; line-height: 1.4">この きの はっぱは なんまい？</span>
-          <span style="align-self: flex-start; padding: 1px 8px; border-radius: 10px; background: var(--color-mint-light); color: var(--color-mint-dark); font-size: 12px; font-weight: 900">りか マスター</span>
-        </div>
-      </div>
-    </article>
-    <article style="display: flex; flex-direction: column; padding: 6px; border-radius: 24px; background: var(--color-navi)">
-      <div style="flex: 1 1 auto; display: flex; flex-direction: column; border-radius: 18px; background: var(--color-white); overflow: hidden">
-        <div role="img" aria-label="じはんきの しゃしん" style="flex: 1 1 auto; min-height: 96px; background: #FDEFEF;  display: flex; align-items: center; justify-content: center">
-          <svg aria-hidden="true" viewBox="0 0 120 120" width="80" height="80"><rect x="30" y="10" width="60" height="100" rx="8" fill="#FFFFFF" stroke="#22223A" stroke-width="4"></rect><rect x="38" y="22" width="12" height="20" rx="3" fill="#9FD3FF"></rect><rect x="54" y="22" width="12" height="20" rx="3" fill="#FFD27A"></rect><rect x="70" y="22" width="12" height="20" rx="3" fill="#B8E6B0"></rect><rect x="38" y="48" width="12" height="20" rx="3" fill="#FFB3C1"></rect><rect x="54" y="48" width="12" height="20" rx="3" fill="#D7C4FF"></rect><rect x="70" y="48" width="12" height="20" rx="3" fill="#9FD3FF"></rect><rect x="40" y="86" width="40" height="12" rx="4" fill="#3B3F52"></rect></svg>
-        </div>
-        <div style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 16px; font-weight: 900; line-height: 1.4">じはんき、1にちで なんぼん うれる？</span>
-          <span style="align-self: flex-start; padding: 1px 8px; border-radius: 10px; background: var(--color-navi-light); color: var(--color-navi-dark); font-size: 12px; font-weight: 900">すうがく はかせ</span>
-        </div>
-      </div>
-    </article>
-    <article style="display: flex; flex-direction: column; padding: 6px; border-radius: 24px; background: var(--color-purple)">
-      <div style="flex: 1 1 auto; display: flex; flex-direction: column; border-radius: 18px; background: var(--color-white); overflow: hidden">
-        <div role="img" aria-label="QRコードの しゃしん" style="flex: 1 1 auto; min-height: 96px; background: #F4F5F9;  display: flex; align-items: center; justify-content: center">
-          <svg aria-hidden="true" viewBox="0 0 120 120" width="76" height="76"><rect x="14" y="14" width="92" height="92" rx="6" fill="#FFFFFF" stroke="#22223A" stroke-width="3"></rect><rect x="22" y="22" width="24" height="24" fill="none" stroke="#22223A" stroke-width="5"></rect><rect x="30" y="30" width="8" height="8" fill="#22223A"></rect><rect x="74" y="22" width="24" height="24" fill="none" stroke="#22223A" stroke-width="5"></rect><rect x="82" y="30" width="8" height="8" fill="#22223A"></rect><rect x="22" y="74" width="24" height="24" fill="none" stroke="#22223A" stroke-width="5"></rect><rect x="30" y="82" width="8" height="8" fill="#22223A"></rect><rect x="56" y="24" width="8" height="8" fill="#22223A"></rect><rect x="56" y="56" width="8" height="8" fill="#22223A"></rect><rect x="72" y="60" width="8" height="8" fill="#22223A"></rect><rect x="88" y="76" width="8" height="8" fill="#22223A"></rect><rect x="62" y="84" width="8" height="8" fill="#22223A"></rect></svg>
-        </div>
-        <div style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 16px; font-weight: 900; line-height: 1.4">しろくろの ならべかたは なんとおり？</span>
-          <span style="align-self: flex-start; padding: 1px 8px; border-radius: 10px; background: var(--color-purple-light); color: var(--color-purple-dark); font-size: 12px; font-weight: 900">エンジニアレベル</span>
-        </div>
-      </div>
-    </article>
-    <article style="display: flex; flex-direction: column; padding: 6px; border-radius: 24px; background: var(--color-navi)">
-      <div style="flex: 1 1 auto; display: flex; flex-direction: column; border-radius: 18px; background: var(--color-white); overflow: hidden">
-        <div role="img" aria-label="はしの しゃしん" style="flex: 1 1 auto; min-height: 96px; background: #EEF3FA;  display: flex; align-items: center; justify-content: center">
-          <svg aria-hidden="true" viewBox="0 0 120 120" width="88" height="88"><path d="M10 78Q60 34 110 78" fill="none" stroke="#22223A" stroke-width="6" stroke-linecap="round"></path><line x1="10" y1="78" x2="110" y2="78" stroke="#22223A" stroke-width="6" stroke-linecap="round"></line><line x1="35" y1="60" x2="35" y2="78" stroke="#22223A" stroke-width="4"></line><line x1="60" y1="55" x2="60" y2="78" stroke="#22223A" stroke-width="4"></line><line x1="85" y1="60" x2="85" y2="78" stroke="#22223A" stroke-width="4"></line><path d="M6 96q14-8 28 0t28 0t28 0t28 0" fill="none" stroke="#4A9FE8" stroke-width="5" stroke-linecap="round"></path></svg>
-        </div>
-        <div style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 16px; font-weight: 900; line-height: 1.4">この はしを わたると なんぽ？</span>
-          <span style="align-self: flex-start; padding: 1px 8px; border-radius: 10px; background: var(--color-navi-light); color: var(--color-navi-dark); font-size: 12px; font-weight: 900">すうがく はかせ</span>
-        </div>
-      </div>
-    </article>
-  </div>
+  <a href="01-yakusoku.html" style="flex-shrink: 0; min-height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; border: 3px solid var(--color-ink); border-radius: 22px; background: var(--color-white); box-shadow: var(--shadow-pop-sm); font-size: 18px; font-weight: 900; color: var(--color-ink); text-decoration: none">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22223A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+    さがして みせよう
+  </a>
 
   <nav aria-label="メニュー" style="margin: auto -24px -24px; padding-top: 18px; height: 102px; flex-shrink: 0; box-sizing: border-box; background: linear-gradient(var(--color-ink), var(--color-ink)) 0 18px / 100% 3px no-repeat, linear-gradient(var(--color-white), var(--color-white)) 0 18px / 100% 100% no-repeat; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr))">
     <a href="20-zukan.html" style="padding-top: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--color-ink-muted); font-size: 14px; font-weight: 700"><span style="width: 56px; height: 34px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"></path><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"></path></svg></span>ずかん</a>
