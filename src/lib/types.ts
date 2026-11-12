@@ -1,5 +1,5 @@
 import type { Subject, Question } from "@/server/llm/schema";
-import type { GroupId } from "./constants";
+import type { GroupId, ReactionId } from "./constants";
 import type { Guess, Rating } from "./rating";
 
 export type AuthUser = {
@@ -103,4 +103,13 @@ export type GroupPost = {
   subject: Subject;
   topic: string;
   title: string | null;
+};
+
+/**
+ * グループの投稿についたリアクション（#156）。counts は投稿の ID ごとの数、mine は自分が送ったもの。
+ * だれが送ったかは画面に出さない（数だけ）
+ */
+export type GroupReactions = {
+  counts: Record<string, Partial<Record<ReactionId, number>>>;
+  mine: Record<string, ReactionId>;
 };

@@ -190,6 +190,24 @@ service cloud.firestore {
         allow update: if false;
       }
 
+      // リアクション（#156）：reactions/{送った人の uid}__{投稿の ID}（1つの はてなに1人1つ。送りなおすと置きかわる）。
+      // 自由な文章は送れず、決まった kind だけ（src/lib/constants.ts の REACTIONS）。読めるのはメンバー（画面には数だけ出す）。
+      // 自分の はてなには送れない（送った人の uid から、持ち主が分かってしまうため）。消せるのは送った本人と管理者
+      match /reactions/{reactionId} {
+        allow read: if isMember(groupId);
+        allow create, update: if isMember(groupId)
+          && request.resource.data.keys().hasOnly(['postId', 'kind', 'createdAt'])
+          && request.resource.data.keys().hasAll(['postId', 'kind', 'createdAt'])
+          && request.resource.data.postId is string && request.resource.data.postId.size() <= 64
+          && reactionId == request.auth.uid + '__' + request.resource.data.postId
+          && request.resource.data.kind in ['sugoi', 'yaritai', 'naruhodo']
+          && request.resource.data.createdAt == request.time
+          && exists(postDoc(groupId, request.resource.data.postId))
+          && !isPostOwner(groupId, request.resource.data.postId);
+        allow delete: if request.auth != null
+          && (resource == null || reactionId == request.auth.uid + '__' + resource.data.postId || isAdmin(groupId));
+      }
+
       // 投稿の持ち主（本人が消せるようにするためだけの記録）。本人の記録だけ読める（退会で全投稿を消すため。管理者も他人の記録は読めない）。
       // 作れるのは、まだない投稿を同じバッチで作るときだけ（ほかの人の投稿の持ち主になれない）。
       // 消すのは投稿と同じバッチ（投稿が残ったまま、持ち主の記録だけを消せない）
