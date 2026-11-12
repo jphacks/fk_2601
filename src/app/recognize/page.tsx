@@ -13,6 +13,9 @@ import { useQuiz } from "@/components/QuizProvider";
 import { RubyText } from "@/components/RubyText";
 import { Button, ErrorNotice, LinkButton, Say } from "@/components/ui";
 
+// はてなが できてから、待ちの画面を見せておく長さ（「はてなが できたよ」と バーが 100% になるのが見える長さ）
+const AUTO_REVEAL_MS = 1500;
+
 /** 「ちがうよ」のあと：どうする？（見本 09） */
 function Denied() {
   return (
@@ -62,6 +65,14 @@ function RecognizeContent() {
   useEffect(() => {
     if (!crop) router.replace("/capture");
   }, [crop, router]);
+
+  // はてなが できたら、「できた！ みてみる」を押さなくても、すこし見せてから次へ進む（手数を へらす。#126）
+  const ready = generation.status === "ready";
+  useEffect(() => {
+    if (!ready || revealed) return;
+    const timer = setTimeout(() => setRevealed(true), AUTO_REVEAL_MS);
+    return () => clearTimeout(timer);
+  }, [ready, revealed]);
 
   if (!crop) return null;
 
