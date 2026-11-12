@@ -66,6 +66,9 @@ export const QuestionSchema = z.object({
       "estimate のとき、答えを身近なものにおきかえる。per は「label 答え÷value unit ぶん」、times は「label 答え×value unit」と表示する。うまく作れなければ null",
     ),
   whatIf: z.string().describe("条件を変えたくなる問いかけ（例: じゃあ、40しゅるいだったら？）。なければ空文字"),
+  tryIt: z
+    .string()
+    .describe("こたえあわせのあとに、その場で ひとりで できる、ごく安全な観察を1つ（みる・さわる・くらべる・かぞえる・さがす だけ）。なければ空文字"),
   related: z.array(z.string()).describe("同じ考えかたが使える、べつの身近なものの問い（0〜2つ）"),
   keyword: z.string().describe("もっとしらべるときのことば。なければ空文字"),
   sources: z.array(SourceSchema),

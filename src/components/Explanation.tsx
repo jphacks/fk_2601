@@ -56,6 +56,19 @@ export function ExplanationSteps({ question, collapsible = false }: { question: 
   );
 }
 
+/** やってみよう：本物の ものに ふれて たしかめる、ごく安全な観察（前に保存した問いや、AI が書かなかったときは出さない。#124） */
+export function TryIt({ question }: { question: Question }) {
+  if (!question.tryIt) return null;
+  return (
+    <div className="flex flex-col gap-1.5 rounded-card bg-yellow-light px-4 py-3.5">
+      <h2 className="font-pop text-[17px] font-normal text-yellow-dark">やってみよう！</h2>
+      <p className="text-[18px] font-black leading-[1.75]">
+        <RubyText kana text={question.tryIt} />
+      </p>
+    </div>
+  );
+}
+
 /** 同じ考えかたが使える、ほかの身近なものの問い（前に保存した問いには無いので、なければ何も出さない） */
 export function Related({ question }: { question: Question }) {
   const related = question.related ?? [];
