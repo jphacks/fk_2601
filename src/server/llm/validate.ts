@@ -25,6 +25,25 @@ function sanitizeUrl(url: string | null): string | null {
 
 const clip = (text: string, max: number) => text.trim().slice(0, max);
 
+// 「やってみよう」に入っていたら出さない ことば（AI への指示でも禁じているが、念のため コードでも はじく。docs/02-spec.md 13章）
+const UNSAFE_TRY = [
+  "火", "ほのお", "マッチ", "ライター", "コンロ", "あつい", "熱", "おゆ", "お湯", "ゆげ",
+  "刃", "ナイフ", "はさみ", "ハサミ", "カッター", "ほうちょう", "包丁", "切る",
+  "でんき", "電気", "コンセント", "でんち", "電池", "でんし", "電子レンジ",
+  "くすり", "薬", "せんざい", "洗剤", "ひょうはく", "漂白",
+  "たかい ところ", "高い所", "高い ところ", "やね", "屋根", "のぼ", "登",
+  "どうろ", "道路", "しゃどう", "車道", "せんろ", "線路", "ふみきり", "踏切", "川", "池", "海",
+  "なめ", "たべ", "食べ", "のんで", "飲", "くちに", "口に",
+  "しらない ひと", "知らない人", "でかけ", "出かけ", "まちで",
+];
+
+/** やってみよう を確かめる。あぶないかもしれない ことばが あれば、出さない（空にする） */
+function sanitizeTryIt(text: string | undefined): string {
+  const t = clip(text ?? "", 120);
+  const plain = stripRuby(t).replace(/\s+/g, " ");
+  return UNSAFE_TRY.some((w) => plain.includes(w)) ? "" : t;
+}
+
 /** 身近なものへの言いかえ（per / times）が、使える形かを確かめる。だめなら null にする */
 function sanitizeRef(ref: Question["ref"]): Question["ref"] {
   if (!ref) return null;
@@ -51,6 +70,7 @@ export function validateQuestion(input: Question, options: { lenient?: boolean }
     variables: input.variables.map((v) => ({ ...v, unit: stripRuby(v.unit).trim() })),
     hint: clip(input.hint ?? "", 120),
     whatIf: clip(input.whatIf ?? "", 80),
+    tryIt: sanitizeTryIt(input.tryIt),
     related: (input.related ?? []).map((r) => clip(r, 100)).filter(Boolean).slice(0, 2),
     keyword: clip(input.keyword ?? "", 40),
     sources: input.sources.map((s) => ({ ...s, url: sanitizeUrl(s.url) })),
