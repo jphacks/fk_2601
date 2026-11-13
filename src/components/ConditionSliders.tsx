@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { computeAnswer, defaultScope } from "@/lib/calc";
 import { formatNumber, numberLength, numberRuby } from "@/lib/format";
-import { refParts } from "@/lib/ref";
+import { refParts, roughRef } from "@/lib/ref";
 import { unitKana, unitRuby } from "@/lib/ruby";
 import type { Question } from "@/server/llm/schema";
 import { CountUp } from "./CountUp";
@@ -147,7 +147,8 @@ export function ConditionSliders({
         )}
         {parts && (
           <p className="mt-2 text-center text-[17px] font-black leading-[1.7]">
-            <RubyText kana text={parts.label} /> {formatNumber(parts.value, grade)}
+            <RubyText kana text={parts.label} /> {roughRef(parts.value) !== parts.value ? "やく " : ""}
+            {formatNumber(roughRef(parts.value), grade)}
             {unitKana(parts.unit, grade)}
             {parts.suffix}
           </p>
