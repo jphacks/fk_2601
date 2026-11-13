@@ -14,6 +14,6 @@ export class UsernameTakenError extends UserFacingError {
   }
 }
 
-export function messageOf(error: unknown, fallback = "うまくいかなかったよ。もういちど ためしてね"): string {
+export function messageOf(error: unknown, fallback = "うまくいかなかったよ。もう{一度|いちど} {試|ため}してね"): string {
   return error instanceof UserFacingError ? error.message : fallback;
 }

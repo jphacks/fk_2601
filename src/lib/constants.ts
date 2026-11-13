@@ -13,11 +13,18 @@ export const SUBJECT_LABEL: Record<Subject, string> = {
   info: "情報",
 };
 
-// 小さい文字には、漢字を使わずひらがなで書く（docs/design/README.md「文字」）
+// 分類の読み（スタンプの ふりがな などに使う）
 export const SUBJECT_KANA: Record<Subject, string> = {
   math: "さんすう",
   science: "りか",
   info: "じょうほう",
+};
+
+// 分類の名前を、ふりがなの記法で（<Jp> で出すと、学年に合わせて漢字か ひらがなになる。docs/design/README.md「文字」）
+export const SUBJECT_JP: Record<Subject, string> = {
+  math: "{算数|さんすう}",
+  science: "{理科|りか}",
+  info: "{情報|じょうほう}",
 };
 
 export const SUBJECTS: Subject[] = ["math", "science", "info"];

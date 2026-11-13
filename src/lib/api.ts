@@ -21,15 +21,15 @@ async function post<T>(backend: Backend, path: string, body: unknown): Promise<T
     const data: unknown = await response.json().catch(() => null);
     if (!response.ok) {
       const message = (data as { error?: { message?: string } } | null)?.error?.message;
-      throw new UserFacingError(message ?? "うまくいかなかったよ。もういちど ためしてね");
+      throw new UserFacingError(message ?? "うまくいかなかったよ。もう{一度|いちど} {試|ため}してね");
     }
     return data as T;
   } catch (error) {
     if (error instanceof UserFacingError) throw error;
     if (error instanceof DOMException && error.name === "AbortError") {
-      throw new UserFacingError("じかんが かかりすぎたよ。もういちど ためしてね");
+      throw new UserFacingError("{時間|じかん}が かかりすぎたよ。もう{一度|いちど} {試|ため}してね");
     }
-    throw new UserFacingError("ネットに つながらないよ。つながってから もういちど ためしてね");
+    throw new UserFacingError("ネットに つながらないよ。つながってから もう{一度|いちど} {試|ため}してね");
   } finally {
     clearTimeout(timer);
   }

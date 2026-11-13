@@ -41,6 +41,19 @@ export function kanaOf(text: string): string {
     .replace(MARKUP, (_, base: string, yomi: string) => (HAN.test(base) ? yomi : base));
 }
 
+/**
+ * 22px より小さい文字の出しかた（docs/design/README.md「文字」。2026-11-13 に決めた。#175）。
+ * その学年までに習った漢字の言葉は、ふりがなを付けずに漢字のまま。習っていない漢字がある言葉は、言葉ごと読み（ひらがな）で書く。
+ * 学年が分からないとき（はじめての登録の とちゅう など）は、すべて読みで書く。HTML ではなく、ふつうの文字として表示する
+ */
+export function plainOf(text: string, grade?: number | null): string {
+  if (!grade) return kanaOf(text);
+  return text
+    .replace(/<ruby>(.*?)(?:<rp>.*?<\/rp>)?<rt>(.*?)<\/rt>(?:<rp>.*?<\/rp>)?<\/ruby>/gis, (_, base: string, yomi: string) => `{${base}|${yomi}}`)
+    .replace(/<\/?(ruby|rt|rp)>/gi, "")
+    .replace(MARKUP, (_, base: string, yomi: string) => (HAN.test(base) && !isLearned(base, grade) ? yomi : base));
+}
+
 // 答えの単位によく出る漢字の読み（AI は単位にふりがなを付けないため、ここで付ける）。長いものから順に当てる
 const UNIT_READING: [string, string][] = [
   ["時間", "じかん"],
@@ -101,9 +114,9 @@ export function unitRuby(unit: string): string {
   return out;
 }
 
-/** 単位を、ひらがなにする（小さい文字のとき） */
-export function unitKana(unit: string): string {
-  return kanaOf(unitRuby(unit));
+/** 単位を、小さい文字の出しかたにする。grade を渡すと、習った漢字は漢字のまま（plainOf）。渡さないときは、ひらがな */
+export function unitKana(unit: string, grade?: number | null): string {
+  return plainOf(unitRuby(unit), grade);
 }
 
 /** ふりがなを取り除いた文字（見出し・画像の説明・グループ分けなど、ふりがなを出せない所に使う） */

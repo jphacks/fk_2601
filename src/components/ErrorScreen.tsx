@@ -1,3 +1,4 @@
+import { Jp } from "./RubyText";
 import { Navigator } from "./Navigator";
 import { Page } from "./Page";
 import { Button, LinkButton } from "./ui";
@@ -16,31 +17,31 @@ export function ErrorScreen({ kind, onRetry }: { kind: "error" | "notfound"; onR
         <h1 className="text-center font-pop text-[30px] font-normal leading-normal">
           あれれ？
           <br />
-          {kind === "notfound" ? "みつからないよ" : "うまくいかなかったよ"}
+          <Jp big>{kind === "notfound" ? "{見|み}つからないよ" : "うまくいかなかったよ"}</Jp>
         </h1>
         <p className="rounded-card bg-navi-light px-4 py-3 text-center text-[19px] font-black leading-[1.75]">
           {kind === "notfound" ? (
             <>
               この ページは
               <br />
-              ないみたい。ホームに もどろう！
+              <Jp>{"ないみたい。ホームに {戻|もど}ろう！"}</Jp>
             </>
           ) : (
             <>
-              もういちど ためしてね。
+              <Jp>{"もう{一度|いちど} {試|ため}してね。"}</Jp>
               <br />
-              だめなときは ホームに もどろう！
+              <Jp>{"だめなときは ホームに {戻|もど}ろう！"}</Jp>
             </>
           )}
         </p>
         <div className="mt-auto flex w-full flex-col gap-3.5">
           {onRetry && (
             <Button variant="seeno" onClick={onRetry}>
-              もういちど ためす
+              <Jp big>{"もう{一度|いちど} {試|ため}す"}</Jp>
             </Button>
           )}
           <LinkButton href="/" variant={onRetry ? "sub" : "main"}>
-            ホームに もどる
+            <Jp>{"ホームに {戻|もど}る"}</Jp>
           </LinkButton>
         </div>
       </div>

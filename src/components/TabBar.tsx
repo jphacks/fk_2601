@@ -1,3 +1,4 @@
+import { Jp } from "./RubyText";
 import Link from "next/link";
 import { Icon, type IconName } from "./Icons";
 
@@ -8,7 +9,7 @@ const SIDE: { key: Exclude<Tab, "home">; href: string; label: string; icon: Icon
   { key: "zukan", href: "/archive", label: "ずかん", icon: "book", on: "bg-yellow-soft", text: "text-yellow-deep", stroke: "#9A6B00" },
   { key: "stamp", href: "/stamp", label: "スタンプ", icon: "stamp", on: "bg-purple-light", text: "text-purple-dark", stroke: "#6A3FD6" },
   { key: "minna", href: "/others", label: "みんな", icon: "people", on: "bg-pink-light", text: "text-pink-deep", stroke: "#C23668" },
-  { key: "settings", href: "/settings", label: "せってい", icon: "gear", on: "bg-mint-light", text: "text-mint-dark", stroke: "#0F7A63" },
+  { key: "settings", href: "/settings", label: "{設定|せってい}", icon: "gear", on: "bg-mint-light", text: "text-mint-dark", stroke: "#0F7A63" },
 ];
 
 function SideTab({ tab, active }: { tab: (typeof SIDE)[number]; active: boolean }) {
@@ -21,7 +22,7 @@ function SideTab({ tab, active }: { tab: (typeof SIDE)[number]; active: boolean 
       <span className={`flex h-[34px] w-14 items-center justify-center rounded-[17px] ${active ? tab.on : ""}`}>
         <Icon name={tab.icon} size={26} stroke={active ? tab.stroke : "#6B7090"} strokeWidth={active ? 2.4 : 2.2} />
       </span>
-      {tab.label}
+      <Jp>{tab.label}</Jp>
     </Link>
   );
 }

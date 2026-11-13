@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "@/components/RubyText";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useArchive } from "@/components/ArchiveProvider";
@@ -52,7 +53,7 @@ function TitleRow({ name, note, selected, onClick }: { name: string; note: strin
       <Medal size={30} />
       <span className="flex flex-col gap-0.5">
         <span className="text-lg font-black">{name}</span>
-        <span className="text-[13px] font-black text-ink-sub">{note}</span>
+        <Jp className="text-[13px] font-black text-ink-sub">{note}</Jp>
       </span>
     </button>
   );
@@ -79,10 +80,12 @@ function FamilyCard({
     <section className="flex flex-col gap-2 rounded-card bg-cloud px-3.5 pb-3.5 pt-3">
       <div className="flex items-baseline justify-between gap-2">
         <h4 className="text-lg font-black">{family.name}</h4>
-        <span className="shrink-0 text-[13px] font-black text-ink-sub">いま {value}</span>
+        <span className="shrink-0 text-[13px] font-black text-ink-sub">
+          <Jp>{"{今|いま}"}</Jp> {value}
+        </span>
       </div>
       <span className="text-[13px] font-black leading-[1.6] text-ink-sub">
-        {next ? `${TIER_LABEL[next.tier]}：${family.how.replace("{n}", String(family.goals[TIERS.indexOf(next.tier)]))}（あと ${next.left}）` : "きんまで ぜんぶ もらったよ！"}
+        {next ? `${TIER_LABEL[next.tier]}：${family.how.replace("{n}", String(family.goals[TIERS.indexOf(next.tier)]))}（あと ${next.left}）` : <Jp>{"{金|きん}まで {全部|ぜんぶ} もらったよ！"}</Jp>}
       </span>
       <div className="grid grid-cols-3 gap-2">
         {TIERS.map((tier, i) => {
@@ -130,7 +133,7 @@ function StampContent() {
   if (status === "loading") {
     return (
       <Page tab="stamp">
-        <Loading message="スタンプを ひらいているよ" />
+        <Loading message="スタンプを {開|ひら}いているよ" />
       </Page>
     );
   }
@@ -138,7 +141,9 @@ function StampContent() {
   if (status === "error") {
     return (
       <Page tab="stamp">
-        <ErrorNotice onRetry={() => void reload()}>スタンプを よみこめなかったよ。ネットに つながっているか みて、もういちど ためしてね</ErrorNotice>
+        <ErrorNotice onRetry={() => void reload()}>
+          <Jp big>{"スタンプを {読|よ}みこめなかったよ。ネットに つながっているか {見|み}て、もう{一度|いちど} {試|ため}してね"}</Jp>
+        </ErrorNotice>
       </Page>
     );
   }
@@ -188,20 +193,26 @@ function StampContent() {
           <div className="flex items-center gap-3 rounded-card bg-purple px-4 py-2.5 text-white">
             <Navigator mood="surprise" size={68} />
             <span className="flex flex-col gap-0.5">
-              <span className="text-sm font-black">いま つけている しょうごう</span>
+              <span className="text-sm font-black">
+                <Jp>{"{今|いま} つけている しょうごう"}</Jp>
+              </span>
               <span className="font-pop text-[23px]">{titleLabel(profile.title)}</span>
             </span>
           </div>
-          <span className="text-[15px] font-black leading-[1.6] text-ink-sub">みんなの はてなに のせると、この しょうごうが でるよ</span>
+          <span className="text-[15px] font-black leading-[1.6] text-ink-sub">
+            <Jp>{"みんなの はてなに のせると、この しょうごうが {出|で}るよ"}</Jp>
+          </span>
 
           <div className="mt-2 flex items-baseline justify-between">
-            <span className="font-pop text-lg">しょうごうを えらぶ</span>
+            <span className="font-pop text-lg">
+              <Jp>{"しょうごうを {選|えら}ぶ"}</Jp>
+            </span>
             <span className="text-[15px] font-black text-ink-sub">
-              もっている {owned} / {TITLE_FAMILIES.length * TIERS.length}
+              <Jp>{"{持|も}っている"}</Jp> {owned} / {TITLE_FAMILIES.length * TIERS.length}
             </span>
           </div>
           <div role="radiogroup" aria-label="しょうごうを えらぶ" className="flex flex-col gap-3">
-            <TitleRow name={FIRST_TITLE_LABEL} note="はじめて あそんだ ときに もらえる" selected={current === null} onClick={() => void equip(null)} />
+            <TitleRow name={FIRST_TITLE_LABEL} note="はじめて {遊|あそ}んだ ときに もらえる" selected={current === null} onClick={() => void equip(null)} />
             {/* まとまりごとに見出しをつける（見出しは押せないので、文字だけ） */}
             {TITLE_GROUPS.map((group) => (
               <div key={group.id} className="flex flex-col gap-3">
@@ -214,7 +225,7 @@ function StampContent() {
           </div>
           {error && (
             <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-              {error}
+              <Jp>{error}</Jp>
             </p>
           )}
         </div>

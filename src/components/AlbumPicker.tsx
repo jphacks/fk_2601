@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "./RubyText";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { useQuiz } from "@/components/QuizProvider";
@@ -41,7 +42,7 @@ export function AlbumPicker({ className = "", children }: { className?: string; 
       </label>
       {error && (
         <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black leading-relaxed text-pink-dark">
-          {error}
+          <Jp>{error}</Jp>
         </p>
       )}
     </>

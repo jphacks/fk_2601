@@ -1,9 +1,10 @@
 "use client";
 
+import { Jp, RubyText } from "./RubyText";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { stampCounts } from "@/lib/collection";
-import { groupOf, STAMP_GOAL, SUBJECT_KANA, type GroupId } from "@/lib/constants";
+import { groupOf, STAMP_GOAL, SUBJECT_JP, type GroupId } from "@/lib/constants";
 import { newlyEarned, nextGoal, TIER_LABEL, TITLE_FAMILIES, titleLabel, titleStats, titleTier } from "@/lib/titles";
 import { messageOf } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
@@ -17,7 +18,7 @@ import { SUBJECT_STYLE, TYPE_LABEL } from "./QuestionCard";
 import { useQuiz } from "./QuizProvider";
 import { Stamp } from "./StampCards";
 import { Button, Say } from "./ui";
-import { kanaOf, stripRuby } from "@/lib/ruby";
+import { stripRuby } from "@/lib/ruby";
 
 /** ずかんのカード（見本 19）：つかまえた写真・はてな・きみのよそう→こたえ・はんこ */
 export function CollectCard({ question, image, summary, rating }: { question: Question; image: string; summary: string; rating: Rating }) {
@@ -33,11 +34,11 @@ export function CollectCard({ question, image, summary, rating }: { question: Qu
         </div>
         <div className="flex flex-col gap-1.5 px-3.5 pb-3.5 pt-2.5">
           <span className={`self-start rounded-[10px] px-2.5 py-0.5 text-[13px] font-black ${s.light} ${s.dark}`}>
-            {SUBJECT_KANA[question.subject]} ・ {kanaOf(question.topic) || TYPE_LABEL[question.type]}
+            <Jp>{`${SUBJECT_JP[question.subject]} ・ ${question.topic || TYPE_LABEL[question.type]}`}</Jp>
           </span>
-          {/* 小さい文字なので、ひらがなで出す */}
-          <span className="text-[18px] font-black leading-[1.45]">{kanaOf(question.text)}</span>
-          <span className="font-pop text-[15px]">{summary}</span>
+          {/* 小さい文字なので、ふりがなを付けず、学年に合わせて出す */}
+          <RubyText kana className="text-[18px] font-black leading-[1.45]" text={question.text} />
+          <Jp className="font-pop text-[15px]">{summary}</Jp>
         </div>
         <div className="absolute right-1.5 top-[70px]">
           <Hanko rating={rating} label={label} size={74} />
@@ -117,7 +118,7 @@ export function SavePanel({
           <Sparkle color="#FF6F9C" size={22} />
           {/* 1行に おさまるよう、画面の はばに合わせて 文字を小さくする */}
           <h2 className="whitespace-nowrap font-pop text-[clamp(20px,7vw,28px)] font-normal leading-tight text-yellow [-webkit-text-stroke:2px_var(--color-ink)]">
-            ずかんに のこそう！
+            <Jp big>{"ずかんに {残|のこ}そう！"}</Jp>
           </h2>
           <Sparkle color="#24C3A0" size={22} delay={0.6} />
         </div>
@@ -129,8 +130,10 @@ export function SavePanel({
           <fieldset className="flex flex-col gap-2 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm">
             <legend className="sr-only">グループの なかまにも みせる</legend>
             <span aria-hidden="true" className="text-[19px] font-black leading-[1.6]">
-              なかまにも みせる
-              <span className="block text-sm font-bold text-pink-dark">なまえは でないよ。かこんだ しゃしんと はてなだけ、えらんだ グループの なかまに みえるよ。</span>
+              <Jp>{"なかまにも {見|み}せる"}</Jp>
+              <span className="block text-sm font-bold text-pink-dark">
+                <Jp>{"{名前|なまえ}は {出|で}ないよ。{囲|かこ}んだ {写真|しゃしん}と はてなだけ、{選|えら}んだ グループの なかまに {見|み}えるよ。"}</Jp>
+              </span>
             </span>
             {memberships.map((m) => (
               <label
@@ -153,18 +156,18 @@ export function SavePanel({
         {/* ナビも いっしょに よろこぶ（のこった空白を うめる） */}
         <div className="mt-auto">
           <Say mood="happy" size={64} react>
-            <span className="whitespace-nowrap text-[clamp(15px,4.6vw,19px)]">いい はてなを みつけたね！</span>
+            <Jp className="whitespace-nowrap text-[clamp(15px,4.6vw,19px)]">{"いい はてなを {見|み}つけたね！"}</Jp>
           </Say>
         </div>
 
         {error && (
           <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-            {error}
+            <Jp>{error}</Jp>
           </p>
         )}
         <div className="mt-auto">
           <Button onClick={save} disabled={busy}>
-            {busy ? "のこしているよ…" : "ずかんに のこす！"}
+            <Jp big>{busy ? "{残|のこ}しているよ…" : "ずかんに {残|のこ}す！"}</Jp>
           </Button>
         </div>
       </div>
@@ -182,13 +185,13 @@ export function SavePanel({
 
       {shareFailed && (
         <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-          ずかんには のこせたけど、なかまには みせられなかったよ。
+          <Jp>{"ずかんには {残|のこ}せたけど、なかまには {見|み}せられなかったよ。"}</Jp>
         </p>
       )}
 
       <section className={`mt-auto flex flex-col gap-2.5 rounded-card px-4 py-3 ${s.light}`}>
         <div className={`flex items-center justify-between font-pop text-[17px] ${s.dark}`}>
-          <span>{SUBJECT_KANA[question.subject]} スタンプ</span>
+          <Jp>{`${SUBJECT_JP[question.subject]} スタンプ`}</Jp>
           <span>{earned ? `${STAMP_GOAL}/${STAMP_GOAL} そろった！` : `${shownStamps}/${STAMP_GOAL}`}</span>
         </div>
         <div className="grid grid-cols-5 items-center justify-items-center gap-2" role="img" aria-label={`スタンプ ${STAMP_GOAL}こちゅう ${shownStamps}こ`}>
@@ -227,14 +230,14 @@ export function SavePanel({
           onClick={() => leave("/archive")}
           className="flex h-[68px] flex-1 items-center justify-center rounded-3xl border-3 border-ink bg-white text-lg font-black shadow-pop-md active:translate-y-[4px] active:shadow-none"
         >
-          ずかんを みる
+          <Jp>{"ずかんを {見|み}る"}</Jp>
         </button>
         <button
           type="button"
           onClick={() => leave("/capture")}
           className="flex h-[68px] flex-[1.2] items-center justify-center rounded-3xl border-3 border-ink bg-navi font-pop text-[19px] text-white shadow-pop-md active:translate-y-[4px] active:shadow-none"
         >
-          もっと さがす！
+          <Jp>{"もっと {探|さが}す！"}</Jp>
         </button>
       </div>
     </div>

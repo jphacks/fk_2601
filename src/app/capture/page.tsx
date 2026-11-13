@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "@/components/RubyText";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -75,7 +76,9 @@ function CaptureContent() {
       )}
       <main className="animate-rise flex h-dvh min-h-[600px] flex-col gap-4 p-6">
         <div className="flex h-[52px] items-center justify-between">
-          <h1 className="font-pop text-2xl font-normal">しゃしんを とろう！</h1>
+          <h1 className="font-pop text-2xl font-normal">
+            <Jp big>{"{写真|しゃしん}を とろう！"}</Jp>
+          </h1>
           <Link
             href="/"
             aria-label="とじる"
@@ -90,12 +93,12 @@ function CaptureContent() {
         <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[32px] bg-photo">
           <video ref={videoRef} playsInline muted className={`absolute inset-0 size-full object-cover ${camera === "live" ? "" : "invisible"}`} />
 
-          {camera === "starting" && <p className="relative px-6 text-center text-lg font-black text-ink-sub">カメラを じゅんびしているよ…</p>}
+          {camera === "starting" && <p className="relative px-6 text-center text-lg font-black text-ink-sub"><Jp>{"カメラを {準備|じゅんび}しているよ…"}</Jp></p>}
           {camera === "unavailable" && (
             <p className="relative px-6 text-center text-lg font-black leading-relaxed text-ink-sub">
-              カメラが つかえなかったよ。
+              <Jp>{"カメラが {使|つか}えなかったよ。"}</Jp>
               <br />
-              おうちの ひとに 「カメラを つかって いいよ」の せっていを たのむか、アルバムから えらんでね。
+              <Jp>{"おうちの {人|ひと}に 「カメラを {使|つか}って いいよ」の {設定|せってい}を たのむか、アルバムから {選|えら}んでね。"}</Jp>
             </p>
           )}
 
@@ -113,7 +116,7 @@ function CaptureContent() {
               <circle cx="12" cy="12" r="8" />
               <line x1="4" y1="4" x2="20" y2="20" />
             </svg>
-            ひとの かおは とらないでね。まわりにも きをつけてね
+            <Jp>{"{人|ひと}の {顔|かお}は とらないでね。まわりにも {気|き}を つけてね"}</Jp>
           </span>
 
           <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
@@ -124,7 +127,7 @@ function CaptureContent() {
 
         {error && (
           <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-            {error}
+            <Jp>{error}</Jp>
           </p>
         )}
 

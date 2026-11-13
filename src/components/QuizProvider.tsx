@@ -93,7 +93,7 @@ function QuizState({ children }: { children: React.ReactNode }) {
         archiveStatusRef.current === "error" ? reload() : Promise.resolve(archivesRef.current);
       loaded
         .then((list) => {
-          if (!list) throw new UserFacingError("ずかんを よみこめなかったよ。ネットに つながっているか みて、もういちど ためしてね");
+          if (!list) throw new UserFacingError("ずかんを {読|よ}みこめなかったよ。ネットに つながっているか {見|み}て、もう{一度|いちど} {試|ため}してね");
           const context = buildGenerationContext(profile, list);
           const body = {
             image: nextCrop.base64,

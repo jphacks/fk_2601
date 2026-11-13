@@ -1,3 +1,4 @@
+import { Jp } from "./RubyText";
 import type { ReactNode } from "react";
 import { Icon } from "./Icons";
 import { Navigator, type Mood } from "./Navigator";
@@ -80,7 +81,8 @@ export function MemoNotice({ children }: { children: ReactNode }) {
 export function SignupError({ children }: { children: ReactNode }) {
   return (
     <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black leading-[1.6] text-pink-dark">
-      {children}
+      {/* エラーの文は ふりがなの記法を ふくむことがある。登録の とちゅうは 学年が ないので、ひらがなで出る */}
+      {typeof children === "string" ? <Jp>{children}</Jp> : children}
     </p>
   );
 }

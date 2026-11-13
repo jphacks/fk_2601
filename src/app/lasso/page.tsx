@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "@/components/RubyText";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Gate } from "@/components/Gate";
@@ -41,29 +42,26 @@ function LassoContent() {
   return (
     // もどるは、写真を手に入れた画面へ（ホームの見本の絵・アルバムなら ホーム、撮影の画面なら 撮影）。
     // 履歴で1つ前にもどると、はてなの画面から「かこみなおす」で来たときに そちらへもどってしまうので、行き先を決めておく
-    <Page title="ぐるっと かこもう！" back={photoFrom}>
+    <Page title="ぐるっと {囲|かこ}もう！" back={photoFrom}>
       <LassoPicker photo={photo} points={points} onChange={setPoints} />
       <Say mood={points ? "happy" : "think"} size={84}>
         {points ? (
           <>
             これで いいかな？
             <br />
-            ちがうときは もういちど！
+            <Jp big>{"ちがうときは もう{一度|いちど}！"}</Jp>
           </>
         ) : (
           <>
-            <ruby>
-              気<rt>き</rt>
-            </ruby>
-            になる ところを
+            <Jp big>{"{気|き}になる ところを"}</Jp>
             <br />
-            ゆびで ぐるっと！
+            <Jp big>{"{指|ゆび}で ぐるっと！"}</Jp>
           </>
         )}
       </Say>
       {error && (
         <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-          {error}
+          <Jp>{error}</Jp>
         </p>
       )}
       <div className="flex gap-2.5">
@@ -79,7 +77,7 @@ function LassoContent() {
       {/* 写真が縦に長くても、スクロールなしで「OK！」が見えるよう、画面の下にとめる（囲む場所は変えない） */}
       <div className="sticky bottom-0 z-10 mt-auto -mx-6 bg-gradient-to-t from-white from-70% to-transparent px-6 pb-[30px] pt-6 -mb-[30px]">
         <Button onClick={confirm} disabled={!points || busy}>
-          {busy ? "まってね…" : "OK！"}
+          {busy ? <Jp big>{"{待|ま}ってね…"}</Jp> : "OK！"}
         </Button>
       </div>
     </Page>

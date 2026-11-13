@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "@/components/RubyText";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useRef, useState } from "react";
@@ -86,17 +87,17 @@ function HomeContent() {
         </section>
 
         {/* 今日のお題（押せないので地の色だけ）。グループのミッションがあれば、グループごとに ならべる */}
-        {(groupMissions?.length ? groupMissions.map((m) => ({ key: m.groupId, label: `${groupOf(m.groupId).kana} の おだい`, text: m.text })) : [{ key: "daily", label: "きょうの おだい", text: todaysMission() }]).map((m) => (
+        {(groupMissions?.length ? groupMissions.map((m) => ({ key: m.groupId, label: `${groupOf(m.groupId).kana} の おだい`, text: m.text })) : [{ key: "daily", label: "{今日|きょう}の おだい", text: todaysMission() }]).map((m) => (
           <div key={m.key} className="flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-3">
             <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-white">
               <Icon name="star" size={26} fill="#FFC83D" stroke="#22223A" strokeWidth={2} />
             </span>
             <span className="flex min-w-0 grow flex-col">
               <span className="text-sm font-black">
-                {m.label}
+                <Jp>{m.label}</Jp>
                 {done ? "（クリア！）" : ""}
               </span>
-              <span className="font-pop text-[19px] leading-snug">{m.text}</span>
+              <Jp className="font-pop text-[19px] leading-snug">{m.text}</Jp>
             </span>
           </div>
         ))}
@@ -109,13 +110,13 @@ function HomeContent() {
           }`}
         >
           <Icon name="camera" size={42} strokeWidth={2.2} />
-          はてなを さがす！
+          <Jp big>{"はてなを {探|さが}す！"}</Jp>
           {guideOpen && guideStep === 2 && <GuideRing />}
         </Link>
 
         <AlbumPicker className="flex h-14 shrink-0 items-center justify-center gap-2 rounded-[22px] border-3 border-ink bg-white text-[19px] font-black text-ink shadow-pop-sm active:translate-y-1 active:shadow-none">
           <Icon name="album" size={24} strokeWidth={2.2} />
-          アルバムから えらぶ
+          <Jp>{"アルバムから {選|えら}ぶ"}</Jp>
         </AlbumPicker>
 
         <SceneSamples />

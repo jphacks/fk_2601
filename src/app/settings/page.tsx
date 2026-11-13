@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "@/components/RubyText";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
@@ -13,8 +14,8 @@ import { messageOf } from "@/lib/errors";
 import type { FirstMode } from "@/lib/types";
 
 const OPTIONS: { value: FirstMode; label: string }[] = [
-  { value: "choices", label: "「3つから えらぶ」を さきに" },
-  { value: "custom", label: "「じぶんで かく」を さきに" },
+  { value: "choices", label: "「3つから {選|えら}ぶ」を {先|さき}に" },
+  { value: "custom", label: "「{自分|じぶん}で {書|か}く」を {先|さき}に" },
 ];
 
 function SettingsContent() {
@@ -33,7 +34,7 @@ function SettingsContent() {
     try {
       await backend.deleteAccount(password);
     } catch (e) {
-      setError(messageOf(e, "ぜんぶは けせなかったよ。ネットに つながっているか みて、もういちど ためしてね"));
+      setError(messageOf(e, "{全部|ぜんぶ}は {消|け}せなかったよ。ネットに つながっているか {見|み}て、もう{一度|いちど} {試|ため}してね"));
     } finally {
       setPassword("");
       setDeleting(false);
@@ -43,29 +44,32 @@ function SettingsContent() {
 
   // プロフィールを消した後で失敗し、再読み込みした場合も退会をやり直せる。
   if (confirmDelete || !profile) return (
-    <Page title="アカウントを けす">
-      <Say mood={error ? "sorry" : "think"}>ほんとうに けす？</Say>
+    <Page title="アカウントを {消|け}す">
+      <Say mood={error ? "sorry" : "think"}>
+        <Jp big>{"{本当|ほんとう}に {消|け}す？"}</Jp>
+      </Say>
       <p className="rounded-card bg-pink-light p-4 text-base font-black leading-relaxed">
-        この アカウントの ずかんと、なかまに みせた はてな、ニックネームや がくねんを ぜんぶ けすよ。<br />
-        けしたものは もとに もどせないよ。この ログイン ID では あそべなくなるよ。
+        <Jp>{"この アカウントの ずかんと、なかまに {見|み}せた はてな、ニックネームや {学年|がくねん}を {全部|ぜんぶ} {消|け}すよ。"}</Jp>
+        <br />
+        <Jp>{"{消|け}したものは もとに {戻|もど}せないよ。この ログイン ID では {遊|あそ}べなくなるよ。"}</Jp>
       </p>
       <form className="flex flex-col gap-4" onSubmit={(event) => { event.preventDefault(); void deleteAccount(); }}>
         {backend.mode === "firebase" ? (
           <label className="flex flex-col gap-2 text-base font-black">
-            きみの アカウントか たしかめるため、パスワードを もういちど いれてね
+            <Jp>{"きみの アカウントか たしかめるため、パスワードを もう{一度|いちど} {入|い}れてね"}</Jp>
             <input type="password" autoComplete="current-password" required value={password} disabled={deleting}
               onChange={(event) => setPassword(event.target.value)}
               className="h-[60px] w-full min-w-0 rounded-[20px] border-3 border-ink bg-white px-4 text-xl" />
           </label>
-        ) : <p className="text-base font-black">この ブラウザに のこした データを けすよ。</p>}
-        {error && <p role="alert" className="rounded-card bg-pink-light p-4 text-base font-black text-pink-dark">{error}</p>}
-        <p role="status" className="text-base font-black">{deleting ? "けしているよ。そのまま まってね" : ""}</p>
+        ) : <p className="text-base font-black"><Jp>{"この ブラウザに {残|のこ}した データを {消|け}すよ。"}</Jp></p>}
+        {error && <p role="alert" className="rounded-card bg-pink-light p-4 text-base font-black text-pink-dark"><Jp>{error}</Jp></p>}
+        <p role="status" className="text-base font-black">{deleting ? <Jp>{"{消|け}しているよ。そのまま {待|ま}ってね"}</Jp> : ""}</p>
         <Button type="submit" variant="danger" disabled={deleting || (backend.mode === "firebase" && !password)}>
-          {deleting ? "けしているよ…" : error ? "もういちど ためす" : "ぜんぶ けす"}
+          <Jp>{deleting ? "{消|け}しているよ…" : error ? "もう{一度|いちど} {試|ため}す" : "{全部|ぜんぶ} {消|け}す"}</Jp>
         </Button>
         {profile && (
           <Button variant="sub" disabled={deleting} onClick={() => { setConfirmDelete(false); setPassword(""); setError(null); }}>
-            せっていに もどる
+            <Jp>{"{設定|せってい}に {戻|もど}る"}</Jp>
           </Button>
         )}
       </form>
@@ -84,7 +88,9 @@ function SettingsContent() {
 
   return (
     <Page tab="settings">
-      <h1 className="flex h-[46px] items-center font-pop text-[26px] font-normal">せってい</h1>
+      <h1 className="flex h-[46px] items-center font-pop text-[26px] font-normal">
+        <Jp big>{"{設定|せってい}"}</Jp>
+      </h1>
 
       <section className="flex flex-col gap-2.5 rounded-card bg-cloud px-4 py-3.5">
         <div className="flex items-center justify-between">
@@ -95,19 +101,19 @@ function SettingsContent() {
           </Link>
         </div>
         <span className="font-pop text-xl leading-[1.6]">
-          <ruby>
-            学年<rt>がくねん</rt>
-          </ruby>
+          <Jp>{"{学年|がくねん}"}</Jp>
         </span>
         <GradePicker size="sm" value={profile.grade} onChange={(grade) => void update({ grade })} />
       </section>
 
       <fieldset className="flex flex-col gap-2.5 border-0 p-0">
-        <legend className="mb-2.5 p-0 font-pop text-lg">はてなの だしかた</legend>
+        <legend className="mb-2.5 p-0 font-pop text-lg">
+          <Jp>{"はてなの {出|だ}しかた"}</Jp>
+        </legend>
         <div role="radiogroup" aria-label="はてなの だしかた" className="flex flex-col gap-2.5">
           {OPTIONS.map((o) => (
             <RadioRow key={o.value} selected={profile.firstMode === o.value} onClick={() => void update({ firstMode: o.value })}>
-              {o.label}
+              <Jp>{o.label}</Jp>
             </RadioRow>
           ))}
         </div>
@@ -130,9 +136,11 @@ function SettingsContent() {
       >
         <Icon name="people" size={28} strokeWidth={2.2} />
         <span className="flex flex-col">
-          <span className="text-[17px] font-black">グループに はいる</span>
+          <span className="text-[17px] font-black">
+            <Jp>{"グループに {入|はい}る"}</Jp>
+          </span>
           {memberships && memberships.length > 0 && (
-            <span className="text-sm font-bold text-ink-sub">いま：{memberships.map((m) => groupOf(m.groupId).kana).join("・")}</span>
+            <span className="text-sm font-bold text-ink-sub"><Jp>{"{今|いま}："}</Jp>{memberships.map((m) => groupOf(m.groupId).kana).join("・")}</span>
           )}
         </span>
         <Icon name="next" size={20} strokeWidth={3} className="ml-auto" />
@@ -148,18 +156,20 @@ function SettingsContent() {
           <path d="M9.3 9.4a2.8 2.8 0 0 1 5.4 1c0 1.8-2.7 2.3-2.7 3.9" fill="none" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" />
           <circle cx="12" cy="17.3" r="1.3" fill="#FFFFFF" />
         </svg>
-        <span className="text-[17px] font-black">あそびかたを もういちど みる</span>
+        <span className="text-[17px] font-black">
+          <Jp>{"{遊|あそ}びかたを もう{一度|いちど} {見|み}る"}</Jp>
+        </span>
         <Icon name="next" size={20} strokeWidth={3} className="ml-auto" />
       </Link>
 
       {error && (
         <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-          {error}
+          <Jp>{error}</Jp>
         </p>
       )}
 
       <Button variant="sub" onClick={() => { setError(null); setConfirmDelete(true); }}>
-        アカウントを けす
+        <Jp>{"アカウントを {消|け}す"}</Jp>
       </Button>
 
       <Button variant="danger" onClick={() => void signOut()}>

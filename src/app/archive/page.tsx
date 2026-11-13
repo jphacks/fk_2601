@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp, RubyText } from "@/components/RubyText";
 import Link from "next/link";
 import { useState } from "react";
 import { useArchive } from "@/components/ArchiveProvider";
@@ -11,7 +12,7 @@ import { Page } from "@/components/Page";
 import { SUBJECT_STYLE } from "@/components/QuestionCard";
 import { Button, ErrorNotice } from "@/components/ui";
 import { stampCounts } from "@/lib/collection";
-import { SUBJECT_KANA, SUBJECTS } from "@/lib/constants";
+import { SUBJECT_JP, SUBJECT_KANA, SUBJECTS } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
 import { kanaOf } from "@/lib/ruby";
@@ -23,12 +24,12 @@ import type { Subject } from "@/server/llm/schema";
 const BADGE: Record<Rating, { text: string; style: string }> = {
   pita: { text: "ピタリ", style: "border-red text-red-dark" },
   oshii: { text: "おしい", style: "border-orange text-orange-dark" },
-  ohazure: { text: "大はずれ", style: "border-navi text-navi-dark" },
+  ohazure: { text: "{大|おお}はずれ", style: "border-navi text-navi-dark" },
 };
 
 function Row({ a, selecting, selected, onToggle }: { a: ArchiveRecord; selecting: boolean; selected: boolean; onToggle: () => void }) {
   const s = SUBJECT_STYLE[a.question.subject];
-  const badge = a.question.type === "why" ? { text: a.rating === "pita" ? "せいかい" : "ざんねん", style: a.rating === "pita" ? BADGE.pita.style : BADGE.ohazure.style } : BADGE[a.rating];
+  const badge = a.question.type === "why" ? { text: a.rating === "pita" ? "{正解|せいかい}" : "ざんねん", style: a.rating === "pita" ? BADGE.pita.style : BADGE.ohazure.style } : BADGE[a.rating];
   const body = (
     <>
       {selecting && (
@@ -46,12 +47,14 @@ function Row({ a, selecting, selected, onToggle }: { a: ArchiveRecord; selecting
       {/* eslint-disable-next-line @next/next/no-img-element -- 保存した切り抜き（data URL） */}
       <img src={a.thumb ?? a.image} alt={a.question.target} className="size-[60px] shrink-0 rounded-2xl bg-photo object-cover" />
       <span className="flex min-w-0 grow flex-col gap-0.5">
-        <span className="line-clamp-2 text-[15px] font-black leading-[1.45]">{kanaOf(a.question.text)}</span>
+        <RubyText kana className="line-clamp-2 text-[15px] font-black leading-[1.45]" text={a.question.text} />
         <span className={`text-[13px] font-black ${s.dark}`}>
-          {kanaOf(a.question.topic)} ・ {formatDate(a.createdAt)}
+          <RubyText kana text={a.question.topic} /> ・ {formatDate(a.createdAt)}
         </span>
       </span>
-      <span className={`shrink-0 rotate-[8deg] rounded-[10px] border-2 bg-white px-2 py-0.5 text-xs font-black ${badge.style}`}>{badge.text}</span>
+      <span className={`shrink-0 rotate-[8deg] rounded-[10px] border-2 bg-white px-2 py-0.5 text-xs font-black ${badge.style}`}>
+        <Jp>{badge.text}</Jp>
+      </span>
     </>
   );
   const box = `flex items-center gap-3 rounded-[22px] border-3 bg-white py-2 pl-2 pr-3 text-ink shadow-pop-sm ${selected ? "border-pink" : "border-ink"}`;
@@ -90,7 +93,7 @@ function ArchiveContent() {
   if (status === "loading") {
     return (
       <Page tab="zukan">
-        <Loading message="ずかんを ひらいているよ" />
+        <Loading message="ずかんを {開|ひら}いているよ" />
       </Page>
     );
   }
@@ -98,7 +101,9 @@ function ArchiveContent() {
   if (status === "error") {
     return (
       <Page tab="zukan">
-        <ErrorNotice onRetry={() => void reload()}>ずかんを よみこめなかったよ。ネットに つながっているか みて、もういちど ためしてね</ErrorNotice>
+        <ErrorNotice onRetry={() => void reload()}>
+          <Jp big>{"ずかんを {読|よ}みこめなかったよ。ネットに つながっているか {見|み}て、もう{一度|いちど} {試|ため}してね"}</Jp>
+        </ErrorNotice>
       </Page>
     );
   }
@@ -149,7 +154,7 @@ function ArchiveContent() {
             }}
             className="ml-auto h-11 rounded-2xl border-[2.5px] border-ink bg-white px-3 text-sm font-black shadow-pop-xs active:translate-y-[3px] active:shadow-none"
           >
-            {selecting ? "やめる" : "えらんで けす"}
+            <Jp>{selecting ? "やめる" : "{選|えら}んで {消|け}す"}</Jp>
           </button>
         )}
       </div>
@@ -167,7 +172,7 @@ function ArchiveContent() {
             }}
             className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-[20px] font-pop text-[17px] leading-[1.2] ${subject === s ? CATEGORY[s].tab : "text-ink-sub"}`}
           >
-            {SUBJECT_KANA[s]}
+            <Jp>{SUBJECT_JP[s]}</Jp>
             <span className="font-body text-[13px] font-black">{counts[s]}こ</span>
           </button>
         ))}
@@ -182,7 +187,7 @@ function ArchiveContent() {
             onClick={() => setUnit(u)}
             className={`h-11 shrink-0 whitespace-nowrap rounded-[22px] border-[2.5px] border-ink px-4 text-base font-black ${unit === u ? CATEGORY[subject].tab : "bg-white text-ink-sub"}`}
           >
-            {u || "すべて"}
+            {u ? <RubyText kana text={u} /> : "すべて"}
           </button>
         ))}
       </div>
@@ -191,7 +196,9 @@ function ArchiveContent() {
         <div className="flex flex-1 flex-col items-center justify-center gap-2.5 rounded-card bg-white p-6">
           <Navigator mood="think" size={96} />
           <span className={`font-pop text-[22px] ${style.dark}`}>まだ ないよ</span>
-          <span className="text-base font-black text-ink-sub">まちで さがして みよう！</span>
+          <span className="text-base font-black text-ink-sub">
+            <Jp>{"{町|まち}で {探|さが}して みよう！"}</Jp>
+          </span>
         </div>
       ) : (
         <ul className="flex flex-col gap-3">
@@ -205,7 +212,7 @@ function ArchiveContent() {
 
       {error && (
         <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-          {error}
+          <Jp>{error}</Jp>
         </p>
       )}
 
@@ -226,24 +233,26 @@ function ArchiveContent() {
               }
               className="self-center rounded-xl border-[2.5px] border-ink bg-white px-4 py-1 text-sm font-black shadow-pop-xs active:translate-y-[3px] active:shadow-none"
             >
-              {allPicked ? "ぜんぶ はずす" : "ぜんぶ えらぶ"}
+              <Jp>{allPicked ? "{全部|ぜんぶ} はずす" : "{全部|ぜんぶ} {選|えら}ぶ"}</Jp>
             </button>
           )}
           {confirming ? (
             <>
-              <p className="rounded-[20px] bg-pink-light py-2 text-center text-base font-black">{picked.size}こ けすよ。もとには もどせないよ。いいかな？</p>
+              <p className="rounded-[20px] bg-pink-light py-2 text-center text-base font-black">
+                <Jp>{`${picked.size}こ {消|け}すよ。もとには {戻|もど}せないよ。いいかな？`}</Jp>
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <Button variant="sub" onClick={() => setConfirming(false)}>
                   やめる
                 </Button>
                 <Button variant="danger" onClick={() => void deletePicked()}>
-                  けす
+                  <Jp>{"{消|け}す"}</Jp>
                 </Button>
               </div>
             </>
           ) : (
             <Button variant="danger" disabled={picked.size === 0} onClick={() => setConfirming(true)}>
-              えらんだ {picked.size}こを けす
+              <Jp>{`{選|えら}んだ ${picked.size}こを {消|け}す`}</Jp>
             </Button>
           )}
         </div>

@@ -10,7 +10,7 @@ import { Icon } from "@/components/Icons";
 import { Page } from "@/components/Page";
 import { useQuiz } from "@/components/QuizProvider";
 import { ResultSummary } from "@/components/ResultSummary";
-import { RubyText } from "@/components/RubyText";
+import { Jp, RubyText } from "@/components/RubyText";
 import { SavePanel } from "@/components/SavePanel";
 import { Button, ErrorNotice, Say } from "@/components/ui";
 import { defaultScope } from "@/lib/calc";
@@ -52,8 +52,12 @@ function ResultContent() {
   if (!evaluation) {
     return (
       <Page title="こたえあわせ" back="/choose">
-        <ErrorNotice>この はてなは こたえを だせなかったよ。ほかの はてなを えらんでね。</ErrorNotice>
-        <Button onClick={() => router.push("/choose")}>はてなを えらびなおす</Button>
+        <ErrorNotice>
+          <Jp big>{"この はてなは {答|こた}えを {出|だ}せなかったよ。ほかの はてなを {選|えら}んでね。"}</Jp>
+        </ErrorNotice>
+        <Button onClick={() => router.push("/choose")}>
+          <Jp big>{"はてなを {選|えら}びなおす"}</Jp>
+        </Button>
       </Page>
     );
   }
@@ -64,9 +68,9 @@ function ResultContent() {
   const summary =
     evaluation.type === "why"
       ? evaluation.rating === "pita"
-        ? "せいかい！"
+        ? "{正解|せいかい}！"
         : "ざんねん…"
-      : `きみ ${describeGuess(guess, unit, profile?.grade)} → こたえ ${formatNumber(evaluation.actual ?? 0, profile?.grade)}${unitKana(unit)}`;
+      : `きみ ${describeGuess(guess, unit, profile?.grade)} → こたえ ${formatNumber(evaluation.actual ?? 0, profile?.grade)}${unitKana(unit, profile?.grade)}`;
 
   if (step === "shoutai") {
     return (
@@ -98,7 +102,7 @@ function ResultContent() {
             onClick={() => setStep("get")}
             className="flex h-[68px] flex-1 items-center justify-center rounded-3xl border-3 border-ink bg-white text-lg font-black shadow-pop-md active:translate-y-[4px] active:shadow-none"
           >
-            ずかんに のこす
+            <Jp>{"ずかんに {残|のこ}す"}</Jp>
           </button>
           {canChange && (
             <button
@@ -116,15 +120,17 @@ function ResultContent() {
 
   if (step === "moshimo") {
     return (
-      <Page title="もっとしりたい！" onBack={() => setStep("nazo")}>
+      <Page title="もっと {知|し}りたい！" onBack={() => setStep("nazo")}>
         <Say mood="think" size={90}>
           <span className="text-[19px]">
-            {selected.whatIf ? <RubyText kana text={selected.whatIf} /> : "じょうけんを かえると、こたえは どうなるかな？"}
+            {selected.whatIf ? <RubyText kana text={selected.whatIf} /> : <Jp>{"{条件|じょうけん}を {変|か}えると、{答|こた}えは どうなるかな？"}</Jp>}
           </span>
         </Say>
         <ConditionSliders question={selected} values={scope} onChange={setValues} grade={profile?.grade} />
         <div className="mt-auto">
-          <Button onClick={() => setStep("get")}>ずかんに のこす！</Button>
+          <Button onClick={() => setStep("get")}>
+            <Jp big>{"ずかんに {残|のこ}す！"}</Jp>
+          </Button>
         </div>
       </Page>
     );
@@ -135,7 +141,9 @@ function ResultContent() {
       {crop ? (
         <SavePanel question={selected} guess={guess} rating={evaluation.rating} image={crop.dataUrl} summary={summary} />
       ) : (
-        <ErrorNotice>しゃしんが みつからなかったよ。もういちど とってみてね。</ErrorNotice>
+        <ErrorNotice>
+          <Jp big>{"{写真|しゃしん}が {見|み}つからなかったよ。もう{一度|いちど} とってみてね。"}</Jp>
+        </ErrorNotice>
       )}
     </Page>
   );

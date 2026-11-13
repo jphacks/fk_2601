@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "./RubyText";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Icon, type IconName } from "./Icons";
 import { Navigator } from "./Navigator";
@@ -15,8 +16,8 @@ export type GuideStep = 0 | 1 | 2;
 // 1枚目：あそぶ じゅんばん（見本 07 の番号の色と絵）
 const FLOW: { title: string; text: string; color: string; icon: ReactNode }[] = [
   {
-    title: "さがす",
-    text: "カメラで まちを とる",
+    title: "{探|さが}す",
+    text: "カメラで {町|まち}を とる",
     color: "bg-navi text-white",
     icon: (
       <>
@@ -26,14 +27,14 @@ const FLOW: { title: string; text: string; color: string; icon: ReactNode }[] = 
     ),
   },
   {
-    title: "かこむ",
-    text: "きに なる ところを ゆびで ぐるっと",
+    title: "{囲|かこ}む",
+    text: "{気|き}に なる ところを {指|ゆび}で ぐるっと",
     color: "bg-yellow text-ink",
     icon: <path d="M10 5c6-2 11 1 11 6s-5 7-10 7S3 15 3 11c0-2.5 2-4.5 5-5.5 1-.3 1.6-1.2 1.4-2.5" />,
   },
   {
-    title: "えらぶ",
-    text: "でてきた はてなを 1つ えらぶ",
+    title: "{選|えら}ぶ",
+    text: "{出|で}てきた はてなを 1つ {選|えら}ぶ",
     color: "bg-orange text-ink",
     icon: (
       <>
@@ -45,7 +46,7 @@ const FLOW: { title: string; text: string; color: string; icon: ReactNode }[] = 
   },
   {
     title: "せーの！",
-    text: "こたえを よそうする",
+    text: "{答|こた}えを {予想|よそう}する",
     color: "bg-pink text-ink",
     icon: (
       <>
@@ -56,7 +57,7 @@ const FLOW: { title: string; text: string; color: string; icon: ReactNode }[] = 
   },
   {
     title: "こたえあわせ",
-    text: "ぴたり？ おしい？ おおはずれ？",
+    text: "ぴたり？ おしい？ {大|おお}はずれ？",
     color: "bg-navi text-white",
     icon: (
       <>
@@ -67,7 +68,7 @@ const FLOW: { title: string; text: string; color: string; icon: ReactNode }[] = 
   },
   {
     title: "もしも",
-    text: "きまりを かえて もういちど",
+    text: "きまりを {変|か}えて もう{一度|いちど}",
     color: "bg-mint text-ink",
     icon: (
       <>
@@ -77,8 +78,8 @@ const FLOW: { title: string; text: string; color: string; icon: ReactNode }[] = 
     ),
   },
   {
-    title: "のこす",
-    text: "ずかんに のこして スタンプ ゲット",
+    title: "{残|のこ}す",
+    text: "ずかんに {残|のこ}して スタンプ ゲット",
     color: "bg-purple text-white",
     icon: (
       <>
@@ -92,10 +93,10 @@ const FLOW: { title: string; text: string; color: string; icon: ReactNode }[] = 
 // 2枚目：下のナビの5つ（見本 08。色は下のナビと同じ）
 const TABS: { label: string; text: string; icon: IconName; chip: string; stroke: string }[] = [
   { label: "ずかん", text: "つかまえた はてなが ならぶ", icon: "book", chip: "bg-yellow-soft", stroke: "#9A6B00" },
-  { label: "スタンプ", text: "スタンプと しょうごうを みる", icon: "stamp", chip: "bg-purple-light", stroke: "#6A3FD6" },
-  { label: "ホーム", text: "いつでも ここに もどれる", icon: "home", chip: "bg-navi", stroke: "#FFFFFF" },
-  { label: "みんな", text: "みんなの はてなを みる", icon: "people", chip: "bg-pink-light", stroke: "#C23668" },
-  { label: "せってい", text: "がくねんや、この あそびかたも ここ", icon: "gear", chip: "bg-mint-light", stroke: "#0F7A63" },
+  { label: "スタンプ", text: "スタンプと しょうごうを {見|み}る", icon: "stamp", chip: "bg-purple-light", stroke: "#6A3FD6" },
+  { label: "ホーム", text: "いつでも ここに {戻|もど}れる", icon: "home", chip: "bg-navi", stroke: "#FFFFFF" },
+  { label: "みんな", text: "みんなの はてなを {見|み}る", icon: "people", chip: "bg-pink-light", stroke: "#C23668" },
+  { label: "{設定|せってい}", text: "{学年|がくねん}や、この {遊|あそ}びかたも ここ", icon: "gear", chip: "bg-mint-light", stroke: "#0F7A63" },
 ];
 
 /** 説明のカード（白。暗い地の上なので線はつけない）。tail を渡すと、説明しているものへ しっぽを向ける */
@@ -209,7 +210,7 @@ export function Guide({
               <h2 className="font-pop text-[22px] font-normal leading-normal">
                 あそびかたは
                 <br />
-                この じゅんばん！
+                <Jp big>{"この {順番|じゅんばん}！"}</Jp>
               </h2>
             </div>
             {/* 低い画面では、リストだけスクロールして「つぎへ」は いつも見せる */}
@@ -219,8 +220,8 @@ export function Guide({
                 <li key={item.title} className="relative flex items-center gap-3">
                   <span className={`flex size-11 shrink-0 items-center justify-center rounded-full font-pop text-lg ${item.color}`}>{i + 1}</span>
                   <span className="flex grow flex-col">
-                    <span className="font-pop text-lg leading-[1.4]">{item.title}</span>
-                    <span className="text-sm font-black leading-[1.4] text-ink-sub">{item.text}</span>
+                    <Jp className="font-pop text-lg leading-[1.4]">{item.title}</Jp>
+                    <Jp className="text-sm font-black leading-[1.4] text-ink-sub">{item.text}</Jp>
                   </span>
                   <svg aria-hidden width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A4E6A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                     {item.icon}
@@ -229,7 +230,7 @@ export function Guide({
               ))}
             </ol>
             <Button className="mb-1.5 shrink-0" onClick={onNext}>
-              つぎへ
+              <Jp>{"{次|つぎ}へ"}</Jp>
             </Button>
           </Sheet>
         )}
@@ -240,9 +241,9 @@ export function Guide({
             <div className="flex items-center gap-2.5">
               <Navigator mood="happy" size={60} react />
               <h2 className="font-pop text-lg font-normal leading-normal">
-                したの ボタンで
+                <Jp>{"{下|した}の ボタンで"}</Jp>
                 <br />
-                いろんな ページに いけるよ
+                <Jp>{"いろんな ページに {行|い}けるよ"}</Jp>
               </h2>
             </div>
             <ul className="flex flex-col gap-2">
@@ -252,8 +253,8 @@ export function Guide({
                     <Icon name={tab.icon} size={22} stroke={tab.stroke} strokeWidth={2.4} />
                   </span>
                   <span className="flex flex-col">
-                    <span className="text-[17px] font-black leading-[1.4]">{tab.label}</span>
-                    <span className="text-sm font-black leading-[1.4] text-ink-sub">{tab.text}</span>
+                    <Jp className="text-[17px] font-black leading-[1.4]">{tab.label}</Jp>
+                    <Jp className="text-sm font-black leading-[1.4] text-ink-sub">{tab.text}</Jp>
                   </span>
                 </li>
               ))}
@@ -263,7 +264,7 @@ export function Guide({
               className="h-[60px] shrink-0 rounded-[22px] border-3 border-ink bg-navi font-pop text-[21px] text-white shadow-pop-md active:translate-y-[5px] active:shadow-none"
               onClick={onNext}
             >
-              つぎへ
+              <Jp>{"{次|つぎ}へ"}</Jp>
             </Button>
           </Sheet>
         )}
@@ -279,15 +280,15 @@ export function Guide({
               <div className="flex flex-col gap-1">
                 <h2 className="font-pop text-2xl font-normal leading-[1.4]">まずは ここから！</h2>
                 <p className="text-base font-black leading-[1.6]">
-                  おすと カメラが ひらくよ。
+                  <Jp>{"{押|お}すと カメラが {開|ひら}くよ。"}</Jp>
                   <br />
-                  まちの はてなを さがそう！
+                  <Jp>{"{町|まち}の はてなを {探|さが}そう！"}</Jp>
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
               <button type="button" onClick={onClose} className={`${PAIR_STYLE} bg-white text-[17px] font-black`}>
-                ホームを みる
+                <Jp>{"ホームを {見|み}る"}</Jp>
               </button>
               <button type="button" onClick={onTry} className={`${PAIR_STYLE} bg-pink font-pop text-[19px]`}>
                 やってみる！

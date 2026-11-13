@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "./RubyText";
 import { useEffect, useState } from "react";
 import { formatNumber } from "@/lib/format";
 import { useReducedMotion } from "@/lib/useReducedMotion";
@@ -79,7 +80,7 @@ export function NumberLine({
       </span>
       {close ? (
         <div className="absolute inset-x-0 top-[82px] text-center font-pop text-base">
-          きみ {formatNumber(guess, grade)} ・ <span className="text-navi-dark">こたえ {formatNumber(actual, grade)}</span>
+          きみ {formatNumber(guess, grade)} ・ <span className="text-navi-dark"><Jp>{"{答|こた}え"}</Jp> {formatNumber(actual, grade)}</span>
         </div>
       ) : (
         <>
@@ -87,7 +88,7 @@ export function NumberLine({
             きみ {formatNumber(guess, grade)}
           </div>
           <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base text-navi-dark" style={{ left: `clamp(75px, ${ax}%, calc(100% - 75px))` }}>
-            こたえ {formatNumber(actual, grade)}
+            <Jp>{"{答|こた}え"}</Jp> {formatNumber(actual, grade)}
           </div>
         </>
       )}
