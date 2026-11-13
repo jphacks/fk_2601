@@ -1,18 +1,36 @@
 import { ASKED_FROM_ARCHIVE } from "./constants";
 import type { Rating } from "./rating";
 import type { ArchiveRecord, Profile } from "./types";
+import type { Subject } from "@/server/llm/schema";
 
 export type AskedPair = { target: string; topic: string };
+
+/** 教科ごとのレベル（1〜5） */
+export type SubjectLevels = Record<Subject, number>;
 
 export type GenerationContext = {
   grade: number;
   level: number;
+  subjectLevels: SubjectLevels;
   archiveCount: number;
   asked: AskedPair[];
 };
 
-/** 点数が、いくつふえるごとに、レベルが1つ上がるか */
-const POINTS_PER_LEVEL = 5;
+const SUBJECTS: Subject[] = ["math", "science", "info"];
+
+/** 手ごたえを見る、さいきんの記録の数（教科ごと） */
+const RECENT_WINDOW = 6;
+/** これより記録が少ないうちは、手ごたえで上げ下げしない（回数が少ないと、ぶれが大きいため） */
+const MIN_RECENT = 4;
+/** 当たりの割合が、これ以上なら1つ上げ、これ以下なら1つ下げる */
+const UP_RATE = 0.6;
+const DOWN_RATE = 0.2;
+
+/**
+ * レベル2〜5に上がる点数。上のレベルほど、たくさん遊ばないと上がらない（2026-11-13 に決めた。#174）。
+ * 前は「5点ごとに1つ」で、10回ちょっと遊ぶと いちばん上に とどき、そのあと 続けても 変わらなかった
+ */
+const LEVEL_POINTS = [5, 15, 30, 50];
 
 /** 予想が よく当たったときの おまけの点（「ピタリ」「おしい」） */
 const BONUS_RATINGS: Rating[] = ["pita", "oshii"];
@@ -31,9 +49,22 @@ export function progressPoints(archive: Pick<ArchiveRecord, "rating" | "origin">
   return points;
 }
 
-/** 学習の進み具合（レベル1〜5）。点数が5点ふえるごとに1つ上がる */
+/** どれだけ やっているか（経験）のレベル（1〜5）。5・15・30・50点で上がる */
 export function levelFromPoints(points: number): number {
-  return Math.min(5, 1 + Math.floor(points / POINTS_PER_LEVEL));
+  return 1 + LEVEL_POINTS.filter((p) => points >= p).length;
+}
+
+/**
+ * さいきんの手ごたえで、レベルを1つだけ上げ下げする（docs/02-spec.md 17章。2026-11-13 に決めた。#174）。
+ * 当たり＝「ピタリ」「おしい」と、「なぜ？」型の正解。数の問いは、はずれて おどろくのが ふつうなので、下げるのは 当たりが2割以下の ときだけ
+ * records は新しい順。記録が MIN_RECENT より少なければ、base のまま
+ */
+export function adjustLevel(base: number, records: Pick<ArchiveRecord, "rating">[]): number {
+  const recent = records.slice(0, RECENT_WINDOW);
+  if (recent.length < MIN_RECENT) return base;
+  const rate = recent.filter((r) => r.rating !== "ohazure").length / recent.length;
+  const step = rate >= UP_RATE ? 1 : rate <= DOWN_RATE ? -1 : 0;
+  return Math.min(5, Math.max(1, base + step));
 }
 
 /** 同じ「対象×単元」を1つにまとめ、新しい順（archive は新しい順に並んでいる）に上限まで残す */
@@ -53,9 +84,15 @@ export function recentAsked(archive: { target: string; topic: string }[], limit 
 /** archive は、ずかんの記録（新しい順） */
 export function buildGenerationContext(profile: Profile, archive: ArchiveRecord[]): GenerationContext {
   const own = archive.filter((a) => a.origin !== "played");
+  // どれだけ やっているか（経験）で決めたレベルを、さいきんの手ごたえで1つだけ上げ下げする。教科ごとにも出す
+  const base = levelFromPoints(progressPoints(archive));
+  const subjectLevels = Object.fromEntries(
+    SUBJECTS.map((subject) => [subject, adjustLevel(base, own.filter((a) => a.question.subject === subject))]),
+  ) as SubjectLevels;
   return {
     grade: profile.grade,
-    level: levelFromPoints(progressPoints(archive)),
+    level: adjustLevel(base, own),
+    subjectLevels,
     // 「これまでに N 問に挑戦した」の N。自分で作った問いの数
     archiveCount: own.length,
     // 出題済みは、遊んだ問いも入れる（同じ問いが出ないように）

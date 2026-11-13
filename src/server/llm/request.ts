@@ -14,6 +14,10 @@ export const QuestionsRequestSchema = z.object({
   grade: z.number().int().min(1).max(6),
   /** 学習の進み具合（1〜5） */
   level: z.number().int().min(1).max(5),
+  /** 教科ごとのレベル（1〜5）。前の版のアプリは送らないので、なくてもよい */
+  subjectLevels: z
+    .object({ math: z.number().int().min(1).max(5), science: z.number().int().min(1).max(5), info: z.number().int().min(1).max(5) })
+    .optional(),
   archiveCount: z.number().int().min(0).max(100_000),
   /** 出題済みの対象×単元 */
   asked: z.array(Asked).max(200),
