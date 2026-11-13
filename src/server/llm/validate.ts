@@ -120,11 +120,10 @@ export function validateQuestion(draft: Question | DraftQuestion, options: { len
   }
 
   if (!q.formula) return fail("式がありません");
-  // 式で使われない変数は、もしもの スライダーを動かしても答えが変わらないので、外す。1つも使わない式は出さない
+  // 式で使われない変数は、もしもの スライダーを動かしても答えが変わらないので、外す。
+  // 1つも使わない式（円の まわりは はばの 何倍？＝pi など、答えが決まった数）は、スライダーなしで出す（もしもの画面は出ない）
   const formula = q.formula;
-  const used = q.variables.filter((v) => new RegExp(`(^|[^A-Za-z0-9_])${v.name}([^A-Za-z0-9_(]|$)`).test(formula));
-  if (!options.lenient && used.length === 0) return fail("式が変数を使っていません");
-  q.variables = used.length > 0 ? used : q.variables;
+  q.variables = q.variables.filter((v) => new RegExp(`(^|[^A-Za-z0-9_])${v.name}([^A-Za-z0-9_(]|$)`).test(formula));
   const result = calculate(q.formula, defaultScope(q));
   if (!result.ok) return fail(result.reason);
   const answer = result.value;
