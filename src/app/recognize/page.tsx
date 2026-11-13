@@ -135,7 +135,7 @@ function RecognizeContent() {
               <span className="font-pop text-[24px] font-normal leading-normal">
                 これは
                 <br />
-                <RubyText text={generation.data.recognition.label} /> だね？
+                <RubyText text={generation.data.recognition.label} /> <span className="whitespace-nowrap">だね？</span>
               </span>
             </Say>
           </div>

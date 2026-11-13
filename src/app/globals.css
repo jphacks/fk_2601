@@ -277,6 +277,45 @@ input[type="range"]::-moz-range-thumb {
   animation: confetti-fall 4s linear infinite;
 }
 
+/*
+ * ふち文字の見出し（ずかんに のこそう！・はてなゲット！・見つけた！）。色のついた文字に ink の ふちと、下に ずらした影。
+ * 文字の色は、使う ところで text-yellow などを 付ける。
+ * -webkit-text-stroke は 文字の 内がわも けずって 細く見えるので、影を ぐるっと 重ねて 外がわにだけ ふちを作る
+ */
+.title-pop {
+  /* --o：ふちの 太さ、--d：下に ずらす 影の 深さ（小さい見出しでは、使う ところで 細くする） */
+  --o: 3px;
+  --d: 4px;
+  letter-spacing: 0.02em;
+  text-shadow:
+    var(--o) 0 0 var(--color-ink),
+    calc(var(--o) * -1) 0 0 var(--color-ink),
+    0 var(--o) 0 var(--color-ink),
+    0 calc(var(--o) * -1) 0 var(--color-ink),
+    calc(var(--o) * 0.7) calc(var(--o) * 0.7) 0 var(--color-ink),
+    calc(var(--o) * -0.7) calc(var(--o) * 0.7) 0 var(--color-ink),
+    calc(var(--o) * 0.7) calc(var(--o) * -0.7) 0 var(--color-ink),
+    calc(var(--o) * -0.7) calc(var(--o) * -0.7) 0 var(--color-ink),
+    calc(var(--o) * 0.93) calc(var(--o) * 0.37) 0 var(--color-ink),
+    calc(var(--o) * -0.93) calc(var(--o) * 0.37) 0 var(--color-ink),
+    calc(var(--o) * 0.93) calc(var(--o) * -0.37) 0 var(--color-ink),
+    calc(var(--o) * -0.93) calc(var(--o) * -0.37) 0 var(--color-ink),
+    calc(var(--o) * 0.37) calc(var(--o) * 0.93) 0 var(--color-ink),
+    calc(var(--o) * -0.37) calc(var(--o) * 0.93) 0 var(--color-ink),
+    calc(var(--o) * 0.37) calc(var(--o) * -0.93) 0 var(--color-ink),
+    calc(var(--o) * -0.37) calc(var(--o) * -0.93) 0 var(--color-ink),
+    0 calc(var(--o) + var(--d)) 0 var(--color-ink),
+    calc(var(--o) * 0.7) calc(var(--o) * 0.7 + var(--d)) 0 var(--color-ink),
+    calc(var(--o) * -0.7) calc(var(--o) * 0.7 + var(--d)) 0 var(--color-ink),
+    var(--o) var(--d) 0 var(--color-ink),
+    calc(var(--o) * -1) var(--d) 0 var(--color-ink);
+}
+/* ふりがなは 小さいので、ふちを つけずに ink で書く */
+.title-pop rt {
+  color: var(--color-ink);
+  text-shadow: none;
+}
+
 /* ホームの まちの絵：かくれている「？」が ふわふわ うく */
 @keyframes hatena-bob {
   0%,
