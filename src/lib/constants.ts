@@ -91,5 +91,11 @@ export const THUMB_QUALITY = 0.7;
 // LLM
 export const LLM_TIMEOUT_MS = 60_000;
 
+// AI を呼ぶ API の使いすぎを止める上限（利用者ごと。サーバーのメモリで数える：src/server/llm/rateLimit.ts、docs/03-technical.md 9章）
+export const RATE_LIMIT_MINUTE = 6;
+export const RATE_LIMIT_DAY = 100;
+// リクエストの大きさの上限（Content-Length。これをこえたら、JSON を読む前に断る）
+export const MAX_REQUEST_BYTES = 2 * 1024 * 1024;
+
 // ユーザー名：メールアドレスの @ より前は64文字まで。16進数にすると1バイト2文字
 export const USERNAME_MAX_BYTES = 32;
