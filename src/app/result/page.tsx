@@ -158,9 +158,17 @@ function ResultContent() {
   }
 
   return (
-    <Page onBack={saved ? undefined : () => setStep(canChange ? "moshimo" : "nazo")}>
+    // 写真が あるときは、「もどる」を SavePanel の中に出す（ナビの ひとことと 同じ段に ならべるため）
+    <Page onBack={crop || saved ? undefined : () => setStep(canChange ? "moshimo" : "nazo")}>
       {crop ? (
-        <SavePanel question={selected} guess={guess} rating={evaluation.rating} image={crop.dataUrl} summary={summary} />
+        <SavePanel
+          question={selected}
+          guess={guess}
+          rating={evaluation.rating}
+          image={crop.dataUrl}
+          summary={summary}
+          onBack={() => setStep(canChange ? "moshimo" : "nazo")}
+        />
       ) : (
         <ErrorNotice>
           <Jp big>{"{写真|しゃしん}が {見|み}つからなかったよ。もう{一度|いちど} とってみてね。"}</Jp>

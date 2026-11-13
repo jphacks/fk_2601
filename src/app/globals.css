@@ -226,7 +226,7 @@ input[type="range"]::-moz-range-thumb {
   animation: stamp-in 0.5s cubic-bezier(0.3, 1.7, 0.5, 1) 0.2s both;
 }
 
-/* ずかんに のこそう：カードの後ろの光が回る・カードが はずんで出る・星が光る・紙ふぶきが ふる */
+/* ずかんに のこそう：カードの後ろの光が回る・カードが はずんで出る・星が光る */
 @keyframes spin-slow {
   to {
     transform: rotate(360deg);
@@ -262,19 +262,6 @@ input[type="range"]::-moz-range-thumb {
 }
 .animate-twinkle {
   animation: twinkle 1.6s ease-in-out infinite;
-}
-@keyframes confetti-fall {
-  0% {
-    top: -16px;
-    transform: rotate(0);
-  }
-  100% {
-    top: 100%;
-    transform: rotate(540deg);
-  }
-}
-.animate-confetti-fall {
-  animation: confetti-fall 4s linear infinite;
 }
 
 /*
@@ -528,18 +515,67 @@ input[type="range"]::-moz-range-thumb {
   animation: draw-line var(--dur, 0.8s) ease-out var(--delay, 0s) both;
 }
 
-@keyframes flag-swing {
+/* ずかんに のこそう：カードが ふわふわ うく・光が ななめに 走る・下の影が のびちぢみする */
+@keyframes float-card {
   0%,
   100% {
-    transform: rotate(-6deg);
+    transform: translateY(0) rotate(0);
   }
   50% {
-    transform: rotate(6deg);
+    transform: translateY(-9px) rotate(1.5deg);
   }
 }
-.animate-flag {
-  animation: flag-swing 1.8s ease-in-out infinite;
+.animate-float-card {
+  animation: float-card 3.2s ease-in-out 0.7s infinite;
 }
+@keyframes float-shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scaleX(0.86);
+    opacity: 0.12;
+  }
+}
+.animate-float-shadow {
+  animation: float-shadow 3.2s ease-in-out 0.7s infinite;
+}
+@keyframes shine-sweep {
+  0% {
+    transform: translateX(-180%) skewX(-20deg);
+  }
+  45%,
+  100% {
+    transform: translateX(320%) skewX(-20deg);
+  }
+}
+.animate-shine {
+  animation: shine-sweep 3.4s ease-in-out 1s infinite;
+}
+
+/* いちばん 押してほしい ボタンが、ときどき ぴょこっと はねる（外がわの わくに つける。ボタンの 押した動きを じゃましない） */
+@keyframes nudge {
+  0%,
+  78%,
+  100% {
+    transform: translateY(0);
+  }
+  85% {
+    transform: translateY(-6px);
+  }
+  91% {
+    transform: translateY(0);
+  }
+  95% {
+    transform: translateY(-2px);
+  }
+}
+.animate-nudge {
+  animation: nudge 2.8s ease-in-out 1.2s infinite;
+}
+
 
 /* 条件を変えたときの、ふくらむ動き */
 @keyframes bump {
