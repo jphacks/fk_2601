@@ -277,6 +277,34 @@ input[type="range"]::-moz-range-thumb {
   animation: confetti-fall 4s linear infinite;
 }
 
+/* ホームの まちの絵：かくれている「？」が ふわふわ うく */
+@keyframes hatena-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+.animate-hatena {
+  animation: hatena-bob 2.4s ease-in-out infinite;
+}
+
+/* ホームの 空：くもが ゆっくり ながれる */
+@keyframes cloud-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(14px);
+  }
+}
+.animate-cloud {
+  animation: cloud-drift 9s ease-in-out infinite;
+}
+
 @keyframes flag-swing {
   0%,
   100% {

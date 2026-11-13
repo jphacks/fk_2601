@@ -452,15 +452,16 @@ export function scenePhoto(key: SceneKey): Photo {
   return { dataUrl: canvas.toDataURL("image/jpeg", 0.9), width: WIDTH, height: HEIGHT };
 }
 
-/** ホームに並べる小さな絵を、canvas に描く（180×240） */
-export function paintThumb(target: HTMLCanvasElement, key: SceneKey) {
+/** 一覧に並べる小さな絵を、canvas に描く（たて横の比は 3:4。width を渡さなければ 180×240） */
+export function paintThumb(target: HTMLCanvasElement, key: SceneKey, width = 180) {
   const full = document.createElement("canvas");
   full.width = WIDTH;
   full.height = HEIGHT;
   const c = full.getContext("2d");
   if (!c) return;
   DRAW[key](c, WIDTH, HEIGHT);
-  target.width = 180;
-  target.height = 240;
-  target.getContext("2d")?.drawImage(full, 0, 0, 180, 240);
+  const height = Math.round((width * HEIGHT) / WIDTH);
+  target.width = width;
+  target.height = height;
+  target.getContext("2d")?.drawImage(full, 0, 0, width, height);
 }
