@@ -28,6 +28,8 @@ function ResultContent() {
   // 保存したあとに もどってきたときは、保存した画面（はてなゲット！）から見せる
   const [step, setStep] = useState<Step>(() => (saved ? "get" : "shoutai"));
   const [values, setValues] = useState<Record<string, number> | null>(null);
+  // こたえあわせを もう見たか（なぞときから もどったときは、「どきどき」や演出を やり直さない）
+  const [answerSeen, setAnswerSeen] = useState(false);
 
   useEffect(() => {
     if (!selected) router.replace(crop ? "/choose" : "/capture");
@@ -75,13 +77,24 @@ function ResultContent() {
   if (step === "shoutai") {
     return (
       <Page>
-        <ResultSummary question={selected} guess={guess} evaluation={evaluation} grade={profile?.grade} />
-        <div className="mt-auto">
-          <Button onClick={() => setStep("nazo")}>
-            <Icon name="search" size={28} strokeWidth={2.8} />
-            なぞときへ！
-          </Button>
-        </div>
+        <ResultSummary
+          question={selected}
+          guess={guess}
+          evaluation={evaluation}
+          grade={profile?.grade}
+          animate={!answerSeen}
+          action={
+            <Button
+              onClick={() => {
+                setAnswerSeen(true);
+                setStep("nazo");
+              }}
+            >
+              <Icon name="search" size={28} strokeWidth={2.8} />
+              なぞときへ！
+            </Button>
+          }
+        />
       </Page>
     );
   }

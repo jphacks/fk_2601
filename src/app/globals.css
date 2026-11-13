@@ -344,6 +344,190 @@ input[type="range"]::-moz-range-thumb {
   animation: cloud-drift 9s ease-in-out infinite;
 }
 
+/* こたえあわせ：数が ふえている あいだの、どきどき（こきざみに ゆれる） */
+@keyframes drum-roll {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.2deg);
+  }
+  50% {
+    transform: translateY(-2px) rotate(1.2deg);
+  }
+}
+.animate-drum {
+  display: inline-block;
+  animation: drum-roll 0.14s linear infinite;
+}
+
+/* ぽんっと 出る（ひとことの札・ふきだし・正解の しるし） */
+@keyframes pop-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.animate-pop-in {
+  animation: pop-in 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+/* ぽんっと 出て、すこし してから 消える（びっくりの「！？」・おしいの 星） */
+@keyframes pop-fade {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  22% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  35% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.1);
+    opacity: 0;
+  }
+}
+.animate-pop-fade {
+  animation: pop-fade 1.5s ease-out both;
+}
+
+/* はんこを 押したときの、広がる輪 */
+@keyframes ring-out {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+.animate-ring {
+  animation: ring-out 0.7s ease-out both;
+}
+
+/* 大はずれ：カードが ぶるぶる ゆれる（びっくり） */
+@keyframes shake-x {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+  12% {
+    transform: translateX(-10px) rotate(-1.5deg);
+  }
+  28% {
+    transform: translateX(9px) rotate(1.5deg);
+  }
+  44% {
+    transform: translateX(-7px) rotate(-1deg);
+  }
+  60% {
+    transform: translateX(5px) rotate(0.6deg);
+  }
+  76% {
+    transform: translateX(-3px);
+  }
+  90% {
+    transform: translateX(2px);
+  }
+}
+.animate-shake {
+  animation: shake-x 0.6s ease-out both;
+}
+
+/* 大はずれ：まんなかから 外へ 広がる、びっくりの線 */
+@keyframes shock-out {
+  0% {
+    transform: scale(0.45);
+    opacity: 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+.animate-shock {
+  animation: shock-out 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+/*
+ * 紙ふぶきが はじける（ピタリ・正解・はてなゲット！）。1まいごとに、とぶ先（--bx・--by）・回る角度（--br）・
+ * おちる長さ（--fall）を 決める。はじめに 外へ とんで、そのあと おちながら 消える（1回だけ）
+ */
+@keyframes burst-fly {
+  0% {
+    transform: translate(0, 0) rotate(0) scale(0.3);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  38% {
+    transform: translate(var(--bx), var(--by)) rotate(var(--br)) scale(1);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.6);
+  }
+  100% {
+    transform: translate(calc(var(--bx) * 1.25), calc(var(--by) + var(--fall))) rotate(calc(var(--br) * 2.6)) scale(1);
+    opacity: 0;
+  }
+}
+.burst-piece {
+  animation: burst-fly var(--dur, 1.9s) cubic-bezier(0.1, 0.75, 0.3, 1) var(--delay, 0s) both;
+}
+
+/* 紙ふぶきが 上から ふる（1回だけ。ふりおわったら 消える） */
+@keyframes rain-fall {
+  0% {
+    transform: translateY(-30px) rotate(0);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--fall)) rotate(var(--br));
+    opacity: 0;
+  }
+}
+.rain-piece {
+  animation: rain-fall var(--dur, 2.6s) linear var(--delay, 0s) both;
+}
+
+/* はなまる（正解の しるし）を、ペンで かくように 出す */
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.animate-draw {
+  stroke-dasharray: 1;
+  animation: draw-line var(--dur, 0.8s) ease-out var(--delay, 0s) both;
+}
+
 @keyframes flag-swing {
   0%,
   100% {
