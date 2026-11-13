@@ -41,11 +41,17 @@ function keepValid(questions: (Question | DraftQuestion)[], lenient = false): Qu
 
 export class NoValidQuestionError extends Error {}
 
+/** 1年生は「倍」を まだ習っていないので、ほかの問いがあるときは compare（何倍）を出さない（docs/02-spec.md 2.4）。見本の問いにも きかせる */
+function fitToGrade(valid: Question[], grade: number): Question[] {
+  const fitGrade = grade < TIMES_GRADE ? valid.filter((q) => q.type !== "compare") : valid;
+  return fitGrade.length > 0 ? fitGrade : valid;
+}
+
 export async function generateQuestions(input: QuestionsRequest): Promise<QuestionsResponse> {
   // 見本の絵で AI がつながらないとき（fallback）は、AI を呼ばずに見本の問いを返す
   if (input.fallback && input.scene) {
     const { label, questions } = builtinQuestions(input.scene);
-    return { recognition: { label, canAsk: true }, questions: keepValid(questions, true), demo: true };
+    return { recognition: { label, canAsk: true }, questions: fitToGrade(keepValid(questions, true), input.grade), demo: true };
   }
 
   const output = isMock()
@@ -54,10 +60,8 @@ export async function generateQuestions(input: QuestionsRequest): Promise<Questi
 
   if (!output.recognition.canAsk) return { recognition: output.recognition, questions: [] };
   // 見本の問い（モック）は、手で書いたものなので、問いの作りかたの検査はゆるくする
-  // 1年生は「倍」を まだ習っていないので、ほかの問いがあるときは compare（何倍）を出さない（docs/02-spec.md 2.4）
   const valid = keepValid(output.questions, isMock());
-  const fitGrade = input.grade < TIMES_GRADE ? valid.filter((q) => q.type !== "compare") : valid;
-  const questions = fitGrade.length > 0 ? fitGrade : valid;
+  const questions = fitToGrade(valid, input.grade);
   // 1つも出せないときはエラー表示にする（自動で作り直さない）
   if (questions.length === 0) throw new NoValidQuestionError();
   return { recognition: output.recognition, questions, ...("demo" in output ? { demo: true } : {}) };
