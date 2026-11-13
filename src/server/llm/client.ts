@@ -54,7 +54,9 @@ export async function callStructured<S extends ZodType>(
     const response = await anthropic().messages.parse({
       model: model(),
       max_tokens: 16000,
-      system,
+      // system は毎回まったく同じ文字にする（学年・日付・乱数を入れない。それらは text の側）。そうすると、2回目からは入力のほとんどがキャッシュから読まれ、安く速くなる
+      // （5分のあいだ。キャッシュできる最小の長さは、Sonnet 5.5・Opus 5.5 で 512 トークン。docs/03-technical.md 5.3）
+      system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
       messages: [
         {
           role: "user",
@@ -73,6 +75,8 @@ export async function callStructured<S extends ZodType>(
       ms: Date.now() - startedAt,
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
+      cacheRead: response.usage.cache_read_input_tokens,
+      cacheWrite: response.usage.cache_creation_input_tokens,
       model: model(),
       effort: effort(),
       thinking: process.env.LLM_THINKING === "off" ? "off" : "auto",
