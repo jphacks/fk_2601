@@ -20,7 +20,7 @@ import { missionDone, todaysMission } from "@/lib/missions";
 /** まちの絵（見本 04）。いえ・き・しんごうに「はてな」がかくれている */
 function TownArt() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 336 230" className="absolute bottom-0 left-0 h-[230px] w-[336px]">
+    <svg aria-hidden="true" viewBox="0 0 336 230" className="absolute bottom-0 left-0 h-[230px] w-[336px] [@media(max-height:700px)]:hidden">
       <circle cx="296" cy="40" r="20" fill="#FFC83D" stroke="#22223A" strokeWidth="3" />
       <path d="M178 96a14 14 0 0 1 26-6 12 12 0 0 1 20 10h-46z" fill="#FFFFFF" stroke="#22223A" strokeWidth="3" strokeLinejoin="round" />
       <path d="M16 140L50 110L84 140Z" fill="#FF6F9C" stroke="#22223A" strokeWidth="3" strokeLinejoin="round" />
@@ -72,23 +72,23 @@ function HomeContent() {
         <section
           role="img"
           aria-label="まちの え。いえ、き、しんごうに はてなが かくれている"
-          className="relative min-h-[236px] flex-1 overflow-hidden rounded-[32px] bg-navi-light"
+          className="relative min-h-[170px] [@media(max-height:700px)]:min-h-[124px] flex-1 overflow-hidden rounded-[32px] bg-navi-light"
         >
           {/* 地面は絵の はばに しばらず、わくの はしまで のばす（右はしの ナビの足もとにも 地面が あるように） */}
           <div aria-hidden className="absolute inset-x-0 bottom-0 h-11 border-t-3 border-ink bg-[#9BE3C8]" />
           <TownArt />
-          <div className="absolute left-[18px] top-4 flex flex-col items-start gap-1.5">
+          <div className="absolute left-[18px] top-4 flex flex-col items-start gap-1.5 [@media(max-height:700px)]:top-3 [@media(max-height:700px)]:flex-row [@media(max-height:700px)]:flex-wrap [@media(max-height:700px)]:items-center [@media(max-height:700px)]:gap-x-2">
             <span className="font-pop text-[21px]">こんにちは、{profile.nickname}！</span>
             <span className="rounded-xl bg-purple px-3 py-[3px] text-sm font-black text-white">{titleLabel(profile.title)}</span>
           </div>
-          <div className="absolute bottom-9 right-0.5">
+          <div className="absolute bottom-9 right-0.5 origin-bottom-right [@media(max-height:700px)]:scale-[0.7]">
             <Navigator mood="happy" size={124} />
           </div>
         </section>
 
         {/* 今日のお題（押せないので地の色だけ）。グループのミッションがあれば、グループごとに ならべる */}
         {(groupMissions?.length ? groupMissions.map((m) => ({ key: m.groupId, label: `${groupOf(m.groupId).kana} の おだい`, text: m.text })) : [{ key: "daily", label: "{今日|きょう}の おだい", text: todaysMission() }]).map((m) => (
-          <div key={m.key} className="flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-3">
+          <div key={m.key} className="flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-3 [@media(max-height:700px)]:py-2">
             <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-white">
               <Icon name="star" size={26} fill="#FFC83D" stroke="#22223A" strokeWidth={2} />
             </span>
@@ -105,7 +105,7 @@ function HomeContent() {
         <Link
           ref={captureRef}
           href={CAPTURE_WITH_PROMISE}
-          className={`relative flex h-[92px] shrink-0 items-center justify-center gap-3 rounded-[30px] border-3 border-ink bg-navi font-pop text-[25px] text-white shadow-[0_7px_0_var(--color-ink)] active:translate-y-[7px] active:shadow-none ${
+          className={`relative flex h-[92px] [@media(max-height:700px)]:h-[72px] shrink-0 items-center justify-center gap-3 rounded-[30px] border-3 border-ink bg-navi font-pop text-[25px] text-white shadow-[0_7px_0_var(--color-ink)] active:translate-y-[7px] active:shadow-none ${
             guideOpen && guideStep === 2 ? "pointer-events-none z-[45]" : ""
           }`}
         >
@@ -114,7 +114,7 @@ function HomeContent() {
           {guideOpen && guideStep === 2 && <GuideRing />}
         </Link>
 
-        <AlbumPicker className="flex h-14 shrink-0 items-center justify-center gap-2 rounded-[22px] border-3 border-ink bg-white text-[19px] font-black text-ink shadow-pop-sm active:translate-y-1 active:shadow-none">
+        <AlbumPicker className="flex h-14 [@media(max-height:700px)]:h-12 shrink-0 items-center justify-center gap-2 rounded-[22px] border-3 border-ink bg-white text-[19px] font-black text-ink shadow-pop-sm active:translate-y-1 active:shadow-none">
           <Icon name="album" size={24} strokeWidth={2.2} />
           <Jp>{"アルバムから {選|えら}ぶ"}</Jp>
         </AlbumPicker>

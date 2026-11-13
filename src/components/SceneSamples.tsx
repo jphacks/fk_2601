@@ -11,7 +11,7 @@ function Thumb({ scene }: { scene: SceneKey }) {
   useEffect(() => {
     if (ref.current) paintThumb(ref.current, scene);
   }, [scene]);
-  return <canvas ref={ref} aria-hidden className="aspect-[3/4] w-full rounded-[14px] border-[2.5px] border-ink bg-photo object-cover" />;
+  return <canvas ref={ref} aria-hidden className="aspect-square w-full rounded-[14px] border-[2.5px] border-ink bg-photo object-cover" />;
 }
 
 const COLOR: Record<SceneKey, string> = { gacha: "bg-pink", signal: "bg-navi", ice: "bg-mint" };
@@ -26,7 +26,7 @@ export function SceneSamples() {
       <h2 className="font-pop text-base font-normal">
         <Jp>{"{見本|みほん}の {絵|え}で {試|ため}す"}</Jp>
       </h2>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3 [@media(max-height:700px)]:mx-auto [@media(max-height:700px)]:w-[90%]">
         {SCENE_KEYS.map((key) => (
           <button
             key={key}
@@ -39,7 +39,7 @@ export function SceneSamples() {
           >
             <span className="block overflow-hidden rounded-[14px] bg-white">
               <Thumb scene={key} />
-              <span className="block px-1 py-1 text-[13px] font-black">{SCENE_NAMES[key]}</span>
+              <span className="block whitespace-nowrap px-0 py-0.5 text-[13px] font-black [@media(max-height:700px)]:text-[12px]">{SCENE_NAMES[key]}</span>
             </span>
           </button>
         ))}

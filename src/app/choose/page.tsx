@@ -121,8 +121,8 @@ function ChooseContent() {
           {generation.status === "ready" && generation.data.questions.length > 0 && (
             <>
               <div className="mt-auto">
-                <Say mood="happy" size={78}>
-                  <Jp big>{"どの はてなが {気|き}になる？"}</Jp>
+                <Say mood="happy" size={56} small>
+                  <Jp>{"どの はてなが {気|き}になる？"}</Jp>
                 </Say>
               </div>
               {generation.data.demo && (
@@ -144,7 +144,7 @@ function ChooseContent() {
                       <SubjectIcon subject={q.subject} />
                       <span className="flex min-w-0 grow flex-col gap-0.5">
                         <Eyebrow question={q} />
-                        <QuestionText question={q} size={21} />
+                        <QuestionText question={q} size={21} clamp />
                       </span>
                     </button>
                   </li>

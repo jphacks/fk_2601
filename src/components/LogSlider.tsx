@@ -19,13 +19,18 @@ export function niceValue(raw: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, rounded));
 }
 
-/** めもり（1・10・100…）。範囲の中にある 10 のべき乗だけを出す */
-function tickValues(min: number, max: number): number[] {
-  const ticks: number[] = [];
-  for (let e = Math.ceil(Math.log10(min)); e <= Math.floor(Math.log10(max)); e++) ticks.push(10 ** e);
-  if (ticks.length < 2) return [min, max];
-  while (ticks.length > 6) ticks.splice(1, 1);
-  return ticks;
+/** めもり（2・10・100 など）。はしの min と max を かならず出し、そのあいだに 10 のべき乗を出す（はしに近すぎる べき乗は出さない） */
+export function tickValues(min: number, max: number): number[] {
+  const ratio = Math.log(max / min);
+  const fraction = (v: number) => Math.log(v / min) / ratio;
+  const powers: number[] = [];
+  for (let e = Math.ceil(Math.log10(min)); e <= Math.floor(Math.log10(max)); e++) {
+    const p = 10 ** e;
+    // はしと同じ（または 14% 以内に近い）べき乗は、はしの数を残して消す
+    if (fraction(p) > 0.14 && fraction(p) < 0.86) powers.push(p);
+  }
+  while (powers.length > 4) powers.splice(1, 1);
+  return [min, ...powers, max];
 }
 
 /**

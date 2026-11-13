@@ -9,7 +9,7 @@ export const SCENE_KEYS: SceneKey[] = ["gacha", "signal", "ice"];
 export const SCENE_NAMES: Record<SceneKey, string> = {
   gacha: "ガチャガチャ",
   signal: "しんごう",
-  ice: "こおりの コップ",
+  ice: "こおり",
 };
 
 const WIDTH = 900;
