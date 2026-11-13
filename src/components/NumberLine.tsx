@@ -22,12 +22,15 @@ const clamp = (pct: number) => Math.min(96, Math.max(4, pct));
  */
 export function NumberLine({
   guess,
+  guessRange,
   actual,
   unit,
   intro = false,
   grade,
 }: {
   guess: number;
+  /** 範囲で予想したとき（4年生まで）：点ではなく、選んだ範囲を帯で見せる。範囲の まんなかの数は、子どもが選んだ数ではないので出さない */
+  guessRange?: { min: number; max: number };
   actual: number;
   unit: string;
   intro?: boolean;
@@ -43,35 +46,48 @@ export function NumberLine({
     return () => cancelAnimationFrame(frame);
   }, [intro]);
 
-  const max = axisMax(Math.max(guess, actual));
-  const gx = clamp((guess / max) * 100);
+  const max = axisMax(Math.max(guessRange?.max ?? guess, actual));
   const ax = clamp((actual / max) * 100);
+  // 範囲のときは、帯の左はし・右はし（lo・hi）と、その まんなか（旗が動きはじめる位置）。点のときは、予想の位置
+  const lo = guessRange ? clamp((guessRange.min / max) * 100) : 0;
+  const hi = guessRange ? clamp((guessRange.max / max) * 100) : 0;
+  const gx = guessRange ? (lo + hi) / 2 : clamp((guess / max) * 100);
   const flagX = arrived ? ax : gx;
-  const left = Math.min(gx, flagX);
-  const width = Math.abs(flagX - gx);
+  // ずれの帯：点のときは予想から旗まで。範囲のときは、範囲の外に出た分だけ（範囲の中なら出さない）
+  let left = Math.min(gx, flagX);
+  let width = Math.abs(flagX - gx);
+  if (guessRange) {
+    left = flagX > hi ? hi : Math.min(flagX, lo);
+    width = flagX > hi ? flagX - hi : Math.max(0, lo - flagX);
+  }
   const move = reduced ? "none" : "left 1.1s cubic-bezier(.2,.9,.25,1) .5s, width 1.1s cubic-bezier(.2,.9,.25,1) .5s";
-  const close = Math.abs(gx - ax) < 18;
+  const close = Math.abs(gx - ax) < (guessRange ? 45 : 18);
+  const guessLabel = guessRange ? `きみ ${formatNumber(guessRange.min, grade)}〜${formatNumber(guessRange.max, grade)}` : `きみ ${formatNumber(guess, grade)}`;
+  const guessSpoken = guessRange ? `${formatNumber(guessRange.min, grade)}〜${formatNumber(guessRange.max, grade)}` : formatNumber(guess, grade);
 
   return (
     <div
       role="img"
-      aria-label={`きみの よそう ${formatNumber(guess, grade)}${unit}、こたえ ${formatNumber(actual, grade)}${unit}`}
+      aria-label={`きみの よそう ${guessSpoken}${unit}、こたえ ${formatNumber(actual, grade)}${unit}`}
       className="relative h-[112px]"
     >
       <span className="absolute left-1 top-1 font-pop text-[13px] text-ink-sub">0</span>
       <span className="absolute right-1 top-1 font-pop text-[13px] text-ink-sub">{formatNumber(max, grade)}</span>
       <div className="absolute inset-x-0 top-7 h-[46px] rounded-[18px] bg-cloud" />
       <div className="absolute inset-x-3.5 top-[50px] h-0 border-t-3 border-dashed border-white" />
+      {guessRange && <div className="absolute top-[31px] h-10 rounded-full bg-pink" style={{ left: `${lo}%`, width: `${hi - lo}%`, minWidth: 14 }} />}
       <div className="absolute top-[31px] h-10 bg-zure" style={{ left: `${left}%`, width: `${width}%`, transition: move }} />
-      <span
-        className="absolute top-[34px] flex size-[34px] -translate-x-1/2 items-center justify-center rounded-full border-3 border-ink bg-pink"
-        style={{ left: `${gx}%` }}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="#22223A" aria-hidden="true">
-          <circle cx="12" cy="8" r="4" />
-          <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z" />
-        </svg>
-      </span>
+      {!guessRange && (
+        <span
+          className="absolute top-[34px] flex size-[34px] -translate-x-1/2 items-center justify-center rounded-full border-3 border-ink bg-pink"
+          style={{ left: `${gx}%` }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#22223A" aria-hidden="true">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z" />
+          </svg>
+        </span>
+      )}
       <span
         className="absolute top-[31px] flex size-10 -translate-x-1/2 items-center justify-center rounded-full border-3 border-ink bg-navi"
         style={{ left: `${flagX}%`, transition: reduced ? "none" : "left 1.1s cubic-bezier(.2,.9,.25,1) .5s" }}
@@ -80,12 +96,12 @@ export function NumberLine({
       </span>
       {close ? (
         <div className="absolute inset-x-0 top-[82px] text-center font-pop text-base">
-          きみ {formatNumber(guess, grade)} ・ <span className="text-navi-dark"><Jp>{"{答|こた}え"}</Jp> {formatNumber(actual, grade)}</span>
+          {guessLabel} ・ <span className="text-navi-dark"><Jp>{"{答|こた}え"}</Jp> {formatNumber(actual, grade)}</span>
         </div>
       ) : (
         <>
           <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base" style={{ left: `clamp(75px, ${gx}%, calc(100% - 75px))` }}>
-            きみ {formatNumber(guess, grade)}
+            {guessLabel}
           </div>
           <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base text-navi-dark" style={{ left: `clamp(75px, ${ax}%, calc(100% - 75px))` }}>
             <Jp>{"{答|こた}え"}</Jp> {formatNumber(actual, grade)}
