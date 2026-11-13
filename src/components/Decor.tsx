@@ -1,13 +1,16 @@
 import type { Rating } from "@/lib/rating";
 
-/** 画面の後ろにちらばる、紙ふぶきの飾り（見本 14〜16・19）。クリックの邪魔をしない */
+/**
+ * 画面の後ろにちらばる、紙ふぶきの飾り（見本 14〜16・19）。クリックの邪魔をしない。
+ * 画面の ふち（左右と上の 24px）まで広げる（中身の はばに おさめると、はしの飾りが とちゅうで切れて見えるため）。Page の中で使う
+ */
 export function Confetti({ tone = "party" }: { tone?: "party" | "calm" }) {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 390 844"
       preserveAspectRatio="xMidYMin slice"
-      className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-full w-full"
+      className="pointer-events-none absolute -inset-x-6 -top-6 -z-10 h-[calc(100%+24px)] w-[calc(100%+48px)]"
     >
       {tone === "party" ? (
         <>

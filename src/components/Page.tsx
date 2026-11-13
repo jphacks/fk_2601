@@ -51,7 +51,8 @@ export function Page({
   children: ReactNode;
 }) {
   return (
-    <main className={`flex min-h-dvh flex-col transition-colors ${bg}`}>
+    // overflow-x-clip：はんこの輪など、ふちの近くで広がる飾りが、画面を 横に スクロールさせないように（下のナビの sticky は そのまま効く）
+    <main className={`flex min-h-dvh flex-col overflow-x-clip transition-colors ${bg}`}>
       <div className={`animate-rise flex flex-1 flex-col gap-4 px-6 pt-6 ${tab ? "pb-4" : "pb-[30px]"}`}>
         {(back || onBack || title) && (
           <header className="flex min-h-[52px] items-center gap-2.5">
