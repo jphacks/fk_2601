@@ -18,6 +18,7 @@ import { SUBJECT_STYLE, TYPE_LABEL } from "./QuestionCard";
 import { useQuiz } from "./QuizProvider";
 import { Stamp } from "./StampCards";
 import { Button, Say } from "./ui";
+import { needsDetail } from "@/lib/questionDetail";
 import { stripRuby } from "@/lib/ruby";
 
 /** ずかんのカード（見本 19）：つかまえた写真・はてな・きみのよそう→こたえ・はんこ */
@@ -66,6 +67,8 @@ export function SavePanel({
   const router = useRouter();
   // 保存したかは、問いの状態に持つ（画面をもどっても、同じ問いを2回保存しない）
   const { saved, markSaved } = useQuiz();
+  // 解説が まだ 来ていない問い（2回目の待ち・失敗）は、保存しない。解説が空の記録が ずかんに のこらないように（#165）
+  const noDetail = needsDetail(question);
   const { archives, add } = useArchive();
   const { memberships } = useApp();
   // 見せるグループ（はじめは どこにも見せない）
@@ -79,7 +82,7 @@ export function SavePanel({
   }
 
   async function save() {
-    if (saved || busy) return;
+    if (saved || busy || noDetail) return;
     setBusy(true);
     setError(null);
     try {
@@ -165,8 +168,13 @@ export function SavePanel({
             <Jp>{error}</Jp>
           </p>
         )}
+        {noDetail && (
+          <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
+            <Jp>{"かいせつが まだ できていないよ。「なぞとき」に もどって、まってね"}</Jp>
+          </p>
+        )}
         <div className="mt-auto">
-          <Button onClick={save} disabled={busy}>
+          <Button onClick={save} disabled={busy || noDetail}>
             <Jp big>{busy ? "{残|のこ}しているよ…" : "ずかんに {残|のこ}す！"}</Jp>
           </Button>
         </div>

@@ -94,6 +94,9 @@ export const LLM_TIMEOUT_MS = 60_000;
 // AI を呼ぶ API の使いすぎを止める上限（利用者ごと。サーバーのメモリで数える：src/server/llm/rateLimit.ts、docs/03-technical.md 9章）
 export const RATE_LIMIT_MINUTE = 6;
 export const RATE_LIMIT_DAY = 100;
+// 2回目（子どもが選んだ問いの解説づくり。画像なし・出力が少ない）は、別に数える（#165）
+export const RATE_LIMIT_DETAIL_MINUTE = 12;
+export const RATE_LIMIT_DETAIL_DAY = 200;
 // リクエストの大きさの上限（Content-Length。これをこえたら、JSON を読む前に断る）
 export const MAX_REQUEST_BYTES = 2 * 1024 * 1024;
 

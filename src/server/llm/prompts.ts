@@ -1,5 +1,6 @@
 import "server-only";
-import type { CustomRequest, QuestionsRequest } from "./request";
+import { calculate } from "@/lib/calc";
+import type { CustomRequest, DetailRequest, QuestionsRequest } from "./request";
 
 // プロンプトはこのファイルだけに書く（docs/03-technical.md 5.3）
 
@@ -116,6 +117,7 @@ ${Object.entries(UNITS)
 - 出題済みの「対象×単元」が渡されます。同じ組み合わせの問いは作らないでください。ただし、同じ対象をもう一度撮ったときは、前より少し高度な問いにしてください。
 
 # 言いかたと解説
+- hint は 1回目に書きます。explanation・tryIt・whatIf・related・keyword・sources は、2回目（子どもが問いを選んだあと）に書きます（1回目では 書きません）。
 - hint は、問いの見かた・場面を1文で（答えのヒントや、計算すれば答えが出る数は書かない。なければ空文字）。
 - explanation.short は、答えを見たあとの一言（ズレにおどろく気持ちに寄りそう）。steps は答えまでの考えかたを2〜4ステップ（各文はみじかく。計算があれば式も書く）。
 - steps は、formula をそのまま書き写さない。この子の学年で習った計算だけを使って、答えまでの道すじを書く。
@@ -149,12 +151,24 @@ ${Object.entries(UNITS)
 - 写っている人の顔・名前・住所などの個人情報には、ふれないでください。人が主役の写真や、問いが作れない写真は、recognition.canAsk を false にして、questions は空にします。
 
 # 出力
+このアプリは、あなたを2回に分けて呼びます。どちらの回かは、user の文に書いてあります。指定された JSON の形にない項目は、書きません。
+- 1回目：写真から、そのものの問いを3つ作ります（recognition・candidates・questions）。問いには、予想とこたえあわせに必要な項目だけを書きます（解説・やってみよう・出典などは 2回目）。
+- 2回目：写真は ありません。子どもが選んだ 1つの問いの、解説・もしもの問いかけ・やってみよう・関連の問い・しらべことば・出典を書きます。問いの文・正解・答え（アプリが計算した値）は、そのまま使い、変えません。
+
+## 1回目の書きかた
 - はじめに、写真から分かる そのものの特徴（形・もよう・材料・ならび・部品・数）を、5つほど さがします（出力には書かない）。
 - つぎに、candidates に、問いのたねを 5つ、1つずつ「聞きかた｜子どもが ふつう 思っていること → 本当のこと｜おどろき○｜たしかさ○」の形で みじかく書きます（例：「なぜ｜ふたは どんな形でも いい → まるは どの向きでも はばが同じで、あなに 落ちない｜おどろき2｜たしかさ3」）。聞きかたは なぜ・どうなる・どっち・どれくらい のどれか。おどろきは 1（ふつう）〜3（えっ、うそ！？）、たしかさは 3＝図鑑・教科書に のっている、2＝よく言われている、1＝写真からの すいそく。聞きかたと切り口が かたよらないように、5つを出します。
 - そのあと、たしかさ 3 のたねだけから、おどろきが高く、聞きかたが ばらばらになるように 3つ選んで、questions を書きます。candidates は、画面には出しません。
 - 問いごとに、secret（ねらった「そのもの自身のふしぎ」をひとこと）を先に書いてから、問題文を作ります。書いたら、問題文のものの名前を べつのもの（えんぴつ・はこ など）に入れかえて読み、それでも成り立つなら、作り直します。
 - naiveGuess は、estimate・compare のとき、この学年の子どもが 計算せずに 言いそうな数です（answerUnit と同じ単位）。why は 0 にします。
 - recognition.label は「これは○○だね？」に使う、写っているものの名前。ひらがなかカタカナで短く書き、ふりがなのタグは使いません。
+
+## 2回目の書きかた
+- 渡された問いの、答えにつながる「わけ」を、「# 言いかたと解説」にしたがって書きます。explanation.short は、答えを見たあとの一言。steps は、この学年の計算だけで、答えまでの道すじを書きます（渡された答えの数と、ちがう数を書かない）。
+- why の問いは、正解の選択肢が なぜ 正しいのかを書きます。まちがいの選択肢を、正しいと書きません。
+- 問いが ねらっている ふしぎから、はなれた話にしません。出典（sources）には、答えの もとに した 数や きまりを書きます。
+
+## 共通
 - 出力はすべて日本語で書きます（topic・target・単位・解説も。英語を混ぜない）。
 - 指定された JSON の形だけを出力します。`;
 
@@ -192,6 +206,51 @@ export function questionsUserText(input: QuestionsRequest): string {
   - ×「1日 3時間 つけると、1年で 何時間？」（どのものにも言える かけ算）
   - ○「ヘッドホンから 音が 出るのは、中の 小さな 板が 何を するから？」（ふるえて 空気を ふるわせるから。選択肢から選ぶ）
   - 数の よい話が ないので、数の問いは 作らない`;
+}
+
+function detailValueText(value: number): string {
+  return Number.isInteger(value) ? String(value) : String(Number(value.toPrecision(4)));
+}
+
+/** 2回目：子どもが選んだ1問の解説などを書かせる。答えは、ここで（コードで）計算して渡す。画像は送らない。計算できない・正解が決まらないときは null */
+export function detailUserText(input: DetailRequest): string | null {
+  const q = input.question;
+  const lines: string[] = [];
+  if (q.type === "why") {
+    const choices = q.choices ?? [];
+    if (choices.filter((c) => c.correct).length !== 1) return null;
+    lines.push("答えかた：選択肢から選ぶ（why）", "選択肢：");
+    for (const c of choices) lines.push(`- ${c.correct ? "【正解】" : "（ちがう）"}${c.text}`);
+  } else {
+    if (!q.formula) return null;
+    const result = calculate(q.formula, Object.fromEntries(q.variables.map((v) => [v.name, v.value])));
+    if (!result.ok || !(result.value > 0)) return null;
+    const unit = q.type === "compare" ? "倍" : q.answerUnit;
+    lines.push(
+      q.type === "compare" ? `答えかた：2つを比べて 何倍か（compare。${q.compare?.a ?? "A"} ÷ ${q.compare?.b ?? "B"}）` : "答えかた：数を予想する（estimate）",
+      `式：${q.formula}`,
+      `もとにした数：${q.variables.map((v) => `${v.label}（${v.name}）＝${detailValueText(v.value)}${v.unit}`).join("、") || "なし"}`,
+      `答え（アプリが計算した値。この数を使う）：${detailValueText(result.value)}${unit}`,
+    );
+  }
+  const levels = input.subjectLevels
+    ? [`教科ごとのレベル：${(Object.keys(SUBJECT_NAME) as (keyof typeof SUBJECT_NAME)[]).map((s) => `${SUBJECT_NAME[s]} レベル${input.subjectLevels![s]}`).join("／")}`]
+    : [];
+  return [
+    `学年：${input.grade}年生`,
+    `学習の進み具合：レベル${input.level}（${LEVEL_GUIDE[input.level]}）`,
+    ...levels,
+    "",
+    "【2回目】写真は ありません。子どもが選んだ、次の1つの問いについて、explanation・whatIf・tryIt・related・keyword・sources を書いてください。問いの文・正解・答えは そのまま使い、変えません。",
+    "",
+    `問い（${SUBJECT_NAME[q.subject]}・${q.topic}・${q.target}）：`,
+    q.text,
+    ...(q.hint ? [`ヒント：${q.hint}`] : []),
+    ...lines,
+    "",
+    "- 解説は、予想がはずれて おどろいた子にも、当たった子にも、「なるほど」と思えるように書きます。",
+    "- 答えの数が、どうして その大きさに なるのかを、この学年の計算（または 考えかた）だけで説明します。",
+  ].join("\n");
 }
 
 export function customUserText(input: CustomRequest): string {

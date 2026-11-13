@@ -42,11 +42,11 @@ function anthropic(): Anthropic {
   return cached;
 }
 
-/** 画像（base64 の JPEG）とテキストを送り、決まった形の JSON を受け取る。呼び出しは1回だけ */
+/** 画像（base64 の JPEG）とテキストを送り、決まった形の JSON を受け取る。呼び出しは1回だけ。画像なし（null）は、2回目（解説づくり）の呼び出し */
 export async function callStructured<S extends ZodType>(
   schema: S,
   system: string,
-  imageBase64: string,
+  imageBase64: string | null,
   text: string,
 ): Promise<z.infer<S>> {
   const startedAt = Date.now();
@@ -61,7 +61,7 @@ export async function callStructured<S extends ZodType>(
         {
           role: "user",
           content: [
-            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: imageBase64 } },
+            ...(imageBase64 ? [{ type: "image" as const, source: { type: "base64" as const, media_type: "image/jpeg" as const, data: imageBase64 } }] : []),
             { type: "text", text },
           ],
         },
