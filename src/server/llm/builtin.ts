@@ -17,6 +17,7 @@ type Draft = Omit<Question, "sources" | "compare" | "choices" | "guessRange" | "
   formula?: string;
   variables?: Question["variables"];
   llmAnswer?: number;
+  compare?: { a: string; b: string };
   guessRange?: { min: number; max: number };
   choices?: { text: string; correct: boolean }[];
   ref?: Question["ref"];
@@ -44,7 +45,7 @@ function build(d: Draft): Question {
     variables: (d.variables ?? []).map((v) => ({ ...v, label: g(v.label) })),
     llmAnswer: d.llmAnswer ?? null,
     guessRange: d.guessRange ?? null,
-    compare: null,
+    compare: d.compare ? { a: g(d.compare.a), b: g(d.compare.b) } : null,
     choices: d.choices?.map((c) => ({ ...c, text: g(c.text) })) ?? null,
     ref: d.ref ? { ...d.ref, label: g(d.ref.label), unit: g(d.ref.unit) } : null,
     sources: [{ kind: "data", title: g(source), url: null, assumption: g(assume) }],
@@ -164,27 +165,30 @@ const BUILTIN: Record<Scene, Entry> = {
         assume: "1{日|にち|1}じゅう おなじ はやさで かわる（ほんとうは {時間|じかん|2}で かわる {信号|しんごう|4}も ある）",
       }),
       build({
-        text: "{信号|しんごう|4}の ランプは 3こ。1こ 1こが「つく」か「きえる」の 2とおり だと、ランプの ひかりかたは ぜんぶで {何|なん|2}とおり？",
-        type: "estimate",
-        subject: "info",
-        topic: "2しんほう",
+        text: "{信号|しんごう|4}の {青|あお|1}の {時間|じかん|2}は、{黄|き|2}いろの {時間|じかん|2}の {何倍|なんばい|3}？",
+        type: "compare",
+        subject: "math",
+        topic: "{倍|ばい|3}",
         target: "しんごう",
-        hint: "ぜんぶ きえている ときも、1とおりと かぞえてね。",
-        formula: "2^n",
-        variables: [{ name: "n", label: "ランプの {数|かず|2}", value: 3, unit: "こ", min: 1, max: 12, step: 1 }],
-        answerUnit: "とおり",
-        llmAnswer: 8,
-        guessRange: { min: 3, max: 300 },
+        hint: "{青|あお|1}は わたる ための {時間|じかん|2}、{黄|き|2}いろは とまる じゅんびの {時間|じかん|2}だよ。",
+        formula: "green / yellow",
+        variables: [
+          { name: "green", label: "{青|あお|1}の {時間|じかん|2}", value: 40, unit: "びょう", min: 20, max: 90, step: 5 },
+          { name: "yellow", label: "{黄|き|2}いろの {時間|じかん|2}", value: 3, unit: "びょう", min: 2, max: 6, step: 1 },
+        ],
+        answerUnit: "倍",
+        llmAnswer: 13.3,
+        compare: { a: "{青|あお|1}の {時間|じかん|2}", b: "{黄|き|2}いろの {時間|じかん|2}" },
         explanation: {
-          short: "ランプが 1こ ふえると、とおりの {数|かず|2}は 2ばいに なるよ。",
-          steps: ["1こ{目|め|1}：つく・きえる の 2とおり。", "2こ{目|め|1}も 2とおり。2×2＝4とおり。", "3こ{目|め|1}も 2とおり。4×2＝8とおり。", "コンピューターも「つく・きえる」の くみあわせで、いろいろな ことを あらわして いるんだ。"],
+          short: "{青|あお|1}は、{黄|き|2}いろの {約|やく|4}13{倍|ばい|3}も ながいんだ！",
+          steps: ["この {信号|しんごう|4}では、{青|あお|1}は 40びょう、{黄|き|2}いろは 3びょう。", "40÷3＝{約|やく|4}13.3。{青|あお|1}の ほうが、{約|やく|4}13{倍|ばい|3} ながい。", "{青|あお|1}は ゆっくり わたる ための {時間|じかん|2}。{黄|き|2}いろは、とまる じゅんびを する ための みじかい {時間|じかん|2}だよ。"],
         },
-        whatIf: "じゃあ、ランプが 10こ だったら？",
-        tryIt: "かたての ゆび 3ぼんを「あげる・さげる」に して、ぜんぶで なんとおり つくれるか ためしてみよう",
-        related: ["QRコードの {白|しろ|1}と {黒|くろ|2}の ならべかたは {何|なん|2}とおり？"],
-        keyword: "2しんほう",
-        source: "2しんほう（コンピューターの {数|かず|2}の あらわしかた）",
-        assume: "ランプは「つく」か「きえる」の 2つだけ",
+        whatIf: "じゃあ、{青|あお|1}が 60びょう だったら？",
+        tryIt: "ストップウォッチ（スマホでも いいよ）で、おとなの {人|ひと|1}と いっしょに、あんぜんな ところから {信号|しんごう|4}を {見|み|1}て、{青|あお|1}と {黄|き|2}いろの {時間|じかん|2}を はかって くらべてみよう",
+        related: ["{赤|あか|1}の {時間|じかん|2}は、{黄|き|2}いろの {時間|じかん|2}の {何倍|なんばい|3}？"],
+        keyword: "{信号|しんごう|4}の {時間|じかん|2}",
+        source: "{信号|しんごう|4}の {青|あお|1}と {黄|き|2}いろの {時間|じかん|2}（この {見本|みほん|1}の {信号|しんごう|4}）",
+        assume: "この {見本|みほん|1}の {信号|しんごう|4}では、{青|あお|1}が 40びょう、{黄|き|2}いろが 3びょう（ほかの {信号|しんごう|4}では ちがうよ）",
       }),
       build({
         text: "「とまれ」の {信号|しんごう|4}は、どうして {赤|あか|1}なの？",
