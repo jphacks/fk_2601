@@ -1,7 +1,7 @@
 "use client";
 
 import { Navigator } from "./Navigator";
-import { RubyText } from "./RubyText";
+import { Jp, RubyText } from "./RubyText";
 import { Button } from "./ui";
 
 /**
@@ -23,14 +23,14 @@ export function SafetyNotice({ onAgree }: { onAgree: () => void }) {
             <Navigator mood="happy" size={160} />
           </div>
           <p className="relative text-center font-pop text-[26px] leading-normal">
-            まちの はてなを
+            <Jp big>{"{町|まち}の はてなを"}</Jp>
             <br />
-            みつけろ！
+            <Jp big>{"{見|み}つけろ！"}</Jp>
           </p>
         </div>
 
         <h2 id="safety-title" className="mt-auto text-center font-pop text-[22px] font-normal">
-          でかける まえの やくそく
+          <Jp big>{"{出|で}かける {前|まえ}の やくそく"}</Jp>
         </h2>
 
         <div className="flex items-center gap-3.5 rounded-card bg-pink-light px-4 py-3.5">
@@ -53,10 +53,7 @@ export function SafetyNotice({ onAgree }: { onAgree: () => void }) {
           <span className="grow text-[23px] font-black leading-[1.7]">
             まわりに
             <br />
-            <ruby>
-              気<rt>き</rt>
-            </ruby>
-            を つけてね
+            <Jp big>{"{気|き}を つけてね"}</Jp>
           </span>
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0F7A63" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
             <path d="M12 3l10 18H2z" />

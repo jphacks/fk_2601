@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "./RubyText";
 import { useEffect, useState } from "react";
 import { Confetti } from "./Decor";
 import { CropCircle } from "./CropCircle";
@@ -35,7 +36,7 @@ function Trivia() {
         まめちしき
       </p>
       <div aria-live="polite" className="flex min-h-[88px] flex-1 items-center">
-        <p className="text-[21px] font-black leading-[1.75]">{TRIVIA[index]}</p>
+        <Jp className="block text-[21px] font-black leading-[1.75]">{TRIVIA[index]}</Jp>
       </div>
       <div aria-hidden className="flex justify-center gap-2">
         {Array.from({ length: dots }, (_, i) => (
@@ -85,7 +86,7 @@ function CatchGame({ running }: { running: boolean }) {
       <div className="relative h-[150px] overflow-hidden rounded-[20px] bg-white">
         {bubbles.length === 0 && (
           <span className="absolute inset-0 flex items-center justify-center text-base font-black text-ink-sub">
-            {running ? "でてくる「？」を さわってね" : "はてなが できたよ！"}
+            <Jp>{running ? "{出|で}てくる「？」を さわってね" : "はてなが できたよ！"}</Jp>
           </span>
         )}
         {bubbles.map((b) => (
@@ -169,7 +170,9 @@ function Progress({ done }: { done: boolean }) {
       >
         <div className="h-full rounded-[11px] bg-navi transition-[width] duration-500" style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-center text-[15px] font-black text-ink-sub">1ぷんくらい かかる ことも あるよ</span>
+      <span className="text-center text-[15px] font-black text-ink-sub">
+        <Jp>{"1{分|ぷん}くらい かかる ことも あるよ"}</Jp>
+      </span>
     </div>
   );
 }
@@ -196,7 +199,9 @@ export function Loading({
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 py-10 text-center" role="status" aria-live="polite">
         <Navigator mood="effort" size={110} />
-        <p className="text-lg font-black">{message ?? "ちょっと まってね"}</p>
+        <p className="text-lg font-black">
+          <Jp>{message ?? "ちょっと {待|ま}ってね"}</Jp>
+        </p>
         <div className="flex gap-2" aria-hidden>
           {["bg-navi", "bg-yellow", "bg-pink"].map((color, i) => (
             <span key={color} className={`loading-dot ${color}`} style={{ animationDelay: `${i * 0.18}s` }} />
@@ -212,8 +217,10 @@ export function Loading({
       <div className="mt-11 flex items-center justify-center gap-3.5" role="status" aria-live="polite">
         <CropCircle src={image} alt="つかまえた ところ" size={128} />
         <div className="flex flex-col gap-2">
-          <span className="font-pop text-[32px] leading-tight text-pink [-webkit-text-stroke:1.5px_var(--color-ink)]">みつけた！</span>
-          <span className="self-start rounded-[14px] bg-yellow-light px-3 py-1 text-[15px] font-black">{done ? "はてなが できたよ" : (message ?? "いま しらべてるよ")}</span>
+          <span className="font-pop text-[32px] leading-tight text-pink [-webkit-text-stroke:1.5px_var(--color-ink)]">
+            <Jp big>{"{見|み}つけた！"}</Jp>
+          </span>
+          <span className="self-start rounded-[14px] bg-yellow-light px-3 py-1 text-[15px] font-black"><Jp>{done ? "はてなが できたよ" : (message ?? "いま {調|しら}べてるよ")}</Jp></span>
         </div>
       </div>
 
@@ -226,7 +233,11 @@ export function Loading({
       {/* できたときに出るボタン。出る前から場所を取っておく（出たときに画面がずれないように） */}
       {onDone && (
         <div className="mt-auto h-[78px] shrink-0">
-          {done && <Button onClick={onDone}>できた！ みてみる</Button>}
+          {done && (
+            <Button onClick={onDone}>
+              <Jp big>{"できた！ {見|み}てみる"}</Jp>
+            </Button>
+          )}
         </div>
       )}
     </div>

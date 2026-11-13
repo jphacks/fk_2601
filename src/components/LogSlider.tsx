@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { formatNumber } from "@/lib/format";
 import { unitRuby } from "@/lib/ruby";
-import { RubyText } from "./RubyText";
+import { Jp, RubyText } from "./RubyText";
 
 const STEPS = 1000;
 const THUMB = 44;
@@ -38,7 +38,7 @@ export function LogSlider({
   value,
   unit,
   onChange,
-  label = "きみの よそうは？",
+  label = "きみの {予想|よそう}は？",
 }: {
   min: number;
   max: number;
@@ -58,7 +58,9 @@ export function LogSlider({
 
   return (
     <div className="mt-auto flex flex-col gap-3">
-      <span className="text-center font-pop text-lg">{label}</span>
+      <span className="text-center font-pop text-lg">
+        <Jp>{label}</Jp>
+      </span>
       {/* 入力するものなので、線だけ（影なし） */}
       <label className="flex items-baseline justify-center gap-2 rounded-[28px] border-3 border-ink bg-yellow-light px-4 py-3">
         <input

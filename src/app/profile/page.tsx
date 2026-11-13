@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "@/components/RubyText";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
@@ -157,9 +158,9 @@ function Ready() {
         <Navigator mood="happy" size={168} react />
         <h1 className="font-pop text-[32px] font-normal leading-[1.4]">じゅんび できたよ！</h1>
         <span className="font-pop text-xl leading-[1.6] text-navi-dark">
-          かこって はてなを
+          <Jp>{"{囲|かこ}って はてなを"}</Jp>
           <br />
-          みつけちゃおう！
+          <Jp>{"{見|み}つけちゃおう！"}</Jp>
         </span>
       </div>
 
@@ -174,16 +175,16 @@ function Ready() {
         </div>
         <span className="flex gap-2 text-[15px] font-black leading-normal text-yellow-dark">
           <Icon name="lock" size={20} strokeWidth={2.2} className="mt-0.5" />
-          ID と パスワードは おうちの ひとと メモしてね
+          <Jp>{"ID と パスワードは おうちの {人|ひと}と メモしてね"}</Jp>
         </span>
       </div>
 
       <div className="mt-auto flex flex-col gap-4">
         <Button disabled={busy} onClick={() => router.replace("/")}>
-          あそびかたを みる！
+          <Jp big>{"{遊|あそ}びかたを {見|み}る！"}</Jp>
         </Button>
         <Button variant="sub" disabled={busy} onClick={() => void skipGuide()}>
-          とばして はじめる
+          <Jp>{"とばして {始|はじ}める"}</Jp>
         </Button>
       </div>
     </main>
@@ -222,9 +223,9 @@ function EditProfile() {
         <Confetti tone="calm" />
         <Say mood="happy" size={108}>
           <span className="font-pop text-[22px] font-normal leading-normal">
-            なまえや がくねんを
+            <Jp big>{"{名前|なまえ}や {学年|がくねん}を"}</Jp>
             <br />
-            かえられるよ！
+            <Jp big>{"{変|か}えられるよ！"}</Jp>
           </span>
         </Say>
 
@@ -257,7 +258,7 @@ function EditProfile() {
 
         {error && (
           <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-            {error}
+            <Jp>{error}</Jp>
           </p>
         )}
         <div className="mt-auto">

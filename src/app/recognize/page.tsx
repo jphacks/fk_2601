@@ -10,7 +10,7 @@ import { Loading } from "@/components/Loading";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
 import { useQuiz } from "@/components/QuizProvider";
-import { RubyText } from "@/components/RubyText";
+import { Jp, RubyText } from "@/components/RubyText";
 import { Button, ErrorNotice, LinkButton, Say } from "@/components/ui";
 
 // はてなが できてから、待ちの画面を見せておく長さ（「はてなが できたよ」と バーが 100% になるのが見える長さ）
@@ -38,7 +38,7 @@ function Denied() {
           <span className="flex size-[62px] shrink-0 items-center justify-center rounded-full border-3 border-ink bg-white">
             <Icon name="camera" size={32} />
           </span>
-          しゃしんを とりなおす
+          <Jp>{"{写真|しゃしん}を とりなおす"}</Jp>
         </LinkButton>
         <LinkButton
           href="/lasso"
@@ -48,7 +48,7 @@ function Denied() {
           <span className="flex size-[62px] shrink-0 items-center justify-center rounded-full border-3 border-ink bg-white">
             <Icon name="lasso" size={32} />
           </span>
-          かこみなおす
+          <Jp>{"{囲|かこ}みなおす"}</Jp>
         </LinkButton>
       </div>
     </div>
@@ -92,7 +92,7 @@ function RecognizeContent() {
         <>
           <ErrorNotice onRetry={regenerate}>{generation.message}</ErrorNotice>
           <LinkButton href="/capture" variant="sub">
-            しゃしんを とりなおす
+            <Jp>{"{写真|しゃしん}を とりなおす"}</Jp>
           </LinkButton>
         </>
       )}
@@ -107,19 +107,19 @@ function RecognizeContent() {
               <Navigator mood="sorry" size={160} />
             </div>
             <p className="rounded-card bg-navi-light px-4 py-3 text-center text-[19px] font-black leading-[1.75]">
-              この しゃしんからは、
+              <Jp>{"この {写真|しゃしん}からは、"}</Jp>
               <br />
-              はてなが つくれなかったよ。
+              <Jp>{"はてなが {作|つく}れなかったよ。"}</Jp>
               <br />
-              べつの ものを かこんでみてね。
+              <Jp>{"{別|べつ}の ものを {囲|かこ}んでみてね。"}</Jp>
             </p>
           </div>
           <div className="mt-auto flex flex-col gap-3.5">
             <LinkButton href="/lasso" variant="seeno">
-              かこみなおす
+              <Jp big>{"{囲|かこ}みなおす"}</Jp>
             </LinkButton>
             <LinkButton href="/capture" variant="sub">
-              しゃしんを とりなおす
+              <Jp>{"{写真|しゃしん}を とりなおす"}</Jp>
             </LinkButton>
           </div>
         </>

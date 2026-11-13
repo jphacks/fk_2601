@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "./RubyText";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { paintThumb, scenePhoto, SCENE_KEYS, SCENE_NAMES, type SceneKey } from "@/lib/scenes";
@@ -22,7 +23,9 @@ export function SceneSamples() {
 
   return (
     <section className="space-y-2">
-      <h2 className="font-pop text-base font-normal">みほんの えで ためす</h2>
+      <h2 className="font-pop text-base font-normal">
+        <Jp>{"{見本|みほん}の {絵|え}で {試|ため}す"}</Jp>
+      </h2>
       <div className="grid grid-cols-3 gap-3">
         {SCENE_KEYS.map((key) => (
           <button

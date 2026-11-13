@@ -12,14 +12,14 @@ import { Gate } from "@/components/Gate";
 import { Page } from "@/components/Page";
 import { QuestionHint, QuestionText, SUBJECT_STYLE, Eyebrow } from "@/components/QuestionCard";
 import { ResultSummary } from "@/components/ResultSummary";
-import { RubyText } from "@/components/RubyText";
+import { Jp, RubyText } from "@/components/RubyText";
 import { Button, ErrorNotice, LinkButton, Say } from "@/components/ui";
 import { defaultScope } from "@/lib/calc";
 import { groupOf } from "@/lib/constants";
 import { messageOf } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
 import { evaluate } from "@/lib/rating";
-import { kanaOf, stripRuby } from "@/lib/ruby";
+import { stripRuby } from "@/lib/ruby";
 import { Loading } from "@/components/Loading";
 
 function DetailContent() {
@@ -46,7 +46,7 @@ function DetailContent() {
   if (status === "loading" || deleting) {
     return (
       <Page back="/archive">
-        <Loading message={deleting ? "けしているよ" : "ずかんを ひらいているよ"} />
+        <Loading message={deleting ? "{消|け}しているよ" : "ずかんを {開|ひら}いているよ"} />
       </Page>
     );
   }
@@ -54,7 +54,9 @@ function DetailContent() {
   if (status === "error") {
     return (
       <Page back="/archive">
-        <ErrorNotice onRetry={() => void reload()}>ずかんを よみこめなかったよ。ネットに つながっているか みて、もういちど ためしてね</ErrorNotice>
+        <ErrorNotice onRetry={() => void reload()}>
+          <Jp big>{"ずかんを {読|よ}みこめなかったよ。ネットに つながっているか {見|み}て、もう{一度|いちど} {試|ため}してね"}</Jp>
+        </ErrorNotice>
       </Page>
     );
   }
@@ -62,8 +64,12 @@ function DetailContent() {
   if (!record) {
     return (
       <Page title="ずかん" back="/archive">
-        <Say mood="sorry">この はてなは みつからなかったよ。</Say>
-        <LinkButton href="/archive">ずかんへ もどる</LinkButton>
+        <Say mood="sorry">
+          <Jp big>{"この はてなは {見|み}つからなかったよ。"}</Jp>
+        </Say>
+        <LinkButton href="/archive">
+          <Jp big>{"ずかんへ {戻|もど}る"}</Jp>
+        </LinkButton>
       </Page>
     );
   }
@@ -82,7 +88,7 @@ function DetailContent() {
   }
 
   return (
-    <Page title="はてなの きろく" back="/archive">
+    <Page title="はてなの {記録|きろく}" back="/archive">
       <div className="flex items-center gap-4">
         <CropCircle src={record.thumb ?? record.image ?? ""} alt={stripRuby(question.target)} size={120} />
         <p className="text-base font-black text-ink-sub">{formatDate(record.createdAt)} に つかまえたよ</p>
@@ -105,7 +111,9 @@ function DetailContent() {
 
       {question.variables.length > 0 && question.type !== "why" && (
         <section className="flex flex-col gap-3">
-          <h2 className="font-pop text-xl font-normal">もっと しりたい！</h2>
+          <h2 className="font-pop text-xl font-normal">
+            <Jp>{"もっと {知|し}りたい！"}</Jp>
+          </h2>
           <ConditionSliders question={question} values={values ?? defaultScope(question)} onChange={setValues} grade={profile?.grade} />
         </section>
       )}
@@ -121,7 +129,7 @@ function DetailContent() {
             {related.map((a) => (
               <li key={a.id}>
                 <Link href={`/archive/${a.id}`} className="line-clamp-2 text-base font-black text-navi-dark underline">
-                  {kanaOf(a.question.text)}（{formatDate(a.createdAt)}）
+                  <RubyText kana text={a.question.text} />（{formatDate(a.createdAt)}）
                 </Link>
               </li>
             ))}
@@ -132,23 +140,24 @@ function DetailContent() {
       <div className="mt-auto flex flex-col gap-3">
         {error && (
           <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-            {error}
+            <Jp>{error}</Jp>
           </p>
         )}
         {record.sharedGroups && record.sharedGroups.length > 0 && (
           <>
-            {/* 小さい文字なので、ひらがなで出す */}
             <p className="text-center text-base font-black text-ink-sub">
-              {record.sharedGroups.map((g) => groupOf(g).kana).join("・")} の なかまに みせているよ
+              {record.sharedGroups.map((g) => groupOf(g).kana).join("・")} <Jp>{"の なかまに {見|み}せているよ"}</Jp>
             </p>
             <Button variant="sub" onClick={() => run(() => unshare(record.id))}>
-              なかまに みせるのを やめる
+              <Jp>{"なかまに {見|み}せるのを やめる"}</Jp>
             </Button>
           </>
         )}
         {confirming ? (
           <>
-            <p className="text-center text-base font-black">この はてなを けすよ。いいかな？</p>
+            <p className="text-center text-base font-black">
+              <Jp>{"この はてなを {消|け}すよ。いいかな？"}</Jp>
+            </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="sub" onClick={() => setConfirming(false)}>
                 やめる
@@ -168,13 +177,13 @@ function DetailContent() {
                   })
                 }
               >
-                けす
+                <Jp>{"{消|け}す"}</Jp>
               </Button>
             </div>
           </>
         ) : (
           <Button variant="ghost" onClick={() => setConfirming(true)}>
-            この はてなを けす
+            <Jp>{"この はてなを {消|け}す"}</Jp>
           </Button>
         )}
       </div>

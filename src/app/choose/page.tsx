@@ -11,7 +11,7 @@ import { Loading } from "@/components/Loading";
 import { Page } from "@/components/Page";
 import { Eyebrow, QuestionText, SUBJECT_STYLE, SubjectIcon } from "@/components/QuestionCard";
 import { useQuiz } from "@/components/QuizProvider";
-import { RubyText } from "@/components/RubyText";
+import { Jp, RubyText } from "@/components/RubyText";
 import { Button, ErrorNotice, Say } from "@/components/ui";
 import { requestCustom } from "@/lib/api";
 import { messageOf } from "@/lib/errors";
@@ -76,8 +76,8 @@ function ChooseContent() {
   }
 
   const tabs: [FirstMode, string][] = [
-    ["choices", "3つから えらぶ"],
-    ["custom", "じぶんで かく"],
+    ["choices", "3つから {選|えら}ぶ"],
+    ["custom", "{自分|じぶん}で {書|か}く"],
   ];
 
   return (
@@ -109,7 +109,7 @@ function ChooseContent() {
             }}
             className={`h-12 rounded-[20px] ${mode === value ? "bg-navi font-pop text-base text-white" : "text-[17px] font-black text-ink-sub"}`}
           >
-            {tabLabel}
+            <Jp>{tabLabel}</Jp>
           </button>
         ))}
       </div>
@@ -117,21 +117,17 @@ function ChooseContent() {
       {mode === "choices" && (
         <>
           {generation.status === "error" && <ErrorNotice onRetry={regenerate}>{generation.message}</ErrorNotice>}
-          {(generation.status === "loading" || generation.status === "idle") && <Loading message="はてなを さがしているよ" image={crop.dataUrl} />}
+          {(generation.status === "loading" || generation.status === "idle") && <Loading message="はてなを {探|さが}しているよ" image={crop.dataUrl} />}
           {generation.status === "ready" && generation.data.questions.length > 0 && (
             <>
               <div className="mt-auto">
                 <Say mood="happy" size={78}>
-                  どの はてなが{" "}
-                  <ruby>
-                    気<rt>き</rt>
-                  </ruby>
-                  になる？
+                  <Jp big>{"どの はてなが {気|き}になる？"}</Jp>
                 </Say>
               </div>
               {generation.data.demo && (
                 <p className="rounded-2xl bg-yellow-light px-3 py-2 text-center text-sm font-black">
-                  みほんの はてなだよ（AIは つかっていないよ）
+                  <Jp>{"{見本|みほん}の はてなだよ（AIは {使|つか}っていないよ）"}</Jp>
                 </p>
               )}
               <ul className="flex flex-col gap-3">
@@ -157,7 +153,7 @@ function ChooseContent() {
               <div className="mt-auto">
                 <Button variant="sub" onClick={regenerate}>
                   <Icon name="dice" size={22} strokeWidth={2.4} />
-                  ほかの はてなを だす
+                  <Jp>{"ほかの はてなを {出|だ}す"}</Jp>
                 </Button>
               </div>
             </>
@@ -168,15 +164,11 @@ function ChooseContent() {
       {mode === "custom" && (
         <form onSubmit={submitCustom} className="flex flex-1 flex-col gap-4">
           <Say mood="think" size={86}>
-            この しゃしんの なにが{" "}
-            <ruby>
-              気<rt>き</rt>
-            </ruby>
-            になる？
+            <Jp big>{"この {写真|しゃしん}の {何|なに}が {気|き}になる？"}</Jp>
           </Say>
           <div className="flex flex-col gap-2">
             <label htmlFor="q" className="font-pop text-lg">
-              はてなを かこう
+              <Jp>{"はてなを {書|か}こう"}</Jp>
             </label>
             <textarea
               id="q"
@@ -192,7 +184,9 @@ function ChooseContent() {
           </div>
 
           <div className="flex flex-col gap-2.5">
-            <span className="text-[15px] font-black text-ink-sub">こんな ことばから はじめてみよう</span>
+            <span className="text-[15px] font-black text-ink-sub">
+              <Jp>{"こんな ことばから {始|はじ}めてみよう"}</Jp>
+            </span>
             <div className="flex flex-wrap gap-2.5">
               {STARTERS.map((s) => (
                 <button
@@ -207,11 +201,13 @@ function ChooseContent() {
             </div>
           </div>
 
-          {busy && <Loading message="はてなを しらべているよ" image={crop.dataUrl} />}
+          {busy && <Loading message="はてなを {調|しら}べているよ" image={crop.dataUrl} />}
 
           {sorry && (
             <div className="flex flex-col gap-3.5">
-              <Say mood="sorry">{sorry}</Say>
+              <Say mood="sorry">
+                <Jp big>{sorry}</Jp>
+              </Say>
               <Button
                 variant="sub"
                 onClick={() => {
@@ -219,19 +215,19 @@ function ChooseContent() {
                   setSorry(null);
                 }}
               >
-                3つの はてなから えらぶ
+                <Jp>{"3つの はてなから {選|えら}ぶ"}</Jp>
               </Button>
             </div>
           )}
           {error && (
             <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-              {error}
+              <Jp>{error}</Jp>
             </p>
           )}
           {!busy && (
             <div className="mt-auto">
               <Button type="submit" disabled={text.trim().length === 0} className="!text-[23px]">
-                この はてなで いく！
+                <Jp big>{"この はてなで {行|い}く！"}</Jp>
               </Button>
             </div>
           )}

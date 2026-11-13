@@ -1,11 +1,11 @@
-import { SUBJECT_KANA } from "@/lib/constants";
+import { SUBJECT_JP } from "@/lib/constants";
 import type { Question } from "@/server/llm/schema";
 import { Icon, type IconName } from "./Icons";
-import { RubyText } from "./RubyText";
+import { Jp, RubyText } from "./RubyText";
 
 export const TYPE_LABEL: Record<Question["type"], string> = {
   estimate: "いくつ？",
-  compare: "くらべる",
+  compare: "{比|くら}べる",
   why: "なぜ？",
 };
 
@@ -19,11 +19,11 @@ export const SUBJECT_STYLE: Record<
   info: { light: "bg-purple-light", solid: "bg-purple", dark: "text-purple-dark", onSolid: "text-white", icon: "qr", hex: "#8B5CF6" },
 };
 
-/** 「じょうほう ・ いくつ？」のような小さな見出し（ひらがな） */
+/** 「じょうほう ・ いくつ？」のような小さな見出し（学年に合わせて漢字か ひらがな） */
 export function Eyebrow({ question }: { question: Question }) {
   return (
     <span className={`text-sm font-black ${SUBJECT_STYLE[question.subject].dark}`}>
-      {SUBJECT_KANA[question.subject]} ・ {TYPE_LABEL[question.type]}
+      <Jp>{`${SUBJECT_JP[question.subject]} ・ ${TYPE_LABEL[question.type]}`}</Jp>
     </span>
   );
 }
@@ -47,10 +47,10 @@ export function Chips({ question }: { question: Question }) {
   return (
     <div className="flex flex-wrap gap-2">
       <span className={`rounded-xl px-3 py-0.5 text-sm font-black ${s.light} ${s.dark}`}>
-        {SUBJECT_KANA[question.subject]}
+        <Jp>{SUBJECT_JP[question.subject]}</Jp>
       </span>
       <span className="rounded-xl bg-pink-light px-3 py-0.5 text-sm font-black text-pink-dark">
-        {TYPE_LABEL[question.type]}
+        <Jp>{TYPE_LABEL[question.type]}</Jp>
       </span>
     </div>
   );

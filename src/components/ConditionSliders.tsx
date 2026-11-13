@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { computeAnswer, defaultScope } from "@/lib/calc";
 import { formatNumber, numberLength, numberRuby } from "@/lib/format";
 import { refParts } from "@/lib/ref";
-import { kanaOf, unitKana, unitRuby } from "@/lib/ruby";
+import { unitKana, unitRuby } from "@/lib/ruby";
 import type { Question } from "@/server/llm/schema";
 import { CountUp } from "./CountUp";
 import { Icon } from "./Icons";
 import { ratioWith } from "./ResultSummary";
-import { RubyText } from "./RubyText";
+import { Jp, RubyText } from "./RubyText";
 
 const THUMB = 44;
 
@@ -74,11 +74,11 @@ export function ConditionSliders({
           <div key={v.name} className="mt-auto flex flex-col gap-1.5 rounded-[26px] bg-yellow-light px-[18px] py-3.5">
             <div className="flex items-center justify-between gap-2">
               <label htmlFor={`v-${v.name}`} className="font-pop text-[17px] leading-snug">
-                {kanaOf(v.label)}
+                <RubyText kana text={v.label} />
               </label>
               <span className="shrink-0 font-pop text-[26px] leading-[1.4]">
                 <RubyText text={numberRuby(now, grade)} />
-                <span className="text-lg">{unitKana(v.unit)}</span>
+                <span className="text-lg">{unitKana(v.unit, grade)}</span>
               </span>
             </div>
             <div className="relative">
@@ -105,7 +105,7 @@ export function ConditionSliders({
             </div>
             {moved && (
               <button type="button" onClick={() => onChange({ ...values, [v.name]: v.value })} className="self-start text-sm font-black text-navi-dark underline">
-                もとに もどす
+                <Jp>{"もとに {戻|もど}す"}</Jp>
               </button>
             )}
           </div>
@@ -114,7 +114,9 @@ export function ConditionSliders({
 
       <div aria-live="polite" className="mt-auto flex flex-col items-center rounded-[26px] bg-navi-light px-[18px] pb-4 pt-3">
         {current === null ? (
-          <p className="text-lg font-black">この じょうけんでは けいさん できないよ</p>
+          <p className="text-lg font-black">
+            <Jp>{"この {条件|じょうけん}では {計算|けいさん} できないよ"}</Jp>
+          </p>
         ) : question.type === "compare" ? (
           <p key={bumped} className="animate-bump text-center text-[20px] font-black leading-[1.75]">
             <RubyText
@@ -124,7 +126,9 @@ export function ConditionSliders({
           </p>
         ) : (
           <>
-            <span className="text-[20px] font-black leading-[1.75]">こたえは</span>
+            <span className="text-[20px] font-black leading-[1.75]">
+              <Jp>{"{答|こた}えは"}</Jp>
+            </span>
             <div key={bumped} className="animate-bump flex items-baseline gap-1 text-navi">
               <span className="font-pop leading-[1.15]" style={{ fontSize: bigSize(current, grade) }}>
                 <CountUp value={current} duration={400} format={(n) => bigNumber(n, grade)} />
@@ -143,8 +147,8 @@ export function ConditionSliders({
         )}
         {parts && (
           <p className="mt-2 text-center text-[17px] font-black leading-[1.7]">
-            {kanaOf(parts.label)} {formatNumber(parts.value, grade)}
-            {unitKana(parts.unit)}
+            <RubyText kana text={parts.label} /> {formatNumber(parts.value, grade)}
+            {unitKana(parts.unit, grade)}
             {parts.suffix}
           </p>
         )}
@@ -162,7 +166,9 @@ export function ConditionSliders({
             <span className="block h-full bg-[#C9CFFF] transition-[width] duration-300" style={{ width: `${pct(original)}%` }} />
           </span>
           <span className="whitespace-nowrap text-right font-pop text-[15px] text-ink-sub">{formatNumber(onLine(original), grade)}</span>
-          <span className="text-[15px] font-black">いま</span>
+          <span className="text-[15px] font-black">
+            <Jp>{"{今|いま}"}</Jp>
+          </span>
           <span className="block h-[22px] overflow-hidden rounded-[11px] bg-cloud">
             <span className="block h-full bg-navi transition-[width] duration-300" style={{ width: `${pct(current)}%` }} />
           </span>
@@ -173,7 +179,7 @@ export function ConditionSliders({
       {changed && (
         <p className="flex items-center gap-1.5 text-sm font-black text-ink-sub">
           <Icon name="info" size={18} strokeWidth={2.4} />
-          スライダーを もとの ばしょに もどすと、さいしょの こたえに なるよ
+          <Jp>{"スライダーを もとの {場所|ばしょ}に {戻|もど}すと、{最初|さいしょ}の {答|こた}えに なるよ"}</Jp>
         </p>
       )}
     </>

@@ -10,8 +10,7 @@ import { Loading } from "@/components/Loading";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
 import { SUBJECT_STYLE } from "@/components/QuestionCard";
-import { kanaOf } from "@/lib/ruby";
-import { RubyText } from "@/components/RubyText";
+import { Jp, RubyText } from "@/components/RubyText";
 import { ErrorNotice, LinkButton } from "@/components/ui";
 import { CAPTURE_WITH_PROMISE, groupOf, REACTIONS, titleLabel, type GroupId, type ReactionId } from "@/lib/constants";
 import type { GroupPost, GroupReactions } from "@/lib/types";
@@ -21,14 +20,14 @@ const REACTION_FACE: Record<ReactionId, string> = { sugoi: "wow", yaritai: "effo
 
 const DAY = 24 * 60 * 60 * 1000;
 
-/** 日の区切り（「きょう」「きのう」「11がつ 12にち」）。小さい文字なので ひらがなと数字 */
+/** 日の区切り（「きょう」「きのう」「11がつ 12にち」）。ふりがなの記法で返す（小さい文字なので、<Jp> で学年に合わせて出す） */
 function dayLabel(time: number, now: number): string {
   const start = (t: number) => new Date(t).setHours(0, 0, 0, 0);
   const diff = Math.round((start(now) - start(time)) / DAY);
-  if (diff === 0) return "きょう";
-  if (diff === 1) return "きのう";
+  if (diff === 0) return "{今日|きょう}";
+  if (diff === 1) return "{昨日|きのう}";
   const d = new Date(time);
-  return `${d.getMonth() + 1}がつ ${d.getDate()}にち`;
+  return `${d.getMonth() + 1}{月|がつ} ${d.getDate()}{日|にち}`;
 }
 
 function timeLabel(time: number): string {
@@ -152,7 +151,7 @@ function OthersContent() {
         <h1 className="font-pop text-[26px] font-normal">みんなの はてな</h1>
         <span className="flex items-center gap-1.5 self-start rounded-[14px] bg-pink-light px-3 py-1 text-sm font-black text-pink-dark">
           <Icon name="shield" size={18} fill="#FFFFFF" stroke="#A12A55" />
-          なまえは でないよ
+          <Jp>{"{名前|なまえ}は {出|で}ないよ"}</Jp>
         </span>
       </div>
 
@@ -186,16 +185,18 @@ function OthersContent() {
         </p>
       )}
 
-      {membershipsFailed && <ErrorNotice onRetry={() => void reloadMemberships()}>みんなの はてなを ひらけなかったよ。</ErrorNotice>}
-      {!membershipsFailed && memberships === null && <Loading message="さがしているよ" />}
+      {membershipsFailed && <ErrorNotice onRetry={() => void reloadMemberships()}>
+          <Jp big>{"みんなの はてなを {開|ひら}けなかったよ。"}</Jp>
+        </ErrorNotice>}
+      {!membershipsFailed && memberships === null && <Loading message="{探|さが}しているよ" />}
       {memberships?.length === 0 && (
         <p className="rounded-card bg-pink-light px-4 py-3 text-lg font-black leading-[1.7]">
-          まだ どの グループにも はいっていないよ。グループに はいると、なかまの はてなが みられるよ。
+          <Jp>{"まだ どの グループにも {入|はい}っていないよ。グループに {入|はい}ると、なかまの はてなが {見|み}られるよ。"}</Jp>
         </p>
       )}
       {memberships?.length === 0 && (
         <LinkButton href="/join" variant="sub">
-          コードで グループに はいる
+          <Jp>{"コードで グループに {入|はい}る"}</Jp>
         </LinkButton>
       )}
 
@@ -207,12 +208,16 @@ function OthersContent() {
             setAttempt((n) => n + 1);
           }}
         >
-          みんなの はてなを ひらけなかったよ。
+          <Jp big>{"みんなの はてなを {開|ひら}けなかったよ。"}</Jp>
         </ErrorNotice>
       )}
-      {groupId && !failed && posts === null && <Loading message="さがしているよ" />}
+      {groupId && !failed && posts === null && <Loading message="{探|さが}しているよ" />}
 
-      {reportFailed && <ErrorNotice>おしらせできなかったよ。ネットに つながっているか みて、もういちど ためしてね</ErrorNotice>}
+      {reportFailed && (
+        <ErrorNotice>
+          <Jp big>{"お{知|し}らせできなかったよ。ネットに つながっているか {見|み}て、もう{一度|いちど} {試|ため}してね"}</Jp>
+        </ErrorNotice>
+      )}
 
       {groupId && timeline && (
         // グループの へや（チャットのように、はてなが ふきだしで ならぶ。自分のは右、なかまのは左）
@@ -221,13 +226,15 @@ function OthersContent() {
             <li className="flex items-center justify-center gap-2 text-center">
               <Navigator mood="think" size={40} />
               <span className="text-sm font-black leading-[1.6] text-ink-sub">
-                {groupOf(groupId).kana} の へやだよ。
+                {groupOf(groupId).kana} <Jp>{"の {部屋|へや}だよ。"}</Jp>
                 <br />
-                みんなは なにを みつけたかな？
+                <Jp>{"みんなは {何|なに}を {見|み}つけたかな？"}</Jp>
               </span>
             </li>
             {timeline.length === 0 && (
-              <li className="rounded-card bg-white px-4 py-3 text-center text-base font-black leading-[1.7]">まだ だれも みせていないよ。きみが さいしょに みせてみよう！</li>
+              <li className="rounded-card bg-white px-4 py-3 text-center text-base font-black leading-[1.7]">
+                <Jp>{"まだ だれも {見|み}せていないよ。きみが {最初|さいしょ}に {見|み}せてみよう！"}</Jp>
+              </li>
             )}
             {timeline.map((p, i) => {
               const s = SUBJECT_STYLE[p.subject];
@@ -238,7 +245,9 @@ function OthersContent() {
               return (
                 <li key={p.id} className="flex flex-col gap-2">
                   {newDay && (
-                    <span className="self-center rounded-full bg-white/80 px-3 py-0.5 text-xs font-black text-ink-muted">{day}</span>
+                    <span className="self-center rounded-full bg-white/80 px-3 py-0.5 text-xs font-black text-ink-muted">
+                      <Jp>{day}</Jp>
+                    </span>
                   )}
                   <div className={`flex items-start gap-2 ${own ? "flex-row-reverse" : ""}`}>
                     {/* なかまは みんな同じ ナビの顔（だれか分からないように） */}
@@ -257,7 +266,7 @@ function OthersContent() {
                           </div>
                           <div className="flex flex-col gap-1.5 px-3 pb-2.5 pt-2">
                             {/* 小さい文字なので、ひらがなで出す */}
-                            <span className="block text-base font-black leading-[1.5]">{kanaOf(p.text)}</span>
+                            <RubyText kana className="block text-base font-black leading-[1.5]" text={p.text} />
                             {own && (
                               <span className={`self-start rounded-[10px] px-2 py-px text-xs font-black ${s.light} ${s.dark}`}>{titleLabel(p.title)}</span>
                             )}
@@ -303,24 +312,28 @@ function OthersContent() {
                       )}
                       {!own && reactFailed === p.id && (
                         <span role="alert" className="rounded-[12px] bg-white px-2 py-1 text-xs font-black leading-[1.5] text-pink-dark">
-                          おくれなかったよ。ネットに つながっているか みて、もういちど ためしてね
+                          <Jp>{"{送|おく}れなかったよ。ネットに つながっているか {見|み}て、もう{一度|いちど} {試|ため}してね"}</Jp>
                         </span>
                       )}
 
                       {/* いやな はてなや、のせては いけない ものを 見つけたら、おしらせできる（きみの はてなには 出さない） */}
                       {!own &&
                         (reported.has(p.id) ? (
-                          <span className="text-xs font-black text-ink-muted">つうほう したよ。ありがとう</span>
+                          <span className="text-xs font-black text-ink-muted">
+                            <Jp>{"{通報|つうほう} したよ。ありがとう"}</Jp>
+                          </span>
                         ) : asking === p.id ? (
                           <div className="flex flex-col gap-1.5 rounded-[14px] bg-white p-2">
-                            <span className="text-xs font-black leading-[1.5]">いやな はてな？ おとなに おしらせするよ</span>
+                            <span className="text-xs font-black leading-[1.5]">
+                              <Jp>{"いやな はてな？ {大人|おとな}に お{知|し}らせするよ"}</Jp>
+                            </span>
                             <div className="flex gap-1.5">
                               <button
                                 type="button"
                                 onClick={() => void report(p.id)}
                                 className="min-h-9 flex-1 rounded-[12px] border-2 border-ink bg-pink px-2 text-xs font-black text-ink active:translate-y-0.5"
                               >
-                                おしらせ
+                                <Jp>{"お{知|し}らせ"}</Jp>
                               </button>
                               <button
                                 type="button"
@@ -340,7 +353,7 @@ function OthersContent() {
                             }}
                             className="min-h-9 px-1.5 text-xs font-black text-ink-muted underline"
                           >
-                            つうほう
+                            <Jp>{"{通報|つうほう}"}</Jp>
                           </button>
                         ))}
                     </div>
@@ -356,7 +369,7 @@ function OthersContent() {
       {groupId && timeline && (
         <LinkButton href={CAPTURE_WITH_PROMISE} variant="sub" className="flex items-center justify-center gap-2">
           <Icon name="camera" size={24} />
-          さがして みせよう
+          <Jp>{"{探|さが}して {見|み}せよう"}</Jp>
         </LinkButton>
       )}
     </Page>

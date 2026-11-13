@@ -1,3 +1,4 @@
+import { Jp } from "./RubyText";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon } from "./Icons";
@@ -58,7 +59,7 @@ export function Page({
             {title && (
               <h1 className="flex items-center gap-2 font-pop text-[24px] font-normal leading-tight">
                 {icon}
-                {title}
+                <Jp big>{title}</Jp>
               </h1>
             )}
           </header>

@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { kanaOf } from "@/lib/ruby";
 import type { Question } from "@/server/llm/schema";
 import { Icon } from "./Icons";
-import { RubyText } from "./RubyText";
+import { Jp, RubyText, useJp } from "./RubyText";
 
-const KIND_LABEL = { data: "データ", book: "ほん", site: "サイト" } as const;
+const KIND_LABEL = { data: "データ", book: "{本|ほん}", site: "サイト" } as const;
 
 // 手じゅんの色（見本 17：青 → 黄 → ピンク のくりかえし）
 const STEP_STYLE = [
@@ -33,7 +32,7 @@ export function ExplanationSteps({ question, collapsible = false }: { question: 
           onClick={() => setOpen((v) => !v)}
           className="flex h-[54px] w-full items-center justify-between rounded-[22px] border-3 border-ink bg-white px-5 font-pop text-lg shadow-pop-sm active:translate-y-1 active:shadow-none"
         >
-          くわしく みる
+          <Jp>{"くわしく {見|み}る"}</Jp>
           <Icon name="down" size={24} strokeWidth={3} className={open ? "rotate-180" : ""} />
         </button>
       )}
@@ -75,7 +74,9 @@ export function Related({ question }: { question: Question }) {
   if (related.length === 0) return null;
   return (
     <div className="flex flex-col gap-2 rounded-card bg-mint-light px-4 py-3.5">
-      <h2 className="font-pop text-[17px] font-normal text-mint-dark">ほかにも こんな ふしぎが あるよ</h2>
+      <h2 className="font-pop text-[17px] font-normal text-mint-dark">
+        <Jp>{"ほかにも こんな ふしぎが あるよ"}</Jp>
+      </h2>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-[18px] font-black leading-[1.75]">
         {related.map((r, i) => (
           <li key={i}>
@@ -89,25 +90,28 @@ export function Related({ question }: { question: Question }) {
 
 /** 出典と前提条件。リンクは、おとなの人といっしょに見るよう伝える */
 export function Sources({ question }: { question: Question }) {
+  const jp = useJp();
   if (question.sources.length === 0 && !question.keyword) return null;
   return (
     // 見出しを押すと開くので、見出しは ほかのボタンと同じく影つきにする
     <details className="rounded-card bg-cloud px-4 py-3 [&>summary]:-mx-2 [&>summary]:rounded-[18px] [&>summary]:border-3 [&>summary]:border-ink [&>summary]:bg-white [&>summary]:px-3 [&>summary]:py-2 [&>summary]:shadow-pop-sm [&>summary]:active:translate-y-1 [&>summary]:active:shadow-none">
-      <summary className="cursor-pointer text-base font-black">こたえの もとに なった データ</summary>
-      {/* AI が書いた文には、ふりがなの記法が入っていることがある。小さい文字なので、読みに置きかえて出す */}
+      <summary className="cursor-pointer text-base font-black">
+        <Jp>{"{答|こた}えの もとに なった データ"}</Jp>
+      </summary>
+      {/* AI が書いた文には、ふりがなの記法が入っていることがある。小さい文字なので、学年に合わせて出す（習った漢字は漢字のまま） */}
       <ul className="mt-3 flex flex-col gap-3 text-base">
         {question.sources.map((s, i) => {
-          const assumption = kanaOf(s.assumption).trim();
+          const assumption = jp(s.assumption).trim();
           return (
             <li key={i} className="flex flex-col gap-1">
               <p className="font-black">
-                <span className="mr-2 rounded-lg bg-navi-light px-2 py-0.5 text-sm text-navi-dark">{KIND_LABEL[s.kind]}</span>
+                <span className="mr-2 rounded-lg bg-navi-light px-2 py-0.5 text-sm text-navi-dark">{jp(KIND_LABEL[s.kind])}</span>
                 {s.url ? (
                   <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-navi-dark underline">
-                    {kanaOf(s.title)}
+                    {jp(s.title)}
                   </a>
                 ) : (
-                  kanaOf(s.title)
+                  jp(s.title)
                 )}
               </p>
               {assumption && assumption !== "—" && <p className="font-bold text-ink-sub">{assumption}</p>}
@@ -117,10 +121,13 @@ export function Sources({ question }: { question: Question }) {
       </ul>
       {question.keyword && (
         <p className="mt-3 text-base font-bold">
-          もっと しらべるときの ことば：<b className="font-black">{kanaOf(question.keyword)}</b>
+          <Jp>{"もっと {調|しら}べるときの ことば："}</Jp>
+          <b className="font-black">{jp(question.keyword)}</b>
         </p>
       )}
-      <p className="mt-3 text-sm font-bold text-ink-muted">リンクを ひらくときは、おとなの ひとと いっしょに みてね。</p>
+      <p className="mt-3 text-sm font-bold text-ink-muted">
+        <Jp>{"リンクを {開|ひら}くときは、{大人|おとな}の {人|ひと}と いっしょに {見|み}てね。"}</Jp>
+      </p>
     </details>
   );
 }

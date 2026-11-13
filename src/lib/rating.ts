@@ -107,10 +107,10 @@ export const RATING_LABEL: Record<Rating, string> = {
 /** 子どもの予想が低学年向けの選択肢か（4年生まで）、スライダー・自由入力か（5年生から） */
 export const usesChoices = (grade: number) => grade <= 4;
 
-/** 子どもの予想を、画面に出す文字にする（選択肢で答えたときは、選んだ範囲のまま出す）。小さい文字で出すので、単位はひらがなにする */
+/** 子どもの予想を、画面に出す文字にする（選択肢で答えたときは、選んだ範囲のまま出す）。小さい文字で出すので、単位は学年に合わせる（習った漢字は漢字） */
 /** 予想を、小さい文字で書く。grade を渡すと、1・2年は小数を整数にまるめる（docs/02-spec.md 2.4） */
 export function describeGuess(guess: Guess, unit: string, grade?: number): string {
-  const u = unitKana(unit);
+  const u = unitKana(unit, grade);
   if (guess.kind === "bin") return `${formatNumber(guess.edges[guess.index], grade)}〜${formatNumber(guess.edges[guess.index + 1], grade)}${u}`;
   if (guess.kind === "number") return `${formatNumber(guess.value, grade)}${u}`;
   if (guess.kind === "compare") return `やく ${formatNumber(guess.ratio, grade)}ばい`;

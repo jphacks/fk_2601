@@ -6,7 +6,7 @@ import { unitKana } from "@/lib/ruby";
 import { binEdges, binValue, BIN_COUNT, usesChoices, type Guess } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
 import { LogSlider } from "./LogSlider";
-import { RubyText } from "./RubyText";
+import { Jp, RubyText } from "./RubyText";
 import { Button, CHOICE_DOWN, CHOICE_UP, Say } from "./ui";
 
 const RATIO_CHOICES = [1.5, 2, 3, 5, 10, 20, 50, 100];
@@ -85,7 +85,9 @@ function ReasonForm({ question, onSubmit, hint }: FormProps) {
   const [index, setIndex] = useState<number | null>(null);
   return (
     <>
-      <span className="mt-auto text-center font-pop text-lg">どれだと おもう？</span>
+      <span className="mt-auto text-center font-pop text-lg">
+        <Jp>{"どれだと {思|おも}う？"}</Jp>
+      </span>
       <div role="radiogroup" aria-label="よそう" className="flex flex-col gap-2.5">
         {(question.choices ?? []).map((c, i) => (
           <button
@@ -120,7 +122,9 @@ function EstimateForm({ question, grade, onSubmit, hint }: FormProps & { grade: 
       <>
         <div className="mt-auto">
           <Say mood="effort" size={66}>
-            <span className="font-pop text-[17px] font-normal leading-normal">どれくらいだと おもう？</span>
+            <span className="font-pop text-[17px] font-normal leading-normal">
+              <Jp>{"どれくらいだと {思|おも}う？"}</Jp>
+            </span>
           </Say>
         </div>
         <div role="radiogroup" aria-label="よそう" className="flex flex-col gap-2.5">
@@ -137,7 +141,7 @@ function EstimateForm({ question, grade, onSubmit, hint }: FormProps & { grade: 
             >
               <BinIcon index={i} />
               <span>
-                {formatNumber(edges[i], grade)} 〜 {formatNumber(edges[i + 1], grade)} {unitKana(question.answerUnit)}
+                {formatNumber(edges[i], grade)} 〜 {formatNumber(edges[i + 1], grade)} {unitKana(question.answerUnit, grade)}
               </span>
             </button>
           ))}
@@ -170,7 +174,9 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
   return (
     <>
       <div className="flex flex-col gap-2">
-        <span className="mt-auto text-center font-pop text-lg">どっちが おおきい？</span>
+        <span className="mt-auto text-center font-pop text-lg">
+          <Jp>{"どっちが {大|おお}きい？"}</Jp>
+        </span>
         <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="どっちが おおきい？">
           {(["a", "b"] as const).map((s, i) => (
             <button
@@ -190,7 +196,9 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-center font-pop text-lg">おおきい ほうは、なんばい くらい？</span>
+        <span className="text-center font-pop text-lg">
+          <Jp>{"{大|おお}きい ほうは、{何倍|なんばい} くらい？"}</Jp>
+        </span>
         {small ? (
           <div className="grid grid-cols-2 gap-2.5">
             {(grade < DECIMAL_GRADE ? RATIO_CHOICES_INT : RATIO_CHOICES).map((r) => (
@@ -206,7 +214,7 @@ function CompareForm({ question, grade, onSubmit, hint }: FormProps & { grade: n
             ))}
           </div>
         ) : (
-          <LogSlider min={1} max={1000} value={slider} unit="倍" label="なんばいだと おもう？" onChange={setSlider} />
+          <LogSlider min={1} max={1000} value={slider} unit="倍" label="{何倍|なんばい}だと {思|おも}う？" onChange={setSlider} />
         )}
       </div>
 

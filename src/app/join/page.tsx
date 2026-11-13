@@ -1,5 +1,6 @@
 "use client";
 
+import { Jp } from "@/components/RubyText";
 import { useState } from "react";
 import { useApp } from "@/components/AuthProvider";
 import { INPUT_STYLE } from "@/components/Fields";
@@ -25,7 +26,7 @@ function JoinContent() {
     if (!user || busy) return;
     const normalized = normalizeJoinCode(code);
     if (!normalized) {
-      setError(`コードは えいごと すうじの ${JOIN_CODE_LENGTH}もじだよ。もういちど たしかめてね`);
+      setError(`コードは {英語|えいご}と {数字|すうじ}の ${JOIN_CODE_LENGTH}{文字|もじ}だよ。もう{一度|いちど} たしかめてね`);
       return;
     }
     setBusy(true);
@@ -43,17 +44,19 @@ function JoinContent() {
   if (joined) {
     const name = groupOf(joined.groupId).kana;
     return (
-      <Page title="グループに はいる" back="/settings">
+      <Page title="グループに {入|はい}る" back="/settings">
         <Say mood="happy" size={76}>
-          <span className="text-lg">{joined.already ? `「${name}」には もう はいっているよ！` : `「${name}」に はいったよ！`}</span>
+          <Jp className="text-lg">{joined.already ? `「${name}」には もう {入|はい}っているよ！` : `「${name}」に {入|はい}ったよ！`}</Jp>
         </Say>
         <p className="rounded-card bg-pink-light px-4 py-3 text-lg font-black leading-[1.7]">
-          ずかんに のこすときに「なかまにも みせる」で えらぶと、おなじ グループの なかまに はてなを みせられるよ。なまえは でないよ。
+          <Jp>{"ずかんに {残|のこ}すときに「なかまにも {見|み}せる」で {選|えら}ぶと、{同|おな}じ グループの なかまに はてなを {見|み}せられるよ。{名前|なまえ}は {出|で}ないよ。"}</Jp>
         </p>
         <div className="mt-auto flex flex-col gap-3">
-          <LinkButton href="/others">みんなの はてなを みる</LinkButton>
+          <LinkButton href="/others">
+            <Jp big>{"みんなの はてなを {見|み}る"}</Jp>
+          </LinkButton>
           <LinkButton href="/settings" variant="sub">
-            せっていに もどる
+            <Jp>{"{設定|せってい}に {戻|もど}る"}</Jp>
           </LinkButton>
         </div>
       </Page>
@@ -61,21 +64,21 @@ function JoinContent() {
   }
 
   return (
-    <Page title="グループに はいる" back="/settings">
+    <Page title="グループに {入|はい}る" back="/settings">
       <Say mood="think" size={76}>
         <span className="text-lg">
-          おとなの ひとに
+          <Jp>{"{大人|おとな}の {人|ひと}に"}</Jp>
           <br />
           もらった コードを
           <br />
-          いれてね
+          <Jp>{"{入|い}れてね"}</Jp>
         </span>
       </Say>
 
       <form onSubmit={submit} className="flex flex-1 flex-col gap-4">
         <div className="flex flex-col gap-2">
           <label htmlFor="join-code" className="font-pop text-lg">
-            さんか コード
+            <Jp>{"{参加|さんか} コード"}</Jp>
           </label>
           <input
             id="join-code"
@@ -89,22 +92,24 @@ function JoinContent() {
             placeholder="ABCD-EFGH"
             className={`${INPUT_STYLE} font-pop tracking-[0.12em] uppercase`}
           />
-          <span className="text-sm font-bold text-ink-sub">えいごと すうじの {JOIN_CODE_LENGTH}もじ（「-」は なくても いいよ）</span>
+          <span className="text-sm font-bold text-ink-sub">
+            <Jp>{`{英語|えいご}と {数字|すうじ}の ${JOIN_CODE_LENGTH}{文字|もじ}（「-」は なくても いいよ）`}</Jp>
+          </span>
         </div>
 
         {memberships && memberships.length > 0 && (
-          <p className="text-base font-black text-ink-sub">いま はいっている グループ：{memberships.map((m) => groupOf(m.groupId).kana).join("・")}</p>
+          <p className="text-base font-black text-ink-sub"><Jp>{"{今|いま} {入|はい}っている グループ："}</Jp>{memberships.map((m) => groupOf(m.groupId).kana).join("・")}</p>
         )}
 
         {error && (
           <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
-            {error}
+            <Jp>{error}</Jp>
           </p>
         )}
 
         <div className="mt-auto">
           <Button type="submit" disabled={busy || code.trim().length === 0}>
-            {busy ? "しらべているよ…" : "はいる！"}
+            <Jp big>{busy ? "{調|しら}べているよ…" : "{入|はい}る！"}</Jp>
           </Button>
         </div>
       </form>

@@ -10,10 +10,10 @@ import { CountUp } from "./CountUp";
 import { Icon } from "./Icons";
 import { Navigator, type Mood } from "./Navigator";
 import { NumberLine } from "./NumberLine";
-import { RubyText } from "./RubyText";
+import { Jp, RubyText } from "./RubyText";
 
 export function ratingText(rating: Rating, type: Question["type"]): string {
-  if (type === "why") return rating === "pita" ? "せいかい！" : "ざんねん…";
+  if (type === "why") return rating === "pita" ? "{正解|せいかい}！" : "ざんねん…";
   return RATING_LABEL[rating];
 }
 
@@ -26,8 +26,8 @@ export function ratioRuby(ratio: number, grade?: number): string {
   const big = ratio >= 1;
   const v = big ? ratio : 1 / ratio;
   if (grade !== undefined && grade < (big ? TIMES_GRADE : FRACTION_GRADE)) {
-    const much = v >= 2 ? "ずっと" : "すこし";
-    return big ? `${much} おおい` : `${much} すくない`;
+    const much = v >= 2 ? "ずっと" : "{少|すこ}し";
+    return big ? `${much} {多|おお}い` : `${much} {少|すく}ない`;
   }
   const n = numberRuby(v >= 10 ? Math.round(v) : Math.round(v * 10) / 10, grade);
   return big ? `{約|やく}${n}{倍|ばい}` : `{約|やく}${n}{分|ぶん}の1`;
@@ -42,7 +42,7 @@ export function ratioWith(base: string, ratio: number, grade?: number): string {
 // 評価ごとの、ナビの顔・ふきだしの地と文字の色・答えのカードの地・ひとことの札の色（赤は「ピタリ」だけに使う。見本 14〜16）
 const LOOK: Record<Rating, { mood: Mood; bubble: string; lines: [string, string]; card: string; chip: string }> = {
   pita: { mood: "pitari", bubble: "bg-red-light text-red-dark", lines: ["ピタリ！", "すごい！"], card: "bg-red-light", chip: "bg-white text-red-dark" },
-  oshii: { mood: "oshii", bubble: "bg-navi-light text-ink", lines: ["おしい！", "あと すこし！"], card: "bg-orange-light", chip: "bg-white text-orange-dark" },
+  oshii: { mood: "oshii", bubble: "bg-navi-light text-ink", lines: ["おしい！", "あと {少|すこ}し！"], card: "bg-orange-light", chip: "bg-white text-orange-dark" },
   ohazure: { mood: "hazure", bubble: "bg-navi-light text-navi-dark", lines: ["こんなに", "ちがうの！？"], card: "bg-navi-light", chip: "bg-yellow text-ink" },
 };
 
@@ -101,7 +101,7 @@ export function ResultSummary({
         <Bubble react={animate} mood={right ? "pitari" : "hazure"} color={right ? "bg-red-light text-red-dark" : "bg-navi-light text-navi-dark"}>
           {right ? (
             <>
-              せいかい！
+              <Jp big>{"{正解|せいかい}！"}</Jp>
               <br />
               すごい！
             </>
@@ -122,7 +122,7 @@ export function ResultSummary({
                   c.correct ? "bg-mint-light" : i === guess.index ? "bg-pink-light" : "bg-cloud text-ink-sub"
                 }`}
               >
-                <span className="mb-0.5 block text-sm font-black">{c.correct ? "◎ せいかい" : i === guess.index ? "× きみの よそう" : ""}</span>
+                <span className="mb-0.5 block text-sm font-black"><Jp>{c.correct ? "◎ {正解|せいかい}" : i === guess.index ? "× きみの {予想|よそう}" : ""}</Jp></span>
                 <RubyText kana text={c.text} />
               </li>
             ))}
@@ -139,15 +139,15 @@ export function ResultSummary({
   const chipText =
     rating === "pita"
       ? "ほぼ ぴったり！"
-      : `${ratioWith("よそう", ratio, grade)}${rating === "ohazure" ? "！" : ""}`;
+      : `${ratioWith("{予想|よそう}", ratio, grade)}${rating === "ohazure" ? "！" : ""}`;
 
   return (
     <div className="relative flex flex-col gap-4">
       <Confetti />
       <Bubble react={animate} mood={look.mood} color={look.bubble}>
-        {look.lines[0]}
+        <Jp big>{look.lines[0]}</Jp>
         <br />
-        {look.lines[1]}
+        <Jp big>{look.lines[1]}</Jp>
       </Bubble>
 
       <section className={`relative flex flex-col items-start gap-1 rounded-[30px] px-5 pb-[18px] pt-3.5 ${look.card}`}>
@@ -170,9 +170,9 @@ export function ResultSummary({
 
       {type === "compare" && question.compare && (
         <p className="rounded-card bg-pink-light px-4 py-2.5 text-[19px] font-black leading-[1.7]">
-          {evaluation.correct === false ? "おおきいのは、きみが えらんだ ほうでは なかったよ。" : "おおきい ほうを あてたね！"}
+          <Jp>{evaluation.correct === false ? "{大|おお}きいのは、きみが {選|えら}んだ ほうでは なかったよ。" : "{大|おお}きい ほうを {当|あ}てたね！"}</Jp>
           <br />
-          <RubyText kana text={question.compare[evaluation.bigger ?? "a"]} /> が おおきいよ
+          <RubyText kana text={question.compare[evaluation.bigger ?? "a"]} /> <Jp>{"が {大|おお}きいよ"}</Jp>
         </p>
       )}
 
@@ -189,7 +189,10 @@ export function ResultSummary({
         </div>
       )}
 
-      <p className="text-center text-sm font-black text-ink-sub">きみの よそう：{describeGuess(guess, unit, grade)}</p>
+      <p className="text-center text-sm font-black text-ink-sub">
+        <Jp>{"きみの {予想|よそう}："}</Jp>
+        {describeGuess(guess, unit, grade)}
+      </p>
     </div>
   );
 }

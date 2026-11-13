@@ -1,3 +1,4 @@
+import { Jp } from "./RubyText";
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Navigator, type Mood } from "./Navigator";
@@ -106,8 +107,13 @@ export function Say({
 export function ErrorNotice({ children, onRetry }: { children: ReactNode; onRetry?: () => void }) {
   return (
     <div className="space-y-4">
-      <Say mood="sorry">{children}</Say>
-      {onRetry && <Button onClick={onRetry}>もういちど ためす</Button>}
+      {/* 文字だけのときは、ふりがなの記法で書かれていても 学年に合わせて出す */}
+      <Say mood="sorry">{typeof children === "string" ? <Jp big>{children}</Jp> : children}</Say>
+      {onRetry && (
+        <Button onClick={onRetry}>
+          <Jp big>{"もう{一度|いちど} {試|ため}す"}</Jp>
+        </Button>
+      )}
     </div>
   );
 }
