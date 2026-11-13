@@ -12,6 +12,8 @@ import { Button } from "./ui";
 
 // まめちしきを入れかえる間かく（docs/design/README.md「見かた」：10秒ごと）
 const TRIVIA_MS = 10_000;
+// これだけ待っても できないときに、「1ぷんくらい かかる ことも あるよ」を出す（ふだんは 約20秒で できる）
+const SLOW_MS = 15_000;
 
 /** まめちしき（10秒ごとに入れかえる。ボタンも こたえも なし） */
 function Trivia() {
@@ -170,8 +172,9 @@ function Progress({ done }: { done: boolean }) {
       >
         <div className="h-full rounded-[11px] bg-navi transition-[width] duration-500" style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-center text-[15px] font-black text-ink-sub">
-        <Jp>{"1{分|ぷん}くらい かかる ことも あるよ"}</Jp>
+      {/* 場所は先に取っておく（出たときに画面がずれないように）。デモ（/demo）では出さない */}
+      <span className="min-h-[1.5em] text-center text-[15px] font-black text-ink-sub">
+        {!done && !isDemo() && elapsed >= SLOW_MS && <Jp>{"もうすこし！ 1{分|ぷん}くらい かかる ことも あるよ"}</Jp>}
       </span>
     </div>
   );

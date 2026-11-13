@@ -63,10 +63,10 @@ export function QuestionHint({ question }: { question: Question }) {
 }
 
 /** 問題文。22px 以上なら漢字にふりがなを付け、それより小さいときは ひらがなで出す（docs/design/README.md「文字」） */
-export function QuestionText({ question, size = 21 }: { question: Question; size?: number }) {
+export function QuestionText({ question, size = 21, clamp = false }: { question: Question; size?: number; clamp?: boolean }) {
   return (
     <div style={{ fontSize: size }}>
-      <RubyText text={question.text} kana={size < 22} className="block font-black leading-[1.75]" />
+      <RubyText text={question.text} kana={size < 22} className={clamp ? "line-clamp-3 font-black leading-[1.55]" : "block font-black leading-[1.75]"} />
     </div>
   );
 }

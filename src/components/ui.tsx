@@ -85,18 +85,21 @@ export function Say({
   size = 88,
   tone = "navi",
   react = false,
+  small = false,
 }: {
   mood?: Mood;
   children: ReactNode;
   size?: number;
   tone?: "navi" | "red";
   react?: boolean;
+  /** 場所がせまいときの、小さなふきだし（文字は 18px。22px より小さいので、中の文は ひらがなにする） */
+  small?: boolean;
 }) {
   const bg = tone === "red" ? "bg-red-light" : "bg-navi-light";
   return (
     <div className="flex items-center gap-3">
       <Navigator mood={mood} size={size} react={react} />
-      <div className={`relative grow rounded-card px-4 py-3 text-[21px] font-black leading-[1.7] ${bg}`}>
+      <div className={`relative grow rounded-card font-black ${small ? "px-3 py-2 text-[18px] leading-[1.5]" : "px-4 py-3 text-[21px] leading-[1.7]"} ${bg}`}>
         <span aria-hidden className={`absolute -left-2 top-[calc(50%-8px)] size-4 rotate-45 ${bg}`} />
         <div className="relative">{children}</div>
       </div>
