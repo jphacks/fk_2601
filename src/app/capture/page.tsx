@@ -94,21 +94,33 @@ function CaptureContent() {
           <video ref={videoRef} playsInline muted className={`absolute inset-0 size-full object-cover ${camera === "live" ? "" : "invisible"}`} />
 
           {camera === "starting" && <p className="relative px-6 text-center text-lg font-black text-ink-sub"><Jp>{"カメラを {準備|じゅんび}しているよ…"}</Jp></p>}
+          {/* カメラが使えないときは、つぎに できること（アルバムから えらぶ）を、まんなかに 大きく出す */}
           {camera === "unavailable" && (
-            <p className="relative px-6 text-center text-lg font-black leading-relaxed text-ink-sub">
-              <Jp>{"カメラが {使|つか}えなかったよ。"}</Jp>
-              <br />
-              <Jp>{"おうちの {人|ひと}に 「カメラを {使|つか}って いいよ」の {設定|せってい}を たのむか、アルバムから {選|えら}んでね。"}</Jp>
-            </p>
+            <div className="relative flex flex-col items-center gap-4 px-6 pt-16">
+              <p className="text-center text-lg font-black leading-relaxed text-ink-sub">
+                <Jp>{"カメラが {使|つか}えなかったよ。"}</Jp>
+                <br />
+                <Jp>{"おうちの {人|ひと}に 「カメラを {使|つか}って いいよ」の {設定|せってい}を たのむか、アルバムから {選|えら}んでね。"}</Jp>
+              </p>
+              <AlbumPicker
+                onError={setError}
+                className="flex h-16 items-center justify-center gap-2 rounded-[24px] border-3 border-ink bg-yellow px-6 font-pop text-[19px] text-ink shadow-pop-md active:translate-y-[5px] active:shadow-none"
+              >
+                <Icon name="album" size={26} strokeWidth={2.2} />
+                <Jp>{"アルバムから {選|えら}ぶ"}</Jp>
+              </AlbumPicker>
+            </div>
           )}
 
-          {/* ねらいの かど */}
-          <svg aria-hidden="true" viewBox="0 0 336 534" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 size-full">
-            <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M56 150v-34h34M246 116h34v34M280 300v34h-34M90 334H56v-34" stroke="#22223A" strokeWidth="12" />
-              <path d="M56 150v-34h34M246 116h34v34M280 300v34h-34M90 334H56v-34" stroke="#FFC83D" strokeWidth="6" />
-            </g>
-          </svg>
+          {/* ねらいの かど（カメラが使えないときは、上の文と重なるので出さない） */}
+          {camera !== "unavailable" && (
+            <svg aria-hidden="true" viewBox="0 0 336 534" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 size-full">
+              <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M56 150v-34h34M246 116h34v34M280 300v34h-34M90 334H56v-34" stroke="#22223A" strokeWidth="12" />
+                <path d="M56 150v-34h34M246 116h34v34M280 300v34h-34M90 334H56v-34" stroke="#FFC83D" strokeWidth="6" />
+              </g>
+            </svg>
+          )}
 
           {/* 撮影時の注意（docs/02-spec.md 3章） */}
           <span className="absolute inset-x-3.5 top-3.5 flex items-center gap-2 rounded-2xl bg-pink-light px-3 py-2 text-[15px] font-black text-pink-dark">
@@ -119,10 +131,12 @@ function CaptureContent() {
             <Jp>{"{人|ひと}の {顔|かお}は とらないでね。まわりにも {気|き}を つけてね"}</Jp>
           </span>
 
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-            <Navigator mood="happy" size={68} />
-            <span className="rounded-[18px] bg-white px-3.5 py-2 text-base font-black">どこに あるかな？</span>
-          </div>
+          {camera !== "unavailable" && (
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+              <Navigator mood="happy" size={68} />
+              <span className="rounded-[18px] bg-white px-3.5 py-2 text-base font-black">どこに あるかな？</span>
+            </div>
+          )}
         </div>
 
         {error && (
@@ -132,7 +146,7 @@ function CaptureContent() {
         )}
 
         <div className="grid h-[108px] shrink-0 grid-cols-3 items-center">
-          <AlbumPicker className="flex flex-col items-center gap-1.5 justify-self-start text-sm font-black">
+          <AlbumPicker onError={setError} className="flex flex-col items-center gap-1.5 justify-self-start text-sm font-black">
             <span className="flex size-16 items-center justify-center rounded-[22px] border-3 border-ink bg-yellow shadow-pop-sm">
               <Icon name="album" size={30} strokeWidth={2.2} />
             </span>
