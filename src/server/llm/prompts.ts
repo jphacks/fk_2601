@@ -173,6 +173,12 @@ function profileText(input: QuestionsRequest): string {
             .join("／")}`,
         ]
       : []),
+    ...(input.liked && input.liked.length > 0
+      ? [`この子が「おもしろい！」と言った単元：${input.liked.join("、")}（にた切り口を1つ入れる）`]
+      : []),
+    ...(input.hardCount && input.hardCount > 0
+      ? [`さいきん10問のうち「むずかしい」と言った数：${input.hardCount}${input.hardCount >= 3 ? "（多いので、1だんかい やさしくする）" : ""}`]
+      : []),
     `出題済みの対象×単元：${asked}`,
   ].join("\n");
 }
