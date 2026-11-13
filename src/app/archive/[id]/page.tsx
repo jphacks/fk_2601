@@ -7,7 +7,7 @@ import { useArchive } from "@/components/ArchiveProvider";
 import { useApp } from "@/components/AuthProvider";
 import { ConditionSliders } from "@/components/ConditionSliders";
 import { CropCircle } from "@/components/CropCircle";
-import { ExplanationSteps, Related, TryIt, Sources } from "@/components/Explanation";
+import { ExplanationSteps, Related, ThinkMore, TryIt, Sources } from "@/components/Explanation";
 import { Gate } from "@/components/Gate";
 import { Page } from "@/components/Page";
 import { QuestionHint, QuestionText, SUBJECT_STYLE, Eyebrow } from "@/components/QuestionCard";
@@ -118,6 +118,7 @@ function DetailContent() {
         </section>
       )}
 
+      <ThinkMore question={question} />
       <TryIt question={question} />
       <Related question={question} />
       <Sources question={question} />

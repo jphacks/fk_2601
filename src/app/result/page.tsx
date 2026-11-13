@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
 import { ConditionSliders } from "@/components/ConditionSliders";
-import { ExplanationSteps, Related, TryIt, Sources } from "@/components/Explanation";
+import { ExplanationSteps, Related, ThinkMore, TryIt, Sources } from "@/components/Explanation";
 import { Gate } from "@/components/Gate";
 import { Icon } from "@/components/Icons";
 import { Page } from "@/components/Page";
@@ -93,6 +93,7 @@ function ResultContent() {
           <RubyText kana text={selected.explanation.short} />
         </Say>
         <ExplanationSteps question={selected} />
+        <ThinkMore question={selected} />
         <TryIt question={selected} />
         <Related question={selected} />
         <Sources question={selected} />
