@@ -136,8 +136,15 @@ export function ResultSummary({
 
   const ref = type === "estimate" ? refParts(question, actual) : null;
   const ratio = actual / guessValue;
-  const chipText =
-    rating === "pita"
+  // 範囲で予想したときは、倍率ではなく、選んだ範囲との ちかさで言う（まんなかの数から計算した倍率は、子どもが選んだ数ではない）
+  const range = guess.kind === "bin" ? { min: guess.edges[guess.index], max: guess.edges[guess.index + 1] } : null;
+  const chipText = range
+    ? rating === "pita"
+      ? "ぴったり この はんい！"
+      : rating === "oshii"
+        ? "おしい！ となりの はんい"
+        : `{予想|よそう}より ずっと ${ratio >= 1 ? "{多|おお}い" : "{少|すく}ない"}！`
+    : rating === "pita"
       ? "ほぼ ぴったり！"
       : `${ratioWith("{予想|よそう}", ratio, grade)}${rating === "ohazure" ? "！" : ""}`;
 
@@ -176,7 +183,7 @@ export function ResultSummary({
         </p>
       )}
 
-      <NumberLine guess={guessValue} actual={actual} unit={unit} intro={animate} grade={grade} />
+      <NumberLine guess={guessValue} guessRange={range ?? undefined} actual={actual} unit={unit} intro={animate} grade={grade} />
 
       {ref && (
         <div className="flex items-center gap-3.5 rounded-card bg-mint-light px-[18px] py-3">
@@ -189,10 +196,12 @@ export function ResultSummary({
         </div>
       )}
 
-      <p className="text-center text-sm font-black text-ink-sub">
-        <Jp>{"きみの {予想|よそう}："}</Jp>
-        {describeGuess(guess, unit, grade)}
-      </p>
+      {!range && (
+        <p className="text-center text-sm font-black text-ink-sub">
+          <Jp>{"きみの {予想|よそう}："}</Jp>
+          {describeGuess(guess, unit, grade)}
+        </p>
+      )}
     </div>
   );
 }
