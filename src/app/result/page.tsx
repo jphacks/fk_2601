@@ -110,15 +110,15 @@ function ResultContent() {
         <TryIt question={selected} />
         <Related question={selected} />
         <Sources question={selected} />
-        <div className="mt-auto flex gap-2.5">
-          <button
-            type="button"
-            onClick={() => setStep("get")}
-            className="flex h-[68px] flex-1 items-center justify-center rounded-3xl border-3 border-ink bg-white text-lg font-black shadow-pop-md active:translate-y-[4px] active:shadow-none"
-          >
-            <Jp>{"ずかんに {残|のこ}す"}</Jp>
-          </button>
-          {canChange && (
+        {canChange ? (
+          <div className="mt-auto flex gap-2.5">
+            <button
+              type="button"
+              onClick={() => setStep("get")}
+              className="flex h-[68px] flex-1 items-center justify-center rounded-3xl border-3 border-ink bg-white text-lg font-black shadow-pop-md active:translate-y-[4px] active:shadow-none"
+            >
+              <Jp>{"ずかんに {残|のこ}す"}</Jp>
+            </button>
             <button
               type="button"
               onClick={() => setStep("moshimo")}
@@ -126,8 +126,15 @@ function ResultContent() {
             >
               もっと！
             </button>
-          )}
-        </div>
+          </div>
+        ) : (
+          // 「もっと！」が ないとき（「なぜ？」型）は、つぎに することが 1つなので、メインのボタンで出す
+          <div className="mt-auto">
+            <Button onClick={() => setStep("get")}>
+              <Jp big>{"ずかんに {残|のこ}す！"}</Jp>
+            </Button>
+          </div>
+        )}
       </Page>
     );
   }
