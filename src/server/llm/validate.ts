@@ -1,7 +1,7 @@
 import "server-only";
 import { calculate, defaultScope } from "@/lib/calc";
 import { stripRuby } from "@/lib/ruby";
-import type { Question } from "./schema";
+import type { DraftQuestion, Question } from "./schema";
 
 // LLM の答え（llmAnswer）と、式で計算した値のずれの許容範囲（docs/03-technical.md 5.2）
 const ANSWER_TOLERANCE = 0.05;
@@ -9,6 +9,12 @@ const ANSWER_TOLERANCE = 0.05;
 const MAX_TEXT_LENGTH = 140;
 const MAX_NUMBERS_IN_TEXT = 2;
 const MAX_NUMBER_IN_TEXT = 10000;
+// 数で答える問いは、計算に使う数を問題文にならべない（文章題にしない）。問題文は1つまで、ヒントと合わせて2つまで
+const MAX_NUMBERS_IN_NUMERIC_TEXT = 1;
+const MAX_NUMBERS_WITH_HINT = 2;
+// 子どもが直感で言いそうな数（naiveGuess）と答えが、これより近い問いは出さない（予想がはずれないため）。
+// 2倍にすると、ガチャを ぜんぶ そろえる平均（直感 8回・答え 約15回）のような よい問いまで落ちた（2026-11-13）
+const MIN_SURPRISE_RATIO = 1.5;
 const NAME_PATTERN = /^[a-z][A-Za-z0-9_]*$/;
 
 export type Validated = { ok: true; question: Question } | { ok: false; reason: string };
@@ -56,8 +62,10 @@ function sanitizeRef(ref: Question["ref"]): Question["ref"] {
  * LLM が出した問いを確かめ、使える形にそろえる。式の答えは LLM の値ではなく、math.js で計算した値を信じる。
  * lenient は、子どもが自分で書いた問いと、見本の問い（写真のものを入れかえられるか・長さ・数の個数では はじかない）
  */
-export function validateQuestion(input: Question, options: { lenient?: boolean } = {}): Validated {
+export function validateQuestion(draft: Question | DraftQuestion, options: { lenient?: boolean } = {}): Validated {
   const fail = (reason: string): Validated => ({ ok: false, reason });
+  // naiveGuess は検査に使うだけで、保存しない。AI が作る問い（DraftQuestion）には swappable がない
+  const { naiveGuess, swappable, ...input }: Omit<Question, "swappable"> & { swappable?: boolean; naiveGuess?: number } = draft;
   const q: Question = {
     ...input,
     // 内部で使うだけの項目は、保存しない
@@ -80,13 +88,18 @@ export function validateQuestion(input: Question, options: { lenient?: boolean }
   if (q.text.trim().length === 0 || q.text.length > 400) return fail("問題文の長さが正しくありません");
   if (!options.lenient) {
     // 写っているものでなければ成り立たない、短くて、条件をならべすぎない問いだけを使う
-    if (input.swappable) return fail("写っているもの以外でも成り立つ問いです");
+    if (swappable) return fail("写っているもの以外でも成り立つ問いです");
     const plain = stripRuby(q.text);
     if (plain.length > MAX_TEXT_LENGTH) return fail("問題文が長すぎます");
     // 「1日」「1回」のような 1 は数えない。専門の大きな数（44100 など）を条件に書いた問いも出さない
     const numbers = (plain.match(/\d+(?:\.\d+)?/g) ?? []).map(Number).filter((n) => n !== 1);
     if (numbers.length > MAX_NUMBERS_IN_TEXT) return fail("問題文に数が多すぎます");
     if (numbers.some((n) => n >= MAX_NUMBER_IN_TEXT)) return fail("問題文に大きな数が書いてあります");
+    if (q.type !== "why") {
+      if (numbers.length > MAX_NUMBERS_IN_NUMERIC_TEXT) return fail("数で答える問いの問題文に、数がならんでいます");
+      const inHint = (stripRuby(q.hint).match(/d+(?:.d+)?/g) ?? []).map(Number).filter((n) => n !== 1);
+      if (numbers.length + inHint.length > MAX_NUMBERS_WITH_HINT) return fail("問題文とヒントに、計算に使う数がならんでいます");
+    }
   }
   if (q.explanation.short.trim().length === 0) return fail("解説がありません");
   if (q.topic.length === 0 || q.target.length === 0) return fail("単元か対象がありません");
@@ -107,12 +120,22 @@ export function validateQuestion(input: Question, options: { lenient?: boolean }
   }
 
   if (!q.formula) return fail("式がありません");
+  // 式で使われない変数は、もしもの スライダーを動かしても答えが変わらないので、外す。1つも使わない式は出さない
+  const formula = q.formula;
+  const used = q.variables.filter((v) => new RegExp(`(^|[^A-Za-z0-9_])${v.name}([^A-Za-z0-9_(]|$)`).test(formula));
+  if (!options.lenient && used.length === 0) return fail("式が変数を使っていません");
+  q.variables = used.length > 0 ? used : q.variables;
   const result = calculate(q.formula, defaultScope(q));
   if (!result.ok) return fail(result.reason);
   const answer = result.value;
   if (answer <= 0) return fail("答えが0以下です");
   if (q.llmAnswer === null || Math.abs(q.llmAnswer - answer) > Math.abs(answer) * ANSWER_TOLERANCE) {
     return fail("LLM の答えと式の答えが大きくずれています");
+  }
+  if (!options.lenient) {
+    // 直感で言いそうな数と答えが近い問いは、計算の練習になるだけなので出さない
+    if (typeof naiveGuess !== "number" || !(naiveGuess > 0)) return fail("直感で言いそうな数がありません");
+    if (Math.max(answer / naiveGuess, naiveGuess / answer) < MIN_SURPRISE_RATIO) return fail("直感で言いそうな数と、答えが近すぎます");
   }
 
   if (q.type === "compare") {

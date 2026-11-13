@@ -9,7 +9,8 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function mockQuestions(scene?: Scene): Promise<QuestionsOutput & { demo: true }> {
   await wait(1500);
   const { label, questions } = builtinQuestions(scene);
-  return { recognition: { label, canAsk: true }, questions, demo: true };
+  // 見本の問いは手で書いたものなので、候補（candidates）や 直感の数（naiveGuess）は 持たない（検査はゆるくする）
+  return { recognition: { label, canAsk: true }, candidates: [], questions: questions.map((q) => ({ ...q, naiveGuess: 0 })), demo: true };
 }
 
 export async function mockCustom(text: string, scene?: Scene): Promise<CustomOutput> {
@@ -22,7 +23,7 @@ export async function mockCustom(text: string, scene?: Scene): Promise<CustomOut
   return {
     recognition: { label, canAsk: true },
     answerable: true,
-    reason: null,
+    reason: "",
     question: {
       ...base,
       text,

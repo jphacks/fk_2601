@@ -79,15 +79,27 @@ export const RecognitionSchema = z.object({
   canAsk: z.boolean().describe("この写真から問いが作れるか"),
 });
 
+// AI に問いを作らせるときの形。出力の形が大きすぎると API に断られる（compiled grammar is too large）ので、項目を足すときは、ほかを減らす。
+// いまは swappable を書かせず（入れかえテストは プロンプトで させる）、そのぶん naiveGuess を足している（2026-11-13 にためした）
+export const DraftQuestionSchema = QuestionSchema.omit({ swappable: true }).extend({
+  naiveGuess: z
+    .number()
+    .describe("estimate・compare のとき、この学年の子どもが 計算せずに 直感で言いそうな数（答えと同じ単位）。答えと2倍以上はなれていない問いは使われない。why は 0"),
+});
+
 export const QuestionsOutputSchema = z.object({
   recognition: RecognitionSchema,
-  questions: z.array(QuestionSchema),
+  // questions より先に書かせる。表示・保存には使わない。問いを書く前に候補を出させて、にた問いに かたよらないようにする（docs/03-technical.md 5.3）。
+  // 項目の多い形や、説明（describe）をつけた形にすると、出力の形が大きすぎて API に断られるので、説明のない 文の配列にする（書きかたは prompts.ts）
+  candidates: z.array(z.string()),
+  questions: z.array(DraftQuestionSchema),
 });
 
 export const CustomOutputSchema = z.object({
   recognition: RecognitionSchema,
   answerable: z.boolean().describe("子どもが書いた問いに、式で答えられるか"),
-  reason: z.string().nullable().describe("答えられないときの理由（子ども向け）"),
+  // null もありにすると、出力の形が大きすぎて API に断られる（2026-11-13 に確かめた）ので、文字にする
+  reason: z.string().describe("答えられないときの理由（子ども向け）。答えられるときは空文字"),
   question: QuestionSchema.nullable(),
 });
 
@@ -95,6 +107,7 @@ export type Subject = z.infer<typeof SubjectSchema>;
 export type Variable = z.infer<typeof VariableSchema>;
 export type Source = z.infer<typeof SourceSchema>;
 export type Question = z.infer<typeof QuestionSchema>;
+export type DraftQuestion = z.infer<typeof DraftQuestionSchema>;
 export type Recognition = z.infer<typeof RecognitionSchema>;
 export type QuestionsOutput = z.infer<typeof QuestionsOutputSchema>;
 export type CustomOutput = z.infer<typeof CustomOutputSchema>;
