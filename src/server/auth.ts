@@ -4,7 +4,7 @@ import { verify, X509Certificate } from "node:crypto";
 export type VerifiedUser = { uid: string };
 
 /** ローカル版（開発・デモ用）はトークンを確認しない。Vercel 上では使えないようにする */
-function isLocalMode(): boolean {
+export function isLocalMode(): boolean {
   return process.env.NEXT_PUBLIC_BACKEND === "local" && !process.env.VERCEL;
 }
 

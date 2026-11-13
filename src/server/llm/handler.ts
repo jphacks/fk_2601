@@ -1,8 +1,10 @@
 import "server-only";
 import type { ZodType, z } from "zod";
-import { verifyRequest } from "@/server/auth";
+import { MAX_REQUEST_BYTES } from "@/lib/constants";
+import { isLocalMode, verifyRequest } from "@/server/auth";
 import { LlmError } from "./client";
 import { NoValidQuestionError } from "./generate";
+import { allowRequest } from "./rateLimit";
 
 export type ApiErrorCode = "unauthorized" | "bad_request" | "refusal" | "timeout" | "busy" | "invalid_output" | "llm_error";
 
@@ -39,6 +41,9 @@ export async function handle<S extends ZodType, R>(
   const user = await verifyRequest(request);
   if (!user) return errorResponse("unauthorized");
 
+  // 大きすぎるリクエストは、JSON を読む前に断る（Content-Length がないときは Vercel の 4.5MB の上限と、各項目の長さの検証で止める）
+  if (Number(request.headers.get("content-length") ?? 0) > MAX_REQUEST_BYTES) return errorResponse("bad_request");
+
   let body: unknown;
   try {
     body = await request.json();
@@ -47,6 +52,11 @@ export async function handle<S extends ZodType, R>(
   }
   const parsed = schema.safeParse(body);
   if (!parsed.success) return errorResponse("bad_request");
+
+  // 使いすぎの歯止め（uid ごとに 1分6回・1日100回。ローカル版と、AI を呼ばない見本の問い（fallback と scene）は数えない）
+  const { fallback, scene } = parsed.data as { fallback?: boolean; scene?: string };
+  const noAi = isLocalMode() || (fallback === true && scene !== undefined);
+  if (!noAi && !allowRequest(user.uid)) return errorResponse("busy");
 
   try {
     return Response.json(await run(parsed.data));
