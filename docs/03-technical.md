@@ -285,6 +285,9 @@ Firestore:
 - モデルは環境変数 `LLM_MODEL`（`claude-opus-5-5`・`claude-sonnet-5-5`・`claude-haiku-5-5`）、考える深さは `LLM_EFFORT`、考える処理のオフは `LLM_THINKING=off`（Haiku だけ）で変える
 - 利用が多いときは API が 429（混雑）を返す。画面には「すこし まってから もういちど ためしてね」と出す（自動で再試行はしない）
 - グループの共有を広げるときは、モデレーション API（`docs/01-overview.md` 11章）が必要（いまは、メンバーの通報と、管理者が `/teacher/groups` から消す形。通報された投稿を自動で隠す・通報の乱用への対策は、広げるときに決める）
+- ブラウザの安全のためのヘッダー：`next.config.ts` の `headers()` で、全部のパスに `X-Content-Type-Options: nosniff`・`Referrer-Policy: strict-origin-when-cross-origin`・`X-Frame-Options: DENY`・`Permissions-Policy: camera=(self), microphone=(), geolocation=()` を付ける（カメラは自分のサイトの中だけ。マイクと位置情報は使わない）
+  - 【未決】`Content-Security-Policy`。Firebase（認証・Firestore）とフォントの読み込みをこわすおそれがあるので、いまは入れていない。入れるときは、本番と同じビルドでログイン・撮影・問いを作る流れを通して確かめる
+- ホーム画面に追加（PWA）：`src/app/manifest.ts` の `theme_color` は `#4a5ae8`（`src/app/layout.tsx` の `viewport.themeColor` と同じ）、`background_color` は `#ffffff`。アイコンは `public/icon-192.png`・`public/icon-512.png`（Android）と `src/app/apple-icon.png`（180×180・iPhone）。どれも `src/app/icon.png` を縮小したもの
 
 ## 10 公開（デプロイ）
 - 本番の URL：https://fk2601.vercel.app （Vercel のプロジェクト `fk_2601`。チーム `csennkai`）
