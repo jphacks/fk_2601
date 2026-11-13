@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Question } from "@/server/llm/schema";
 import { Icon } from "./Icons";
+import { Navigator } from "./Navigator";
 import { Jp, RubyText, useJp } from "./RubyText";
 
 const KIND_LABEL = { data: "データ", book: "{本|ほん}", site: "サイト" } as const;
@@ -52,6 +53,28 @@ export function ExplanationSteps({ question, collapsible = false }: { question: 
         </ol>
       )}
     </>
+  );
+}
+
+/**
+ * かんがえてみよう（じゃあ、こうだったら？）：「なぜ？」型は、スライダーで変えられる条件が ないので「もしも」の画面が出ない。
+ * かわりに、AI が書いた「形・材料・ばしょが ちがったら？」の問いかけを、なぞときに出して、考えを ひろげる（#168）。答えは出さない。押せないので地の色だけ
+ */
+export function ThinkMore({ question }: { question: Question }) {
+  if (question.type !== "why" || !question.whatIf) return null;
+  return (
+    <div className="flex items-center gap-3 rounded-card bg-purple-light px-4 py-3.5">
+      <Navigator mood="think" size={56} />
+      <div className="flex flex-col gap-1">
+        {/* AI の問いかけは「じゃあ、…」で始まることが多いので、見出しは かさならない ことばにする */}
+        <h2 className="font-pop text-[17px] font-normal text-purple-dark">
+          <Jp>{"{考|かんが}えてみよう"}</Jp>
+        </h2>
+        <p className="text-[18px] font-black leading-[1.75]">
+          <RubyText kana text={question.whatIf} />
+        </p>
+      </div>
+    </div>
   );
 }
 
