@@ -8,7 +8,7 @@ import { AlbumPicker } from "@/components/AlbumPicker";
 import { useArchive } from "@/components/ArchiveProvider";
 import { useApp } from "@/components/AuthProvider";
 import { Gate } from "@/components/Gate";
-import { Guide, GuideRing, type GuideStep } from "@/components/Guide";
+import { Guide, type GuideStep } from "@/components/Guide";
 import { Icon } from "@/components/Icons";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
@@ -105,13 +105,10 @@ function HomeContent() {
         <Link
           ref={captureRef}
           href={CAPTURE_WITH_PROMISE}
-          className={`relative flex h-[92px] [@media(max-height:700px)]:h-[72px] shrink-0 items-center justify-center gap-3 rounded-[30px] border-3 border-ink bg-navi font-pop text-[25px] text-white shadow-[0_7px_0_var(--color-ink)] active:translate-y-[7px] active:shadow-none ${
-            guideOpen && guideStep === 2 ? "pointer-events-none z-[45]" : ""
-          }`}
+          className="flex h-[92px] shrink-0 items-center justify-center gap-3 rounded-[30px] border-3 border-ink bg-navi font-pop text-[25px] text-white shadow-[0_7px_0_var(--color-ink)] active:translate-y-[7px] active:shadow-none [@media(max-height:700px)]:h-[72px]"
         >
           <Icon name="camera" size={42} strokeWidth={2.2} />
           <Jp big>{"はてなを {探|さが}す！"}</Jp>
-          {guideOpen && guideStep === 2 && <GuideRing />}
         </Link>
 
         <AlbumPicker className="flex h-14 [@media(max-height:700px)]:h-12 shrink-0 items-center justify-center gap-2 rounded-[22px] border-3 border-ink bg-white text-[19px] font-black text-ink shadow-pop-sm active:translate-y-1 active:shadow-none">
