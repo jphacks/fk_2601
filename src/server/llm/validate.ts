@@ -31,6 +31,16 @@ function sanitizeUrl(url: string | null): string | null {
 
 const clip = (text: string, max: number) => text.trim().slice(0, max);
 
+// AI は正解を1番目に書く（15問中15問。2026-11-13）ので、サーバーで1回だけ ランダムに並べかえる。保存される順が、そのまま画面の順になる
+function shuffled<T>(items: T[]): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 // 「やってみよう」に入っていたら出さない ことば（AI への指示でも禁じているが、念のため コードでも はじく。docs/02-spec.md 13章）
 const UNSAFE_TRY = [
   "火", "ほのお", "マッチ", "ライター", "コンロ", "あつい", "熱", "おゆ", "お湯", "ゆげ",
@@ -116,7 +126,7 @@ export function validateQuestion(draft: Question | DraftQuestion, options: { len
   if (q.type === "why") {
     const choices = q.choices ?? [];
     if (choices.length < 2 || choices.filter((c) => c.correct).length !== 1) return fail("選択肢が正しくありません");
-    return { ok: true, question: { ...q, formula: null, variables: [], guessRange: null, compare: null, llmAnswer: null, ref: null } };
+    return { ok: true, question: { ...q, choices: shuffled(choices), formula: null, variables: [], guessRange: null, compare: null, llmAnswer: null, ref: null } };
   }
 
   if (!q.formula) return fail("式がありません");

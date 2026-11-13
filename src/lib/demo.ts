@@ -108,8 +108,8 @@ const QUESTIONS: Question[] = [
     guessRange: null,
     compare: null,
     choices: [
-      { text: "{氷|こおり}に なると ふくらんで、ペットボトルが ぱんぱんに なる", correct: true },
       { text: "{氷|こおり}に なると ちぢんで、ペットボトルが へこむ", correct: false },
+      { text: "{氷|こおり}に なると ふくらんで、ペットボトルが ぱんぱんに なる", correct: true },
       { text: "{氷|こおり}に なっても、ぜんぜん かわらない", correct: false },
     ],
     explanation: {
@@ -143,9 +143,9 @@ const QUESTIONS: Question[] = [
     guessRange: null,
     compare: null,
     choices: [
-      { text: "{商品|しょうひん}の {番号|ばんごう}。ねだんは、{番号|ばんごう}から おみせの コンピューターが さがす", correct: true },
       { text: "ねだんそのもの", correct: false },
       { text: "いつまで のめるか（のめる {日|ひ}）", correct: false },
+      { text: "{商品|しょうひん}の {番号|ばんごう}。ねだんは、{番号|ばんごう}から おみせの コンピューターが さがす", correct: true },
     ],
     explanation: {
       short: "しまは、{番号|ばんごう}を きかいが よめる {形|かたち}に した ものなんだ！",
