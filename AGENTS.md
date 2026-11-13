@@ -39,12 +39,12 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
 └── src/
     ├── app/              # 画面（Next.js の App Router）と API（app/api/questions）
-    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx・Icons.tsx。Signup.tsx は はじめての登録の部品、Guide.tsx は ホームに重ねる あそびかたの説明、GroupMissions.tsx は グループのミッションを読む。teacher/ は先生用の管理画面の部品（Group*.tsx・JoinCodePanel.tsx は本番のデータを扱う グループの管理）
+    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx（飾りと、答え合わせ・保存の お祝いの演出）・Icons.tsx。Signup.tsx は はじめての登録の部品、Guide.tsx は ホームに重ねる あそびかたの説明、GroupMissions.tsx は グループのミッションを読む。teacher/ は先生用の管理画面の部品（Group*.tsx・JoinCodePanel.tsx は本番のデータを扱う グループの管理）
     ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み。習っていない漢字は ひらがなにする）、kanji.ts（学年別漢字配当表）、titles.ts（称号：20種類 × どう・ぎん・きん）、scenes.ts（見本の絵）、joinCode.ts（参加コードを作る・そろえる）、demo.ts（ピッチ用のデモ版：`/demo` で始まる。AI を呼ばず、ペットボトルの問いを出す。`docs/03-technical.md` 10章）、teacherDemo.ts（管理画面の見本で使う架空のクラス・メンバー・授業中の記録・クラスに共有された投稿・ミッション・この2週間の件数・授業時間・参加コード・一緒に見る先生・教室に映すときの子ども向けの文と3択）など
     └── server/           # サーバーだけで動く処理。llm/（prompts・schema・client・validate・mock・builtin（AI なしの見本の問い））と auth.ts（ID トークンの確認）
 ```
 - はじめての人：`/login`（ようこそ → ログイン ID → パスワード）→ `/profile`（ニックネーム → 学年 → じゅんび できたよ）→ `/`（あそびかたの説明を1回だけ重ねる。`docs/02-spec.md` 4章）
-- 画面の流れ：`/`（ホーム）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。`/join`（参加コードでグループに入る）は「せってい」から開く。先生用の管理画面（見本）は `/teacher` から（子どもの画面に入口を出さない。架空のデータだけで動く：`docs/03-technical.md` 10章）。グループの管理（きょう・はてな・ミッション・メンバーと参加コード。本番のデータ）は `/teacher/groups/{グループ}`（クラスの切り替えの「グループ」から。`docs/03-technical.md` 6章）。画面ごとの決まりは `docs/02-spec.md` 1章
+- 画面の流れ：`/`（ホーム。見本の絵は `/samples` の一覧で えらぶ）→ `/capture`（撮影）→ `/lasso`（囲む）→ `/recognize`（待ち・これは○○だね？）→ `/choose`（はてなを選ぶ）→ `/predict`（せーの！）→ `/result`（こたえあわせ → なぞとき → もしも → ずかんに のこす）→ `/archive`（はてなずかん）。下のナビの画面は `/archive`・`/stamp`（スタンプ・しょうごう）・`/`・`/others`・`/settings` の5つ。`/join`（参加コードでグループに入る）は「せってい」から開く。先生用の管理画面（見本）は `/teacher` から（子どもの画面に入口を出さない。架空のデータだけで動く：`docs/03-technical.md` 10章）。グループの管理（きょう・はてな・ミッション・メンバーと参加コード。本番のデータ）は `/teacher/groups/{グループ}`（クラスの切り替えの「グループ」から。`docs/03-technical.md` 6章）。画面ごとの決まりは `docs/02-spec.md` 1章
 
 ## セットアップ・コマンド
 | 用途 | コマンド |
@@ -96,7 +96,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 - 予想と結果のズレが一目で分かるように見せる（驚きがこのアプリの中心）
 - 答え合わせの後に、条件を変えて考え直せる構造を保つ
 - アプリ内の文言は小学生が読める平易な日本語にする。専門用語を使う場合は短い説明を添える
-- 子どもの画面の見た目は `docs/design/README.md` の見本に従う（色トークン・太さ 3px の `ink` の線・下にずらした影・ナビの7つの表情）。画面の文言は ふりがなの記法 `{漢字|よみ}` で書き `<Jp>`（22px 以上は `<Jp big>`）で出す。22px 以上は ふりがなつき、小さい文字は ふりがな なしで、習っていない漢字は ひらがなになる（AI の文は `<RubyText kana>`、単位は `unitRuby`・`unitKana(unit, grade)`：`src/lib/ruby.ts`）。ひらがなにするときは、むずかしい熟語を そのまま読みにせず、やさしい ことばに言いかえる（例：前提 → まえてい・ぜんてい ✕／「〜と する」「こたえの もとに なった データ」○。言いかえの表は `docs/02-spec.md` 2.2。新しい言いかえを使ったら表に足す）。画面の共通部品は `src/components/ui.tsx`・`Page.tsx`・`TabBar.tsx`・`Decor.tsx`・`Icons.tsx`
+- 子どもの画面の見た目は `docs/design/README.md` の見本に従う（色トークン・太さ 3px の `ink` の線・下にずらした影・ナビの7つの表情・お祝いの演出）。画面の文言は ふりがなの記法 `{漢字|よみ}` で書き `<Jp>`（22px 以上は `<Jp big>`）で出す。22px 以上は ふりがなつき、小さい文字は ふりがな なしで、習っていない漢字は ひらがなになる（AI の文は `<RubyText kana>`、単位は `unitRuby`・`unitKana(unit, grade)`：`src/lib/ruby.ts`）。ひらがなにするときは、むずかしい熟語を そのまま読みにせず、やさしい ことばに言いかえる（例：前提 → まえてい・ぜんてい ✕／「〜と する」「こたえの もとに なった データ」○。言いかえの表は `docs/02-spec.md` 2.2。新しい言いかえを使ったら表に足す）。画面の共通部品は `src/components/ui.tsx`・`Page.tsx`・`TabBar.tsx`・`Decor.tsx`・`Icons.tsx`
 - 先生用の管理画面を作るときは、`docs/design/teachers/` の見本（決まりは同じフォルダの `README.md`）に従う。見本にある画面・機能・動きは実装するものとして扱う（仮の値と【未決】、見本の中だけの絵は除く）。色は `t-` 付きのトークンを使い、子どもの画面の文字の決まり（ふりがな・ひらがな）は使わない。例外（教室に映す画面など、子どもが読むもの）は同じ `README.md` の「文字」に従う
 
 ### LLM の扱い
