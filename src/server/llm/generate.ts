@@ -9,6 +9,7 @@ import {
   CustomOutputSchema,
   QuestionsOutputSchema,
   type CustomOutput,
+  type DraftQuestion,
   type Question,
   type Recognition,
 } from "./schema";
@@ -29,7 +30,7 @@ export type CustomResponse = {
 
 const isMock = () => process.env.LLM_MODE === "mock";
 
-function keepValid(questions: Question[], lenient = false): Question[] {
+function keepValid(questions: (Question | DraftQuestion)[], lenient = false): Question[] {
   const valid: Question[] = [];
   for (const q of questions) {
     const result = validateQuestion(q, { lenient });
@@ -68,7 +69,7 @@ export async function generateCustom(input: CustomRequest): Promise<CustomRespon
     : await callStructured(CustomOutputSchema, SYSTEM_PROMPT, input.image, customUserText(input));
 
   if (!output.answerable || !output.question) {
-    return { recognition: output.recognition, answerable: false, reason: output.reason, question: null };
+    return { recognition: output.recognition, answerable: false, reason: output.reason || null, question: null };
   }
   const result = validateQuestion(output.question, { lenient: true });
   if (!result.ok) {
