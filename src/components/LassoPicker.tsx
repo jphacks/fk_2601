@@ -118,7 +118,7 @@ export function LassoPicker({
         alt="とった しゃしん"
         width={photo.width}
         height={photo.height}
-        className="block h-auto max-h-[max(260px,calc(100dvh-398px))] w-auto max-w-full"
+        className="block h-auto max-h-[max(260px,calc(100dvh-404px))] w-auto max-w-full"
         draggable={false}
       />
       <canvas

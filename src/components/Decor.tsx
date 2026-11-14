@@ -326,7 +326,7 @@ export function Rays({ centerY = 42 }: { centerY?: number }) {
  */
 export function Spotlight({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative -mx-6 flex flex-col items-center px-6 pt-4">
+    <div className="relative -mx-6 flex flex-col items-center px-6 pt-2">
       <span aria-hidden className="absolute left-1/2 top-1/2 -z-10 aspect-square w-full max-w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,#fff_58%,rgba(255,255,255,0))]" />
       <span className="absolute left-2 top-6">
         <Sparkle color="#FFC83D" size={30} />
@@ -345,7 +345,7 @@ export function Spotlight({ children }: { children: React.ReactNode }) {
           <div className="-rotate-3">{children}</div>
         </div>
       </div>
-      <span aria-hidden className="animate-float-shadow mt-3 h-3.5 w-[210px] rounded-[50%] bg-ink opacity-20" />
+      <span aria-hidden className="animate-float-shadow mt-2 h-3.5 w-[210px] rounded-[50%] bg-ink opacity-20" />
     </div>
   );
 }
