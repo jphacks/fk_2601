@@ -10,7 +10,7 @@ import { useApp } from "@/components/AuthProvider";
 import { Gate } from "@/components/Gate";
 import { Guide, GuideRing, type GuideStep } from "@/components/Guide";
 import { Icon } from "@/components/Icons";
-import { Navigator } from "@/components/Navigator";
+import { MyNavigator } from "@/components/MyNavigator";
 import { Page } from "@/components/Page";
 import { SceneSamples } from "@/components/SceneSamples";
 import { CAPTURE_WITH_PROMISE, GUIDE_PARAM, groupOf, titleLabel } from "@/lib/constants";
@@ -82,7 +82,7 @@ function HomeContent() {
             <span className="rounded-xl bg-purple px-3 py-[3px] text-sm font-black text-white">{titleLabel(profile.title)}</span>
           </div>
           <div className="absolute bottom-9 right-0.5 origin-bottom-right [@media(max-height:700px)]:scale-[0.7]">
-            <Navigator mood="happy" size={124} />
+            <MyNavigator mood="happy" size={124} grow />
           </div>
         </section>
 

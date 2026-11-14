@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { stampCounts } from "@/lib/collection";
 import { groupOf, STAMP_GOAL, SUBJECT_JP, type GroupId } from "@/lib/constants";
+import { naviStage, naviStageInfo } from "@/lib/navi";
+import { progressPoints } from "@/lib/progress";
 import { newlyEarned, nextGoal, TIER_LABEL, TITLE_FAMILIES, titleLabel, titleStats, titleTier } from "@/lib/titles";
 import { messageOf } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
@@ -13,6 +15,7 @@ import { useArchive } from "./ArchiveProvider";
 import { useApp } from "./AuthProvider";
 import { Bunting, Confetti, Hanko, Rays, SideConfetti, Sparkle, Spotlight } from "./Decor";
 import { Medal } from "./Icons";
+import { MyNavigator, useNaviLook } from "./MyNavigator";
 import { Navigator, type Mood } from "./Navigator";
 import { SUBJECT_STYLE, TYPE_LABEL } from "./QuestionCard";
 import { useQuiz } from "./QuizProvider";
@@ -120,6 +123,9 @@ export function SavePanel({
   const gotTitles = saved && archives.length > 0 ? newlyEarned(archives.slice(1), archives) : [];
   const subjectFamily = TITLE_FAMILIES.find((f) => f.id === question.subject);
   const subjectNext = saved && subjectFamily ? nextGoal(subjectFamily, titleStats(archives)) : null;
+  // ナビが そだったか（この1つで、段階が上がったときだけ。#193）
+  const { stage: naviNow } = useNaviLook();
+  const grewTo = saved && archives.length > 0 && naviStage(progressPoints(archives.slice(1))) < naviNow ? naviStageInfo(naviNow) : null;
 
   if (!saved) {
     return (
@@ -219,7 +225,7 @@ export function SavePanel({
     <div className="relative flex flex-1 flex-col gap-4">
       <Confetti />
       <div className="flex items-center justify-center gap-1.5">
-        <Navigator mood="happy" size={70} react />
+        <MyNavigator mood="happy" size={70} react />
         <h2 className="font-pop text-[34px] font-normal leading-tight text-yellow [-webkit-text-stroke:2px_var(--color-ink)]">はてなゲット！</h2>
       </div>
       <CollectCard question={question} image={image} summary={summary} rating={rating} />
@@ -266,7 +272,20 @@ export function SavePanel({
         </div>
       ))}
 
-      <div className="mt-auto flex gap-2.5">        <button
+      {grewTo && (
+        <div className="flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-2.5">
+          <MyNavigator mood="surprise" size={72} react />
+          <div className="flex flex-col">
+            <span className="font-pop text-[20px] leading-tight">ナビが そだったよ！</span>
+            <span className="text-[15px] font-black text-yellow-dark">
+              <Jp>{`「${grewTo.name}」に なったよ。${grewTo.look}`}</Jp>
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-auto flex gap-2.5">
+        <button
           type="button"
           onClick={() => leave("/archive")}
           className="flex h-[68px] flex-1 items-center justify-center rounded-3xl border-3 border-ink bg-white text-lg font-black shadow-pop-md active:translate-y-[4px] active:shadow-none"
