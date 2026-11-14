@@ -20,6 +20,9 @@ desktop.ini
 .idea/
 *.swp
 
+# 問いの評価スクリプト（npm run eval:questions）の報告。写真（eval/images）はコミットする
+eval/out/
+
 # ログ
 *.log
 
