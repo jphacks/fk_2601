@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useApp } from "@/components/AuthProvider";
 import { INPUT_STYLE } from "@/components/Fields";
 import { Gate } from "@/components/Gate";
+import { PresenceNote } from "@/components/HelpButton";
 import { Page } from "@/components/Page";
 import { Button, LinkButton, Say } from "@/components/ui";
 import { groupOf, type GroupId } from "@/lib/constants";
@@ -51,6 +52,7 @@ function JoinContent() {
         <p className="rounded-card bg-pink-light px-4 py-3 text-lg font-black leading-[1.7]">
           <Jp>{"ずかんに {残|のこ}すときに「なかまにも {見|み}せる」で {選|えら}ぶと、{同|おな}じ グループの なかまに はてなを {見|み}せられるよ。{名前|なまえ}は {出|で}ないよ。"}</Jp>
         </p>
+        <PresenceNote />
         <div className="mt-auto flex flex-col gap-3">
           <LinkButton href="/others">
             <Jp big>{"みんなの はてなを {見|み}る"}</Jp>
@@ -96,6 +98,8 @@ function JoinContent() {
             <Jp>{`{英語|えいご}と {数字|すうじ}の ${JOIN_CODE_LENGTH}{文字|もじ}（「-」は なくても いいよ）`}</Jp>
           </span>
         </div>
+
+        <PresenceNote />
 
         {memberships && memberships.length > 0 && (
           <p className="text-base font-black text-ink-sub"><Jp>{"{今|いま} {入|はい}っている グループ："}</Jp>{memberships.map((m) => groupOf(m.groupId).kana).join("・")}</p>

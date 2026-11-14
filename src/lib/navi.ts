@@ -1,6 +1,6 @@
 import { earnedTitleIds, type TitleStats } from "./titles";
 
-// ナビを育てる（docs/02-spec.md 18章。#193）。
+// ナビを育てる（docs/02-spec.md 19章。#193）。
 // ごほうびは「問いを見つけて ずかんに のこしたこと」に結びつける（点数・スタンプの数・称号）。予想が当たった数には結びつけない。
 // 見た目は、ナビの画像の上に重ねる SVG（src/components/NaviDress.tsx）で、コードで描く
 

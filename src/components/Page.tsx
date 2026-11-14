@@ -1,6 +1,7 @@
 import { Jp } from "./RubyText";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { HelpButton } from "./HelpButton";
 import { Icon } from "./Icons";
 import { TabBar, type Tab } from "./TabBar";
 
@@ -52,7 +53,9 @@ export function Page({
 }) {
   return (
     <main className={`flex min-h-dvh flex-col transition-colors ${bg}`}>
-      <div className={`animate-rise flex flex-1 flex-col gap-4 px-6 pt-6 ${tab ? "pb-4" : "pb-[30px]"}`}>
+      <div className={`animate-rise relative flex flex-1 flex-col gap-4 px-6 pt-6 ${tab ? "pb-4" : "pb-[30px]"}`}>
+        {/* 「たすけて」（グループに入っている子だけ。#192）。ヘッダーがあれば右はし、ない下ナビの画面は 右上に重ねる */}
+        {!(back || onBack || title) && tab && <HelpButton className="absolute right-6 top-[27px] z-10" />}
         {(back || onBack || title) && (
           <header className="flex min-h-[52px] items-center gap-2.5">
             <BackButton href={back ?? undefined} onBack={onBack} />
@@ -62,6 +65,7 @@ export function Page({
                 <Jp big>{title}</Jp>
               </h1>
             )}
+            <HelpButton className="ml-auto" />
           </header>
         )}
         {children}

@@ -7,6 +7,7 @@ import { useApp } from "@/components/AuthProvider";
 import { Confetti } from "@/components/Decor";
 import { GradePicker, INPUT_STYLE } from "@/components/Fields";
 import { Gate } from "@/components/Gate";
+import { PresenceNote } from "@/components/HelpButton";
 import { Icon } from "@/components/Icons";
 import { Navigator } from "@/components/Navigator";
 import { Page } from "@/components/Page";
@@ -136,7 +137,7 @@ function FirstProfile() {
 
 /** じゅんび できたよ：きめたものを まとめて見せて、あそびかたへ（ホームを開くと、まだ見ていない説明が出る） */
 function Ready() {
-  const { user, profile, markGuideSeen } = useApp();
+  const { user, profile, markGuideSeen, memberships } = useApp();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -177,6 +178,8 @@ function Ready() {
           <Icon name="lock" size={20} strokeWidth={2.2} className="mt-0.5" />
           <Jp>{"ID と パスワードは おうちの {人|ひと}と メモしてね"}</Jp>
         </span>
+        {/* 自動で入ったグループがあるとき：先生に いまの画面が見えることを、はじめに伝える（#192） */}
+        {memberships && memberships.length > 0 && <PresenceNote />}
       </div>
 
       <div className="mt-auto flex flex-col gap-4">

@@ -1,7 +1,8 @@
 import { Jp } from "./RubyText";
 import Link from "next/link";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { isValidElement, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Navigator, type Mood } from "./Navigator";
+import { useReportError } from "./PresenceProvider";
 
 /**
  * ボタン（docs/design/README.md「部品の Tailwind レシピ」）
@@ -107,7 +108,16 @@ export function Say({
   );
 }
 
+/** 文そのもの、または <Jp>文</Jp> の文を取り出す（それ以外は null） */
+function textOf(node: ReactNode): string | null {
+  if (typeof node === "string") return node;
+  if (isValidElement<{ children?: ReactNode }>(node) && typeof node.props.children === "string") return node.props.children;
+  return null;
+}
+
 export function ErrorNotice({ children, onRetry }: { children: ReactNode; onRetry?: () => void }) {
+  // 文のときは、先生の画面の「さいごのエラー」に知らせる（#192。グループに入っていない子・デモでは何も起きない）
+  useReportError(textOf(children));
   return (
     <div className="space-y-4">
       {/* 文字だけのときは、ふりがなの記法で書かれていても 学年に合わせて出す */}

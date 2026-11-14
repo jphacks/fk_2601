@@ -1,5 +1,5 @@
 import type { GroupId, ReactionId } from "@/lib/constants";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupReactions, GroupRole, GroupSettings, JoinCode, Membership, Profile } from "@/lib/types";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupPresence, GroupReactions, GroupRole, GroupSettings, JoinCode, Membership, PresenceWrite, Profile } from "@/lib/types";
 
 /** 認証とデータの保存。Firebase 版と、Firebase なしで動かす開発用のローカル版がある */
 export interface Backend {
@@ -84,4 +84,13 @@ export interface Backend {
    * 自分の はてなには送れない（持ち主が分かってしまうため。firestore.rules で断る）
    */
   setGroupReaction(uid: string, groupId: GroupId, postId: string, reaction: ReactionId | null): Promise<void>;
+  /**
+   * 「いま つかっている」ようすを書く（#192。groups/{グループ}/presence/{uid}）。本人だけが書ける。
+   * firestore.rules を本番に反映するまでは断られる。呼ぶ側は、断られても子どもに見せず、あきらめる
+   */
+  savePresence(uid: string, groupId: GroupId, write: PresenceWrite): Promise<void>;
+  /** 自分の「たすけて」が出ているか（開きなおしても、押した状態を保つため）。まだ書いていなければ false */
+  getOwnHelp(uid: string, groupId: GroupId): Promise<boolean>;
+  /** since（ミリ秒）よりあとに動いた人（新しく動いた順）。管理者だけが読める */
+  listGroupPresence(groupId: GroupId, since: number): Promise<GroupPresence[]>;
 }

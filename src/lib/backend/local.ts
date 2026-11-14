@@ -1,7 +1,8 @@
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import { GROUP_POSTS_PAGE, GROUPS, type GroupId, type ReactionId } from "@/lib/constants";
 import { newJoinCode } from "@/lib/joinCode";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupReactions, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
+import { PRESENCE_ERROR_MAX } from "@/lib/presence";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupPresence, GroupReactions, GroupRole, GroupSettings, Membership, Profile } from "@/lib/types";
 import { usernameToLocalId, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -23,6 +24,9 @@ const groupSettingsKey = (groupId: GroupId) => `local:groupSettings:${groupId}`;
 const KEY_JOIN_CODES = "local:joinCodes";
 const groupJoinCodeKey = (groupId: GroupId) => `local:groupJoinCode:${groupId}`;
 type LocalJoinCodes = Record<string, { groupId: GroupId; open: boolean }>;
+// 「いま つかっている」（#192）：uid → ようす
+const groupPresenceKey = (groupId: GroupId) => `local:groupPresence:${groupId}`;
+type LocalPresence = Record<string, Omit<GroupPresence, "uid">>;
 // グループのミッション（#139）：日付 → 文
 const groupMissionsKey = (groupId: GroupId) => `local:groupMissions:${groupId}`;
 
@@ -139,6 +143,9 @@ export const localBackend: Backend = {
       writeJson(groupPostsKey(group.id), posts.filter((post) => owners[post.id] !== user.uid && !(ids.has(post.id) && !owners[post.id])));
       writeJson(groupOwnersKey(group.id), Object.fromEntries(Object.entries(owners).filter(([, uid]) => uid !== user.uid)));
       writeJson(groupReactionsKey(group.id), readJson<LocalReaction[]>(groupReactionsKey(group.id), []).filter((r) => r.uid !== user.uid));
+      const presence = readJson<LocalPresence>(groupPresenceKey(group.id), {});
+      delete presence[user.uid];
+      writeJson(groupPresenceKey(group.id), presence);
     }
     for (const key of archiveKeys) localStorage.removeItem(key);
     localStorage.removeItem(groupsKey(user.uid));
@@ -218,6 +225,9 @@ export const localBackend: Backend = {
     const groups = readJson<LocalGroups>(groupsKey(uid), {});
     delete groups[groupId];
     writeJson(groupsKey(uid), groups);
+    const presence = readJson<LocalPresence>(groupPresenceKey(groupId), {});
+    delete presence[uid];
+    writeJson(groupPresenceKey(groupId), presence);
   },
 
   async stopAutoJoin(groupId) {
@@ -343,6 +353,42 @@ export const localBackend: Backend = {
     if (reaction === null) return writeJson(groupReactionsKey(groupId), others);
     if (readJson<Record<string, string>>(groupOwnersKey(groupId), {})[postId] === uid) throw new Error("own post");
     writeJson(groupReactionsKey(groupId), [...others, { postId, uid, kind: reaction }]);
+  },
+
+  // Firebase 版と同じく、書かなかった項目（error・help）は前の値のまま
+  async savePresence(uid, groupId, write) {
+    const all = readJson<LocalPresence>(groupPresenceKey(groupId), {});
+    const before = all[uid];
+    const now = Date.now();
+    const next = {
+      username: write.username,
+      screen: write.screen,
+      at: now,
+      error: before?.error ?? null,
+      errorAt: before?.errorAt ?? null,
+      help: before?.help ?? false,
+      helpAt: before?.helpAt ?? null,
+    };
+    if (write.error !== undefined) {
+      next.error = write.error === null ? null : write.error.slice(0, PRESENCE_ERROR_MAX);
+      next.errorAt = now;
+    }
+    if (write.help !== undefined) {
+      next.help = write.help;
+      if (write.help) next.helpAt = now;
+    }
+    writeJson(groupPresenceKey(groupId), { ...all, [uid]: next });
+  },
+
+  async getOwnHelp(uid, groupId) {
+    return readJson<LocalPresence>(groupPresenceKey(groupId), {})[uid]?.help === true;
+  },
+
+  async listGroupPresence(groupId, since) {
+    return Object.entries(readJson<LocalPresence>(groupPresenceKey(groupId), {}))
+      .map(([uid, p]): GroupPresence => ({ uid, ...p }))
+      .filter((p) => p.at >= since)
+      .sort((a, b) => b.at - a.at);
   },
 
   async missingGroupPosts(groupId, ids) {

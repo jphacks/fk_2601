@@ -1,5 +1,5 @@
 import "server-only";
-import type { Question } from "./schema";
+import type { Certainty, Question } from "./schema";
 
 // 見本の問い（AI を使わない）。開発用のモックと、AI がつながらないときの「見本の絵」で使う。
 // 「直感がはずれやすい」問いの作りかたの手本にもなる（docs/03-technical.md 5.3）
@@ -7,12 +7,15 @@ import type { Question } from "./schema";
 export const SCENES = ["gacha", "signal", "ice"] as const;
 export type Scene = (typeof SCENES)[number];
 
-type Entry = { label: string; questions: Question[] };
+// 見本の問いは、たしかさ（certainty）と わけ（basis）が かならず ある（AI の出力の形と同じ）
+type BuiltinQuestion = Question & { certainty: Certainty; basis: string };
+type Entry = { label: string; questions: BuiltinQuestion[] };
 
 // 読みやすさのため、学年つきの記法 {漢字|よみ|学年} で書いて、学年の部分をとってから使う
 const g = (s: string) => s.replace(/\{([^{}|]+)\|([^{}|]+)\|\d\}/g, "{$1|$2}");
 
-type Draft = Omit<Question, "sources" | "compare" | "choices" | "guessRange" | "llmAnswer" | "formula" | "variables" | "answerUnit" | "ref" | "secret" | "swappable"> & {
+type Draft = Omit<Question, "sources" | "compare" | "choices" | "guessRange" | "llmAnswer" | "formula" | "variables" | "answerUnit" | "ref" | "secret" | "swappable" | "certainty" | "basis"> & {
+  basis: string;
   answerUnit?: string;
   formula?: string;
   variables?: Question["variables"];
@@ -25,12 +28,14 @@ type Draft = Omit<Question, "sources" | "compare" | "choices" | "guessRange" | "
   assume: string;
 };
 
-function build(d: Draft): Question {
+function build(d: Draft): BuiltinQuestion {
   const { source, assume, ...rest } = d;
   return {
     ...rest,
     secret: "",
     swappable: false,
+    // 見本の問いは、手で書いたもので、事実を たしかめてある
+    certainty: "textbook",
     text: g(d.text),
     topic: g(d.topic),
     target: g(d.target),
@@ -83,6 +88,7 @@ const BUILTIN: Record<Scene, Entry> = {
         tryIt: "トランプが あれば、1まいずつ ひいて もどし、4つの マークが ぜんぶ でるまで、なんかい ひくか ためしてみよう",
         related: ["おかしの おまけシール、ぜんぶ あつめるには {何|なん|2}こ かう？"],
         keyword: "クーポン コレクター もんだい",
+        basis: "コレクター問題（クーポン収集問題）では、n種類をそろえるまでの回数の平均は n×(1+1/2+…+1/n)。n＝10 なら約29回（数学の確率の定番の結果）",
         source: "クーポン コレクター{問題|もんだい|3}（{数学|すうがく|2}で よく {知|し|2}られている {問題|もんだい|3}）",
         assume: "どの おもちゃも おなじくらい {出|で|1}やすい／おなじ おもちゃが なんども {出|で|1}る ことが ある",
       }),
@@ -109,6 +115,7 @@ const BUILTIN: Record<Scene, Entry> = {
         tryIt: "いろえんぴつを 3ぼん えらんで、ならべかたを ぜんぶ かいて かぞえてみよう",
         related: ["じゃんけんを 3{人|にん|1}で したら、{手|て|1}の {出|だ|1}しかたは {何|なん|2}とおり？"],
         keyword: "{場合|ばあい|2}の {数|かず|2}",
+        basis: "くりかえしのある順列：3色から選ぶことを3回くりかえすと、3×3×3＝27とおり（算数・数学の「場合の数」の積の法則）",
         source: "{場合|ばあい|2}の {数|かず|2}（かけ{算|ざん|2}の きまり）",
         assume: "どの {色|いろ|2}も {出|で|1}る ことが ある",
       }),
@@ -132,6 +139,7 @@ const BUILTIN: Record<Scene, Entry> = {
         tryIt: "まるい ものと しかくい ものを つくえの うえで ころがして、どっちが よく ころがるか くらべてみよう",
         related: ["マンホールの ふたは、どうして まるい？"],
         keyword: "きゅう（ボールの かたち）",
+        basis: "球は、どの向きでも見た目の大きさ（直径）が同じで、かどがないので、どの面を下にしても同じようにころがる（算数・理科の球の性質）",
         source: "ものの かたちと ころがりかた",
         assume: "—",
       }),
@@ -161,6 +169,7 @@ const BUILTIN: Record<Scene, Entry> = {
         tryIt: "とけいを みながら、1ぷんで なんかい てを たたけるか かぞえてみよう。1にちだと どれくらいに なるかな",
         related: ["ふみきりは 1{日|にち|1}に {何|なん|2}かい しまる？"],
         keyword: "{信号|しんごう|4}の サイクル",
+        basis: "1日は86400秒。90秒で1周する信号は、1日に 86400÷90＝960回 青になる（周期が一定という仮定のもとでの計算）",
         source: "{時間|じかん|2}の たんいの かんけい（1{日|にち|1}＝86400びょう）",
         assume: "1{日|にち|1}じゅう おなじ はやさで かわる（ほんとうは {時間|じかん|2}で かわる {信号|しんごう|4}も ある）",
       }),
@@ -187,6 +196,7 @@ const BUILTIN: Record<Scene, Entry> = {
         tryIt: "いえの {時計|とけい|2}の びょうしんを {見|み|1}ながら、3びょうと 40びょうを {心|こころ|2}の {中|なか|1}で かぞえて、ながさを くらべてみよう",
         related: ["{赤|あか|1}の {時間|じかん|2}は、{黄|き|2}いろの {時間|じかん|2}の {何倍|なんばい|3}？"],
         keyword: "{信号|しんごう|4}の {時間|じかん|2}",
+        basis: "この見本の信号を、青40秒・黄3秒としたときの比 40÷3（見本の設定であり、実際の信号の長さは場所によってちがう）",
         source: "{信号|しんごう|4}の {青|あお|1}と {黄|き|2}いろの {時間|じかん|2}（この {見本|みほん|1}の {信号|しんごう|4}）",
         assume: "この {見本|みほん|1}の {信号|しんごう|4}では、{青|あお|1}が 40びょう、{黄|き|2}いろが 3びょう（ほかの {信号|しんごう|4}では ちがうよ）",
       }),
@@ -210,6 +220,7 @@ const BUILTIN: Record<Scene, Entry> = {
         tryIt: "あかい いろがみと あおい いろがみを、へやの はしから みて、どっちが めだつか くらべてみよう",
         related: ["{夕|ゆう|1}やけは、どうして {赤|あか|1}い？"],
         keyword: "{光|ひかり|2}の さんらん",
+        basis: "赤い光は波長が長く、空気中でちらばりにくいので、遠くまで届きやすい（理科の光の性質。交通信号の色の理由として広く説明されている）",
         source: "{光|ひかり|2}の せいしつ（{色|いろ|2}による ちらばりかたの ちがい）",
         assume: "—",
       }),
@@ -238,6 +249,7 @@ const BUILTIN: Record<Scene, Entry> = {
         tryIt: "コップに 水と 氷を いれて、水の たかさに しるしを つけ、とけたあとと くらべてみよう",
         related: ["うみに うかぶ {氷|こおり|3}が とけたら、うみの {水|みず|1}は ふえる？"],
         keyword: "アルキメデスの げんり",
+        basis: "浮いている氷は、自分の重さと同じ重さの水をおしのけている（アルキメデスの原理）。とけると、その分の水になるので、水面の高さは変わらない",
         source: "アルキメデスの げんり（うく {力|ちから|1}）",
         assume: "{氷|こおり|3}は うかんでいて、コップの そこに ついていない",
       }),
@@ -265,6 +277,7 @@ const BUILTIN: Record<Scene, Entry> = {
         tryIt: "コップ 1ぱいの 水を、ペットボトルに なんばい いれると いっぱいに なるか ためしてみよう",
         related: ["おふろの {水|みず|1}は、コップ {何|なん|2}ばいぶん？"],
         keyword: "かさの たんい（mL・L）",
+        basis: "200mLのコップ何杯分かは、プールの体積（25m×12m×1.2m＝360m³＝360000L）÷ 0.2L で求める。プールの大きさは、よくある例としての仮定",
         source: "{学校|がっこう|1}の 25mプールの よくある {大|おお|1}きさ",
         assume: "プールの {大|おお|1}きさは 25m×12m×1.2m／コップには いつも 200mL ちょうど {入|はい|1}る",
       }),
@@ -288,6 +301,7 @@ const BUILTIN: Record<Scene, Entry> = {
         tryIt: "れいぞうこから だした つめたい いれものを、しばらく みて、まわりに なにが つくか みてみよう",
         related: ["{冬|ふゆ|2}に まどが くもるのは、どうして？"],
         keyword: "けつろ",
+        basis: "空気中の水蒸気は、冷たい面にふれて冷やされると水てきになる（結露。理科の「水のすがた」の単元で習う内容）",
         source: "{水|すい|1}じょうきと けつろ",
         assume: "—",
       }),
@@ -295,7 +309,7 @@ const BUILTIN: Record<Scene, Entry> = {
   },
 };
 
-export function builtinQuestions(scene?: Scene): { label: string; questions: Question[] } {
+export function builtinQuestions(scene?: Scene): { label: string; questions: BuiltinQuestion[] } {
   const key = scene ?? SCENES[Math.floor(Math.random() * SCENES.length)];
   return { label: BUILTIN[key].label, questions: BUILTIN[key].questions };
 }

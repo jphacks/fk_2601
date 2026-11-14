@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Mochiy_Pop_One, Zen_Maru_Gothic } from "next/font/google";
 import { ArchiveProvider } from "@/components/ArchiveProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import { PresenceProvider } from "@/components/PresenceProvider";
 import { QuizProvider } from "@/components/QuizProvider";
 import { APP_NAME } from "@/lib/constants";
 import "./globals.css";
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <ArchiveProvider>
             <QuizProvider>
-              <div className="mx-auto min-h-dvh w-full max-w-md">{children}</div>
+              <PresenceProvider>
+                <div className="mx-auto min-h-dvh w-full max-w-md">{children}</div>
+              </PresenceProvider>
             </QuizProvider>
           </ArchiveProvider>
         </AuthProvider>
