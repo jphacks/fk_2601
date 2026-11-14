@@ -2,7 +2,8 @@ import type { Backend } from "@/lib/backend";
 import { DEMO_DELAY_MS, demoCustom, demoQuestions, isDemo } from "@/lib/demo";
 import { UserFacingError } from "@/lib/errors";
 import type { CustomResponse, QuestionsResponse } from "@/server/llm/generate";
-import type { CustomRequest, QuestionsRequest } from "@/server/llm/request";
+import type { CustomRequest, DetailRequest, QuestionsRequest } from "@/server/llm/request";
+import type { Detail } from "@/server/llm/schema";
 
 // サーバーのタイムアウト（60秒）より少し長く待つ
 const CLIENT_TIMEOUT_MS = 70_000;
@@ -46,4 +47,9 @@ export function requestQuestions(backend: Backend, input: QuestionsRequest): Pro
 export function requestCustom(backend: Backend, input: CustomRequest): Promise<CustomResponse> {
   if (isDemo()) return demoWait(demoCustom());
   return post<CustomResponse>(backend, "/api/questions/custom", input);
+}
+
+/** 子どもが選んだ1問の、解説・やってみよう・出典などを作る（2回目。画像は送らない）。デモは、問いが はじめから そろっているので 呼ばない */
+export function requestDetail(backend: Backend, input: DetailRequest): Promise<Detail> {
+  return post<Detail>(backend, "/api/questions/detail", input);
 }

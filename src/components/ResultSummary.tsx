@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FRACTION_GRADE, formatNumber, isApprox, numberLength, numberRuby, TIMES_GRADE } from "@/lib/format";
 import { describeGuess, RATING_LABEL, type Evaluation, type Guess, type Rating } from "@/lib/rating";
-import { refParts } from "@/lib/ref";
+import { refParts, roughRef } from "@/lib/ref";
 import { unitRuby } from "@/lib/ruby";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import type { Question } from "@/server/llm/schema";
@@ -285,8 +285,8 @@ export function ResultSummary({
         <div className={`flex items-center gap-3.5 rounded-card bg-mint-light px-[18px] py-3 ${full ? "mt-auto" : ""}`}>
           <Icon name="bulb" size={34} fill="#FFC83D" stroke="#22223A" strokeWidth={1.8} />
           <span className="text-[19px] font-black leading-[1.7]">
-            <RubyText kana text={ref.label} /> {isApprox(ref.value) ? "やく " : ""}
-            {formatNumber(ref.value, grade)}
+            <RubyText kana text={ref.label} /> {roughRef(ref.value) !== ref.value || isApprox(ref.value) ? "やく " : ""}
+            {formatNumber(roughRef(ref.value), grade)}
             <RubyText kana text={`${unitRuby(ref.unit)}${ref.suffix}`} />
           </span>
         </div>

@@ -12,6 +12,9 @@ export const VariableSchema = z.object({
   step: z.number().describe("スライダーの刻み"),
 });
 
+// 正解の事実の たしかさ。guess（写真からの すいそく）の問いは、画面に出さない（validate.ts。docs/03-technical.md 5.2）
+export const CertaintySchema = z.enum(["textbook", "common", "guess"]);
+
 export const SourceSchema = z.object({
   kind: z.enum(["data", "book", "site"]),
   title: z.string(),
@@ -50,6 +53,12 @@ export const QuestionSchema = z.object({
     .array(z.object({ text: z.string(), correct: z.boolean() }))
     .nullable()
     .describe("why のときだけ。理由・結果・どっち、の選択肢を2〜3つ、正解は1つ"),
+  certainty: CertaintySchema.describe(
+    "正解の事実の たしかさ。textbook＝教科書・図鑑にのっている／common＝ひろく知られている／guess＝写真からの すいそく（guess の問いは使われない）。数の問いは、式のもとにした きまり・数の たしかさ",
+  ),
+  basis: z
+    .string()
+    .describe("正解の わけを、大人が教科書・図鑑でたしかめられる1文（例: 円は どの向きでも 直径が同じなので、ふたが あなに 落ちない）。ふりがな記法は使わない。子どもには小さく出す"),
   explanation: z.object({
     short: z.string().describe("まず見せる一言"),
     steps: z.array(z.string()).describe("タップで見る計算過程のステップ"),
@@ -79,9 +88,14 @@ export const RecognitionSchema = z.object({
   canAsk: z.boolean().describe("この写真から問いが作れるか"),
 });
 
-// AI に問いを作らせるときの形。出力の形が大きすぎると API に断られる（compiled grammar is too large）ので、項目を足すときは、ほかを減らす。
+// 2回目（子どもが問いを選んだあと）に、その1問だけ書かせる項目（#165）。1回目には書かせない
+const DETAIL_KEYS = { explanation: true, whatIf: true, tryIt: true, related: true, keyword: true, sources: true } as const;
+export const DetailSchema = QuestionSchema.pick(DETAIL_KEYS);
+
+// 1回目で、AI に問いを作らせるときの形。予想とこたえあわせに必要な分だけで、解説・やってみよう・出典などは 2回目（DetailSchema）。
+// 出力の形が大きすぎると API に断られる（compiled grammar is too large）ので、項目を足すときは、ほかを減らす。
 // いまは swappable を書かせず（入れかえテストは プロンプトで させる）、そのぶん naiveGuess を足している（2026-11-13 にためした）
-export const DraftQuestionSchema = QuestionSchema.omit({ swappable: true }).extend({
+export const DraftQuestionSchema = QuestionSchema.omit({ swappable: true, ...DETAIL_KEYS }).extend({
   naiveGuess: z
     .number()
     .describe("estimate・compare のとき、この学年の子どもが 計算せずに 直感で言いそうな数（答えと同じ単位）。答えと2倍以上はなれていない問いは使われない。why は 0"),
@@ -95,18 +109,25 @@ export const QuestionsOutputSchema = z.object({
   questions: z.array(DraftQuestionSchema),
 });
 
+// 自分で書いた問いには、certainty は書かせない（certainty と basis の両方を足すと、出力の形が大きすぎて API に断られる。2026-11-14 に確かめた）。
+// 自分で書いた問いは、たしかさで はじかない（lenient）ので、わけ（basis）だけ書かせる
+const CustomQuestionSchema = QuestionSchema.omit({ certainty: true });
+
 export const CustomOutputSchema = z.object({
   recognition: RecognitionSchema,
   answerable: z.boolean().describe("子どもが書いた問いに、式で答えられるか"),
   // null もありにすると、出力の形が大きすぎて API に断られる（2026-11-13 に確かめた）ので、文字にする
   reason: z.string().describe("答えられないときの理由（子ども向け）。答えられるときは空文字"),
-  question: QuestionSchema.nullable(),
+  question: CustomQuestionSchema.nullable(),
 });
 
 export type Subject = z.infer<typeof SubjectSchema>;
 export type Variable = z.infer<typeof VariableSchema>;
 export type Source = z.infer<typeof SourceSchema>;
-export type Question = z.infer<typeof QuestionSchema>;
+export type Certainty = z.infer<typeof CertaintySchema>;
+// certainty・basis は、前に保存した問い（#161 より前）には ない。API に出させるときは必ず書かせる（QuestionSchema）が、型は ない場合も受けとる
+export type Question = Omit<z.infer<typeof QuestionSchema>, "certainty" | "basis"> & { certainty?: Certainty; basis?: string };
+export type Detail = z.infer<typeof DetailSchema>;
 export type DraftQuestion = z.infer<typeof DraftQuestionSchema>;
 export type Recognition = z.infer<typeof RecognitionSchema>;
 export type QuestionsOutput = z.infer<typeof QuestionsOutputSchema>;

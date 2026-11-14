@@ -27,7 +27,7 @@ import {
   query,
   serverTimestamp,
   setDoc,
-  type Timestamp,
+  Timestamp,
   updateDoc,
   where,
   writeBatch,
@@ -35,7 +35,8 @@ import {
 import { UserFacingError, UsernameTakenError } from "@/lib/errors";
 import { GROUP_POSTS_PAGE, GROUPS, isReactionId, type GroupId } from "@/lib/constants";
 import { newJoinCode } from "@/lib/joinCode";
-import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupReactions, JoinCode, Membership, Profile } from "@/lib/types";
+import { PRESENCE_ERROR_MAX } from "@/lib/presence";
+import type { ArchiveRecord, AuthUser, GroupMember, GroupMission, GroupPost, GroupPresence, GroupReactions, JoinCode, Membership, Profile } from "@/lib/types";
 import { usernameToEmail, validatePassword, validateUsername } from "@/lib/username";
 import type { Backend } from "./types";
 
@@ -141,6 +142,12 @@ export const firebaseBackend: Backend = {
             await batch.commit();
           }
         }
+      }
+      // 「いま つかっている」の記録（#192）。ルールを反映する前は断られるので、そのときは とばす
+      for (const group of GROUPS) {
+        await deleteDoc(doc(db(), "groups", group.id, "presence", user.uid)).catch((error: { code?: string }) => {
+          if (error.code !== "permission-denied") throw error;
+        });
       }
       for (const group of GROUPS) await deleteDoc(doc(db(), "groups", group.id, "members", user.uid));
       for (const profile of profiles.docs) await deleteDoc(profile.ref);
@@ -250,6 +257,8 @@ export const firebaseBackend: Backend = {
 
   async removeMember(groupId, uid) {
     await deleteDoc(doc(db(), "groups", groupId, "members", uid));
+    // その人の「いま つかっている」の記録も消す（なくても、断られても、外すことは成功にする）
+    await deleteDoc(doc(db(), "groups", groupId, "presence", uid)).catch(() => undefined);
   },
 
   // ルールで、いまの時刻（サーバーの時計）にするときだけ通す
@@ -408,6 +417,45 @@ export const firebaseBackend: Backend = {
     const ref = doc(db(), "groups", groupId, "reactions", `${uid}__${postId}`);
     if (reaction === null) await deleteDoc(ref);
     else await setDoc(ref, { postId, kind: reaction, createdAt: serverTimestamp() });
+  },
+
+  // 「いま つかっている」（#192）：presence/{uid}。merge で書くので、書かなかった項目（error・help）は前の値のまま。
+  // 時刻はサーバーの時計（端末の時計がずれていても、先生の画面で同じ物差しで比べられる）
+  async savePresence(uid, groupId, write) {
+    const data: Record<string, unknown> = { username: write.username, screen: write.screen, at: serverTimestamp() };
+    if (write.error !== undefined) {
+      data.error = write.error === null ? null : write.error.slice(0, PRESENCE_ERROR_MAX);
+      data.errorAt = serverTimestamp();
+    }
+    if (write.help !== undefined) {
+      data.help = write.help;
+      if (write.help) data.helpAt = serverTimestamp();
+    }
+    await setDoc(doc(db(), "groups", groupId, "presence", uid), data, { merge: true });
+  },
+
+  async getOwnHelp(uid, groupId) {
+    return (await getDoc(doc(db(), "groups", groupId, "presence", uid))).data()?.help === true;
+  },
+
+  async listGroupPresence(groupId, since) {
+    const snapshot = await getDocs(
+      query(collection(db(), "groups", groupId, "presence"), where("at", ">=", Timestamp.fromMillis(since)), orderBy("at", "desc"), limit(200)),
+    );
+    const millis = (value: unknown) => (value as Timestamp | undefined)?.toMillis?.() ?? null;
+    return snapshot.docs.map((d): GroupPresence => {
+      const data = d.data();
+      return {
+        uid: d.id,
+        username: typeof data.username === "string" ? data.username : null,
+        screen: typeof data.screen === "string" ? data.screen : "other",
+        at: millis(data.at) ?? 0,
+        error: typeof data.error === "string" ? data.error : null,
+        errorAt: millis(data.errorAt),
+        help: data.help === true,
+        helpAt: millis(data.helpAt),
+      };
+    });
   },
 
   // 端末に残った古い写しで「ない」と判断しないよう、サーバーに聞く

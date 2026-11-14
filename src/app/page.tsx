@@ -10,8 +10,9 @@ import { useApp } from "@/components/AuthProvider";
 import { Gate } from "@/components/Gate";
 import { Guide, type GuideStep } from "@/components/Guide";
 import { Icon } from "@/components/Icons";
-import { Navigator } from "@/components/Navigator";
+import { MyNavigator } from "@/components/MyNavigator";
 import { Page } from "@/components/Page";
+import { usePresence } from "@/components/PresenceProvider";
 import { CAPTURE_WITH_PROMISE, GUIDE_PARAM, groupOf, titleLabel } from "@/lib/constants";
 import { useTodayGroupMissions } from "@/components/GroupMissions";
 import { missionDone, todaysMission } from "@/lib/missions";
@@ -71,6 +72,8 @@ function HomeContent() {
   const [albumError, setAlbumError] = useState<string | null>(null);
   // グループのミッション（#139）。どのグループも出していない日・読み込み中は、いつもの きょうの おだいを出す
   const groupMissions = useTodayGroupMissions();
+  // 「たすけて」ボタン（グループに入っている子だけ。画面の枠が 右上に重ねる：#192）が出るときは、あいさつの右を あけておく
+  const canHelp = usePresence()?.canHelp ?? false;
   if (!profile) return null;
 
   const done = missionDone(archives);
@@ -94,7 +97,7 @@ function HomeContent() {
       <Page tab="home" tabRaised={guideOpen && guideStep === 1}>
         {/* 主役：空と まちの絵。ナビが、今日のお題を ふきだしで言う（のこった たかさは、空が うめる） */}
         <section className="flex min-h-[300px] flex-1 flex-col overflow-hidden rounded-[32px] bg-navi-light [@media(max-height:700px)]:min-h-[260px]">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-[18px] pt-4">
+          <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 pl-[18px] pt-4 ${canHelp ? "pr-[116px]" : "pr-[18px]"}`}>
             <h1 className="font-pop text-[21px] font-normal leading-snug">こんにちは、{profile.nickname}！</h1>
             <span className="rounded-xl bg-purple px-3 py-[3px] text-sm font-black text-white">{titleLabel(profile.title)}</span>
           </div>
@@ -130,8 +133,9 @@ function HomeContent() {
               <TownArt />
               <HiddenHatena left="22.2cqh" bottom="54.3%" color="#8B5CF6" delay={0} />
               <HiddenHatena left="53.5cqh" bottom="52.6%" color="#FF6F9C" delay={0.9} />
-              <div className="absolute bottom-[15.6%] right-0.5 aspect-square h-[54%] [&>img]:!size-full">
-                <Navigator mood="happy" size={124} />
+              {/* 自分のナビ（そだつと 少しずつ大きくなる。#193）。ひくい画面では、絵と いっしょに 小さくする */}
+              <div className="absolute bottom-[15.6%] right-0.5 origin-bottom-right [@media(max-height:700px)]:scale-[0.7] [@media(min-height:701px)_and_(max-height:760px)]:scale-[0.8]">
+                <MyNavigator mood="happy" size={124} grow />
               </div>
             </div>
           </div>

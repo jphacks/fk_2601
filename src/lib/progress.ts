@@ -14,6 +14,10 @@ export type GenerationContext = {
   subjectLevels: SubjectLevels;
   archiveCount: number;
   asked: AskedPair[];
+  /** さいきん「おもしろい！」と言った問いの単元（新しい順に LIKED_MAX こまで） */
+  liked: string[];
+  /** さいきん HARD_WINDOW 問のうち、「むずかしい」と言った数 */
+  hardCount: number;
 };
 
 const SUBJECTS: Subject[] = ["math", "science", "info"];
@@ -67,6 +71,25 @@ export function adjustLevel(base: number, records: Pick<ArchiveRecord, "rating">
   return Math.min(5, Math.max(1, base + step));
 }
 
+/** 「おもしろい！」の単元を、問いを作るときに伝える数の上限 */
+const LIKED_MAX = 5;
+/** 「むずかしい」の数を見る、さいきんの記録の数 */
+const HARD_WINDOW = 10;
+
+/**
+ * 子どもの「どうだった？」から、問いを作る手がかりを取り出す（#164）。records は新しい順。
+ * liked は「おもしろい！」の単元（同じ単元は1つ。新しい順に5つまで）。hardCount はさいきん10問のうちの「むずかしい」の数
+ */
+export function feelingHints(records: Pick<ArchiveRecord, "feeling" | "question">[]): { liked: string[]; hardCount: number } {
+  const liked: string[] = [];
+  for (const r of records) {
+    if (r.feeling !== "fun" || !r.question.topic || liked.includes(r.question.topic)) continue;
+    liked.push(r.question.topic);
+    if (liked.length >= LIKED_MAX) break;
+  }
+  return { liked, hardCount: records.slice(0, HARD_WINDOW).filter((r) => r.feeling === "hard").length };
+}
+
 /** 同じ「対象×単元」を1つにまとめ、新しい順（archive は新しい順に並んでいる）に上限まで残す */
 export function recentAsked(archive: { target: string; topic: string }[], limit = ASKED_FROM_ARCHIVE): AskedPair[] {
   const seen = new Set<string>();
@@ -97,5 +120,6 @@ export function buildGenerationContext(profile: Profile, archive: ArchiveRecord[
     archiveCount: own.length,
     // 出題済みは、遊んだ問いも入れる（同じ問いが出ないように）
     asked: recentAsked(archive.map((a) => a.question)),
+    ...feelingHints(archive),
   };
 }

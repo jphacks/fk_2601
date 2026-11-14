@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { stampCounts } from "@/lib/collection";
 import { groupOf, STAMP_GOAL, SUBJECT_JP, type GroupId } from "@/lib/constants";
+import { naviStage, naviStageInfo } from "@/lib/navi";
+import { progressPoints } from "@/lib/progress";
 import { newlyEarned, nextGoal, TIER_LABEL, TITLE_FAMILIES, titleLabel, titleStats, titleTier } from "@/lib/titles";
 import { messageOf } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
@@ -12,17 +14,22 @@ import type { Question } from "@/server/llm/schema";
 import { useArchive } from "./ArchiveProvider";
 import { useApp } from "./AuthProvider";
 import { Burst, Confetti, Hanko, Rays, Sparkle, Spotlight } from "./Decor";
+import { HelpButton } from "./HelpButton";
 import { Icon, Medal } from "./Icons";
-import { Navigator } from "./Navigator";
+import { MyNavigator, useNaviLook } from "./MyNavigator";
+import { Navigator, type Mood } from "./Navigator";
 import { BackButton } from "./Page";
+import { usePresence } from "./PresenceProvider";
 import { SUBJECT_STYLE, TYPE_LABEL } from "./QuestionCard";
 import { useQuiz } from "./QuizProvider";
 import { Stamp } from "./StampCards";
 import { Button, CHOICE_DOWN, CHOICE_UP, Say } from "./ui";
+import { needsDetail } from "@/lib/questionDetail";
 import { stripRuby } from "@/lib/ruby";
+import type { Feeling } from "@/lib/types";
 
 // カードの写真の たかさ（ひくい画面では ちぢめる）。はんこは、写真の下のふちに かさねる
-const PHOTO_HEIGHT = "clamp(100px, 15dvh, 136px)";
+const PHOTO_HEIGHT = "clamp(84px, 11dvh, 124px)";
 
 /**
  * ずかんのカード（見本 19）：つかまえた写真・はてな・きみのよそう→こたえ・はんこ。
@@ -64,7 +71,7 @@ export function CollectCard({
             <Jp>{`${SUBJECT_JP[question.subject]} ・ ${question.topic || TYPE_LABEL[question.type]}`}</Jp>
           </span>
           {/* 小さい文字なので、ふりがなを付けず、学年に合わせて出す */}
-          <RubyText kana className="line-clamp-4 text-[18px] font-black leading-[1.45]" text={question.text} />
+          <RubyText kana className="line-clamp-3 text-[18px] font-black leading-[1.45]" text={question.text} />
           <Jp className="font-pop text-[15px]">{summary}</Jp>
         </div>
         <div className="absolute right-1.5 top-[calc(var(--photo)-42px)]">
@@ -75,6 +82,13 @@ export function CollectCard({
     </div>
   );
 }
+
+/** 「この はてな、どうだった？」の3つ（顔は ナビの表情。小さい文字なので ひらがなで書く）。次の問いを作る手がかりになる（#164） */
+const FEELINGS: { id: Feeling; label: string; mood: Mood; off: string; on: string }[] = [
+  { id: "fun", label: "おもしろい！", mood: "happy", off: "bg-pink-light", on: "bg-pink" },
+  { id: "ok", label: "ふつう", mood: "sorry", off: "bg-mint-light", on: "bg-mint" },
+  { id: "hard", label: "むずかしい", mood: "effort", off: "bg-orange-light", on: "bg-orange" },
+];
 
 /** 答え合わせのあと、ずかんに保存する（見本 19「はてなゲット！」）。入っているグループの なかまに、名前を出さずに見せるかも選べる */
 export function SavePanel({
@@ -97,13 +111,19 @@ export function SavePanel({
   const router = useRouter();
   // 保存したかは、問いの状態に持つ（画面をもどっても、同じ問いを2回保存しない）
   const { saved, markSaved } = useQuiz();
+  // 解説が まだ 来ていない問い（2回目の待ち・失敗）は、保存しない。解説が空の記録が ずかんに のこらないように（#165）
+  const noDetail = needsDetail(question);
   const { status, archives, add } = useArchive();
   const { memberships } = useApp();
+  // 「たすけて」ボタン（グループに入っている子だけ：#192）が出るときは、上の段の ナビの ふきだしを はぶく（はばが たりないため）
+  const canHelp = usePresence()?.canHelp ?? false;
   // 見せるグループ（はじめは どこにも見せない）
   const [picked, setPicked] = useState<GroupId[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shareFailed, setShareFailed] = useState(false);
+  // どうだった？（えらばなくても 保存できる。もう一度 押すと、えらびなおせる）
+  const [feeling, setFeeling] = useState<Feeling | null>(null);
   // いま のこした ところか（紙ふぶきは、のこした しゅんかんだけ。あとで もどってきたときは出さない）
   const [celebrate, setCelebrate] = useState(false);
 
@@ -112,13 +132,13 @@ export function SavePanel({
   }
 
   async function save() {
-    if (saved || busy) return;
+    if (saved || busy || noDetail) return;
     setBusy(true);
     setError(null);
     try {
       // 入っているグループだけに見せる（ルールでも、メンバーでないグループには書けない）
       const groups = picked.filter((g) => memberships?.some((m) => m.groupId === g));
-      const result = await add({ question, guess, rating, image, groups });
+      const result = await add({ question, guess, rating, image, groups, ...(feeling ? { feeling } : {}) });
       setShareFailed(result.shareFailed);
       setCelebrate(true);
       markSaved();
@@ -141,6 +161,9 @@ export function SavePanel({
   const gotTitles = saved && archives.length > 0 ? newlyEarned(archives.slice(1), archives) : [];
   const subjectFamily = TITLE_FAMILIES.find((f) => f.id === question.subject);
   const subjectNext = saved && subjectFamily ? nextGoal(subjectFamily, titleStats(archives)) : null;
+  // ナビが そだったか（この1つで、段階が上がったときだけ。#193）
+  const { stage: naviNow } = useNaviLook();
+  const grewTo = saved && archives.length > 0 && naviStage(progressPoints(archives.slice(1))) < naviNow ? naviStageInfo(naviNow) : null;
   // ずかんの 何こめか。ずかんを 読みこめていないときは、まちがった数に なるので出さない
   const number = status === "ready" ? archives.length + (saved ? 0 : 1) : undefined;
 
@@ -148,14 +171,19 @@ export function SavePanel({
     return (
       <div className="relative flex flex-1 flex-col gap-4">
         <Rays />
-        {/* 上の段：もどる と、ナビの ひとこと（カードを 大きく見せたいので、1行に まとめる） */}
+        {/* 上の段：もどる・ナビの ひとこと・たすけて（Page のヘッダーと同じ ならび。カードを 大きく見せたいので、1行に まとめる） */}
         <div className="flex min-h-[52px] items-center gap-2.5">
           <BackButton onBack={onBack} />
-          <div className="grow">
-            <Say mood="happy" size={52} react small>
-              いい はてなだね！
-            </Say>
-          </div>
+          {canHelp ? (
+            <Navigator mood="happy" size={52} react />
+          ) : (
+            <div className="grow">
+              <Say mood="happy" size={52} react small>
+                いい はてなだね！
+              </Say>
+            </div>
+          )}
+          <HelpButton className="ml-auto" />
         </div>
 
         {/* 見出し：画面の はばに合わせて、1行に おさまる いちばん大きな文字にする */}
@@ -167,21 +195,45 @@ export function SavePanel({
           <CollectCard question={question} image={image} summary={summary} rating={rating} number={number} shine />
         </Spotlight>
 
+        {/* どうだった？（#164）：顔は ナビの表情。えらぶと 色がついて 押しこまれる。もう一度 押すと とりけせる */}
+        <fieldset className="mt-auto flex flex-col">
+          <legend className="mb-1.5 font-pop text-[17px] leading-snug">この はてな、どうだった？</legend>
+          <div className="grid grid-cols-3 gap-2.5 pb-1">
+            {FEELINGS.map((f) => {
+              const on = feeling === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => setFeeling(on ? null : f.id)}
+                  className={`flex flex-col items-center justify-center rounded-[18px] border-3 border-ink px-1 py-1 text-[clamp(12px,3.5vw,14px)] font-black leading-tight ${
+                    on ? `${f.on} ${CHOICE_DOWN}` : `${f.off} ${CHOICE_UP}`
+                  }`}
+                >
+                  <Navigator mood={f.mood} size={38} />
+                  <span className="whitespace-nowrap">{f.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
         {memberships && memberships.length > 0 && (
-          // わくは 押せないので 地の色だけ。中の グループの ボタンだけが 押せる（えらぶと 色がついて 押しこまれる）
-          <fieldset className="mt-auto flex flex-col gap-2 rounded-card bg-pink-light px-4 py-3">
+          // わくは 押せないので 地の色だけ。中の グループの ボタンだけが 押せる（えらぶと 色がついて 押しこまれる）。
+          // 見出しと ボタンは、はばが たりれば 1行に ならべる（入っている グループが 多いときは 折り返す）
+          <fieldset className="flex flex-col gap-1.5 rounded-card bg-pink-light px-4 py-2">
             <legend className="sr-only">グループの なかまにも みせる</legend>
-            <span aria-hidden="true" className="flex items-center gap-2 font-pop text-[17px] leading-snug">
-              <Icon name="people" size={22} stroke="#A12A55" strokeWidth={2.4} />
-              <Jp>{"なかまにも {見|み}せる？"}</Jp>
-            </span>
-            <div className="flex flex-wrap gap-2.5 pb-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-1">
+              <span aria-hidden="true" className="font-pop text-[17px] leading-snug">
+                <Jp>{"なかまにも {見|み}せる？"}</Jp>
+              </span>
               {memberships.map((m) => {
                 const on = picked.includes(m.groupId);
                 return (
                   <label
                     key={m.groupId}
-                    className={`flex h-12 cursor-pointer items-center gap-2 rounded-[18px] border-3 border-ink pl-2.5 pr-3.5 text-[17px] font-black has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-navi ${
+                    className={`flex h-11 cursor-pointer items-center gap-2 rounded-[18px] border-3 border-ink pl-2.5 pr-3.5 text-[17px] font-black has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-navi ${
                       on ? `bg-pink ${CHOICE_DOWN}` : `bg-white ${CHOICE_UP}`
                     }`}
                   >
@@ -206,10 +258,15 @@ export function SavePanel({
             <Jp>{error}</Jp>
           </p>
         )}
+        {noDetail && (
+          <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
+            <Jp>{"かいせつが まだ できていないよ。「なぞとき」に もどって、まってね"}</Jp>
+          </p>
+        )}
         {/* ひくい画面では、スクロールしなくても ボタンが見えるよう、下に とめる */}
-        <div className="mt-auto [@media(max-height:760px)]:sticky [@media(max-height:760px)]:bottom-0 [@media(max-height:760px)]:z-10 [@media(max-height:760px)]:-mx-6 [@media(max-height:760px)]:-mb-[30px] [@media(max-height:760px)]:bg-gradient-to-t [@media(max-height:760px)]:from-white [@media(max-height:760px)]:from-70% [@media(max-height:760px)]:to-transparent [@media(max-height:760px)]:px-6 [@media(max-height:760px)]:pb-[30px] [@media(max-height:760px)]:pt-5">
-          <div className={busy ? "" : "animate-nudge"}>
-            <Button onClick={save} disabled={busy}>
+        <div className="mt-auto [@media(max-height:830px)]:sticky [@media(max-height:830px)]:bottom-0 [@media(max-height:830px)]:z-10 [@media(max-height:830px)]:-mx-6 [@media(max-height:830px)]:-mb-[30px] [@media(max-height:830px)]:bg-gradient-to-t [@media(max-height:830px)]:from-white [@media(max-height:830px)]:from-70% [@media(max-height:830px)]:to-transparent [@media(max-height:830px)]:px-6 [@media(max-height:830px)]:pb-[30px] [@media(max-height:830px)]:pt-5">
+          <div className={busy || noDetail ? "" : "animate-nudge"}>
+            <Button onClick={save} disabled={busy || noDetail}>
               <Icon name="book" size={30} strokeWidth={2.6} />
               <Jp big>{busy ? "{残|のこ}しているよ…" : "ずかんに {残|のこ}す！"}</Jp>
             </Button>
@@ -224,7 +281,7 @@ export function SavePanel({
       <Confetti />
       {celebrate && <Burst tone="party" y={32} rain />}
       <div className="flex items-center justify-center gap-2">
-        <Navigator mood="happy" size={70} react />
+        <MyNavigator mood="happy" size={70} react />
         <h2 className="title-pop whitespace-nowrap text-yellow font-pop text-[clamp(28px,8.6vw,36px)] font-normal leading-[1.5]">はてなゲット！</h2>
       </div>
       <div className={`mt-auto self-center pt-2 ${celebrate ? "animate-card-pop" : ""}`}>
@@ -285,6 +342,18 @@ export function SavePanel({
           </span>
         </div>
       ))}
+
+      {grewTo && (
+        <div className={`flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-2.5 ${celebrate ? "animate-pop-in" : ""}`} style={celebrate ? { animationDelay: `${0.9 + gotTitles.length * 0.2}s` } : undefined}>
+          <MyNavigator mood="surprise" size={72} react />
+          <div className="flex flex-col">
+            <span className="font-pop text-[20px] leading-tight">ナビが そだったよ！</span>
+            <span className="text-[15px] font-black text-yellow-dark">
+              <Jp>{`「${grewTo.name}」に なったよ。${grewTo.look}`}</Jp>
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="mt-auto flex gap-2.5">
         <button

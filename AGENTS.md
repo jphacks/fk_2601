@@ -38,9 +38,9 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 ├── public/icon-*.png     # ホーム画面に追加（PWA）のアイコン 192・512（src/app/icon.png を縮小したもの。manifest.ts が読む）
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
 └── src/
-    ├── app/              # 画面（Next.js の App Router）と API（app/api/questions）
-    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx（飾りと、答え合わせ・保存の お祝いの演出）・Icons.tsx。Signup.tsx は はじめての登録の部品、Guide.tsx は ホームに重ねる あそびかたの説明、GroupMissions.tsx は グループのミッションを読む。teacher/ は先生用の管理画面の部品（Group*.tsx・JoinCodePanel.tsx は本番のデータを扱う グループの管理）
-    ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み。習っていない漢字は ひらがなにする）、kanji.ts（学年別漢字配当表）、titles.ts（称号：20種類 × どう・ぎん・きん）、scenes.ts（見本の絵）、joinCode.ts（参加コードを作る・そろえる）、demo.ts（ピッチ用のデモ版：`/demo` で始まる。AI を呼ばず、ペットボトルの問いを出す。`docs/03-technical.md` 10章）、teacherDemo.ts（管理画面の見本で使う架空のクラス・メンバー・授業中の記録・クラスに共有された投稿・ミッション・この2週間の件数・授業時間・参加コード・一緒に見る先生・教室に映すときの子ども向けの文と3択）など
+    ├── app/              # 画面（Next.js の App Router）と API（app/api/questions：問いを作る1回目・custom＝自分で書いた問い・detail＝選んだ問いの解説を作る2回目）
+    ├── components/       # 共通部品。AuthProvider・ArchiveProvider・QuizProvider が状態を持つ。見た目の部品は ui.tsx・Page.tsx・TabBar.tsx・Decor.tsx（飾りと、答え合わせ・保存の お祝いの演出）・Icons.tsx。Navigator.tsx は ナビの絵、NaviDress.tsx は ナビに重ねる成長の飾りと きせかえ（SVG）、MyNavigator.tsx は 自分のナビ（そだった すがた・着ている物）。Signup.tsx は はじめての登録の部品、Guide.tsx は ホームに重ねる あそびかたの説明、GroupMissions.tsx は グループのミッションを読む。PresenceProvider.tsx・HelpButton.tsx は 先生に「いま どの画面か」を知らせる・「たすけて」ボタン（`docs/02-spec.md` 18章）。teacher/ は先生用の管理画面の部品（Group*.tsx・JoinCodePanel.tsx は本番のデータを扱う グループの管理）
+    ├── lib/              # 画面側の処理。backend/（Firebase 版とローカル版）、calc.ts（式の安全な計算）、questionDetail.ts（問いの解説を作る2回目が要るかの判定と、送る本文）、rating.ts（答え合わせ）、ruby.ts（ふりがな・ひらがな化・単位の読み。習っていない漢字は ひらがなにする）、kanji.ts（学年別漢字配当表）、titles.ts（称号：20種類 × どう・ぎん・きん）、navi.ts（ナビの成長の5段階・きせかえ8こ・もらえる条件。`docs/02-spec.md` 19章）、scenes.ts（見本の絵）、joinCode.ts（参加コードを作る・そろえる）、presence.ts（先生に知らせる画面の名前・時間の決まり）、demo.ts（ピッチ用のデモ版：`/demo` で始まる。AI を呼ばず、ペットボトルの問いを出す。`docs/03-technical.md` 10章）、teacherDemo.ts（管理画面の見本で使う架空のクラス・メンバー・授業中の記録・クラスに共有された投稿・ミッション・この2週間の件数・授業時間・参加コード・一緒に見る先生・教室に映すときの子ども向けの文と3択）など
     └── server/           # サーバーだけで動く処理。llm/（prompts・schema・client・validate・mock・builtin（AI なしの見本の問い））と auth.ts（ID トークンの確認）
 ```
 - はじめての人：`/login`（ようこそ → ログイン ID → パスワード）→ `/profile`（ニックネーム → 学年 → じゅんび できたよ）→ `/`（あそびかたの説明を1回だけ重ねる。`docs/02-spec.md` 4章）
@@ -117,6 +117,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 - 認証やパスワードの保存を自作しない。採用するサービス・ライブラリの機能を使う
 - 退会は公開中の全投稿を先に消し、全プロフィールのずかん・参加情報・プロフィール・認証アカウントの順に消す。失敗後もやり直せるよう、認証は最後まで残す（`docs/02-spec.md` 4.3）
 - アーカイブ（写真・問い・予想・結果）は本人しか読み書きできないようにする。グループ（「みんなの はてな」）に見せるのは切り抜き画像・問い・称号だけで、ユーザー名・ニックネーム・位置情報・持ち主は含めない
+- グループの先生（管理者）に見せる「いま使っているようす」（`groups/{g}/presence/{uid}`。#192）に書くのは、ログイン ID・いまの画面の名前・時刻・さいごのエラーの文・たすけて だけ。写真・問いの中身・位置・ニックネームは書かない。書きこみの回数をおさえる（画面が変わったとき＋1分に1回まで）。断られても、子どもに見せずに続ける
 - 集める個人情報は最小限にする。`docs/` に書かれていない項目を勝手に増やさない
 - ログに画像データ・パスワード・トークン・API キーを出力しない
 - 学校版では上の決まりの一部を変える（本名・学校のメールアドレスを扱う、授業時間中に保存したものは担当クラスの先生が読める、グループの共有をクラス・友達グループの共有に広げる、先生の管理画面は大人向けの見た目と文字にする。`docs/06-school-expansion.md`）。その機能の Issue で実装するとき以外は、上の決まりのまま扱う。本名・メールアドレスは LLM に送らない

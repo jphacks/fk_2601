@@ -1,16 +1,17 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { requestQuestions } from "@/lib/api";
+import { requestDetail, requestQuestions } from "@/lib/api";
 import { ASKED_MAX } from "@/lib/constants";
 import { messageOf, UserFacingError } from "@/lib/errors";
 import type { Crop, Photo } from "@/lib/image";
 import { buildGenerationContext } from "@/lib/progress";
+import { detailRequestBody, needsDetail, withDetail } from "@/lib/questionDetail";
 import type { Guess } from "@/lib/rating";
 import type { SceneKey } from "@/lib/scenes";
 import type { ArchiveRecord } from "@/lib/types";
 import type { QuestionsResponse } from "@/server/llm/generate";
-import type { Question } from "@/server/llm/schema";
+import type { Detail, Question } from "@/server/llm/schema";
 import { useApp } from "./AuthProvider";
 import { useArchive } from "./ArchiveProvider";
 
@@ -18,6 +19,16 @@ export type Generation =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "ready"; data: QuestionsResponse }
+  | { status: "error"; message: string };
+
+/**
+ * えらんだ問いの 解説などを作る 2回目（#165）の状態。none は 2回目が要らない（見本・デモ・自分で書いた問いは、はじめから そろっている）。
+ * loading・error の間は、解説が空なので、ずかんに 保存しない
+ */
+export type DetailState =
+  | { status: "none" }
+  | { status: "loading" }
+  | { status: "ready"; data: Detail }
   | { status: "error"; message: string };
 
 type QuizContext = {
@@ -28,8 +39,11 @@ type QuizContext = {
   photoFrom: string;
   crop: Crop | null;
   generation: Generation;
-  /** えらんだ問いと、その予想 */
+  /** えらんだ問いと、その予想（解説などが 2回目で届いたら、重ねて返す） */
   selected: Question | null;
+  detail: DetailState;
+  /** 2回目が 失敗したとき、もう一度 呼ぶ（ユーザーの操作で呼ぶ1回。自動リトライではない） */
+  retryDetail: () => void;
   guess: Guess | null;
   /** いまの問いを、ずかんに保存したか（保存したら、もどっても もう一度は保存しない） */
   saved: boolean;
@@ -67,10 +81,14 @@ function QuizState({ children }: { children: React.ReactNode }) {
   const [photoFrom, setPhotoFrom] = useState("/");
   const [crop, setCrop] = useState<Crop | null>(null);
   const [generation, setGeneration] = useState<Generation>({ status: "idle" });
-  const [selected, setSelected] = useState<Question | null>(null);
+  const [picked, setPicked] = useState<Question | null>(null);
+  const [detail, setDetail] = useState<DetailState>({ status: "none" });
   const [guess, setGuessState] = useState<Guess | null>(null);
   const [saved, setSaved] = useState(false);
   const latest = useRef(0);
+  // 2回目の結果は、問いごとに覚える（もどって同じ問いを えらんでも、呼びなおさない）。新しい写真・作りなおしで捨てる
+  const detailCache = useRef(new Map<Question, Detail>());
+  const detailRun = useRef(0);
   // 問いを作るときに、いまの図鑑（出題済みの組み合わせ・学習の進み具合）を使う
   const archivesRef = useRef(archives);
   useEffect(() => {
@@ -82,6 +100,40 @@ function QuizState({ children }: { children: React.ReactNode }) {
   }, [archiveStatus]);
   // 作り直すときに、いま出ている問いと同じ対象×単元を避けるため、見たものを覚えておく
   const seen = useRef<{ target: string; topic: string }[]>([]);
+
+  // えらんだ問いと、2回目の状態を消す
+  const clearPicked = useCallback(() => {
+    detailRun.current++;
+    detailCache.current.clear();
+    setPicked(null);
+    setDetail({ status: "none" });
+  }, []);
+
+  // 2回目：えらんだ1問の 解説などを作る。子どもが 予想している あいだに 終わる
+  const loadDetail = useCallback(
+    (question: Question) => {
+      const id = ++detailRun.current;
+      const cached = detailCache.current.get(question);
+      if (cached) {
+        setDetail({ status: "ready", data: cached });
+        return;
+      }
+      if (!profile) return;
+      setDetail({ status: "loading" });
+      const body = detailRequestBody(question, buildGenerationContext(profile, archivesRef.current));
+      requestDetail(backend, body)
+        .then((data) => {
+          detailCache.current.set(question, data);
+          if (id !== detailRun.current) return;
+          setDetail({ status: "ready", data });
+        })
+        .catch((error) => {
+          if (id !== detailRun.current) return;
+          setDetail({ status: "error", message: messageOf(error) });
+        });
+    },
+    [backend, profile],
+  );
 
   const run = useCallback(
     (nextCrop: Crop) => {
@@ -128,22 +180,22 @@ function QuizState({ children }: { children: React.ReactNode }) {
     setPhotoFrom(from);
     setPhotoState(next);
     setCrop(null);
-    setSelected(null);
+    clearPicked();
     setGuessState(null);
     setSaved(false);
     setGeneration({ status: "idle" });
-  }, []);
+  }, [clearPicked]);
 
   const startGeneration = useCallback(
     (next: Crop) => {
       seen.current = [];
       setCrop(next);
-      setSelected(null);
+      clearPicked();
       setGuessState(null);
       setSaved(false);
       run(next);
     },
-    [run],
+    [run, clearPicked],
   );
 
   const regenerate = useCallback(() => {
@@ -157,24 +209,41 @@ function QuizState({ children }: { children: React.ReactNode }) {
     setPhotoFrom("/");
     setPhotoState(null);
     setCrop(null);
-    setSelected(null);
+    clearPicked();
     setGuessState(null);
     setSaved(false);
     setGeneration({ status: "idle" });
-  }, []);
+  }, [clearPicked]);
 
-  const selectQuestion = useCallback((question: Question) => {
-    setSelected(question);
-    setGuessState(null);
-    setSaved(false);
-  }, []);
+  const selectQuestion = useCallback(
+    (question: Question) => {
+      setPicked(question);
+      setGuessState(null);
+      setSaved(false);
+      if (needsDetail(question)) loadDetail(question);
+      else {
+        detailRun.current++;
+        setDetail({ status: "none" });
+      }
+    },
+    [loadDetail],
+  );
+
+  const retryDetail = useCallback(() => {
+    if (picked && needsDetail(picked)) loadDetail(picked);
+  }, [picked, loadDetail]);
+
+  const selected = useMemo(() => (picked && detail.status === "ready" ? withDetail(picked, detail.data) : picked), [picked, detail]);
 
   const setGuess = useCallback((next: Guess) => setGuessState(next), []);
   const markSaved = useCallback(() => setSaved(true), []);
 
   const value = useMemo<QuizContext>(
-    () => ({ photo, scene, photoFrom, crop, generation, selected, guess, saved, markSaved, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset }),
-    [photo, scene, photoFrom, crop, generation, selected, guess, saved, markSaved, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset],
+    () => ({
+      photo, scene, photoFrom, crop, generation, selected, detail, retryDetail, guess, saved, markSaved,
+      setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset,
+    }),
+    [photo, scene, photoFrom, crop, generation, selected, detail, retryDetail, guess, saved, markSaved, setPhoto, startGeneration, regenerate, selectQuestion, setGuess, reset],
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }

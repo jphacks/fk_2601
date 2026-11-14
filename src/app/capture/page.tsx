@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { AlbumPicker } from "@/components/AlbumPicker";
 import { Gate } from "@/components/Gate";
+import { HelpButton } from "@/components/HelpButton";
 import { Icon } from "@/components/Icons";
 import { Navigator } from "@/components/Navigator";
 import { SafetyNotice } from "@/components/SafetyNotice";
@@ -79,15 +80,18 @@ function CaptureContent() {
           <h1 className="font-pop text-2xl font-normal">
             <Jp big>{"{写真|しゃしん}を とろう！"}</Jp>
           </h1>
-          <Link
-            href="/"
-            aria-label="とじる"
-            className="flex size-[50px] items-center justify-center rounded-full border-3 border-ink bg-white shadow-pop-xs active:translate-y-[3px] active:shadow-none"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22223A" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </Link>
+          <div className="flex items-center gap-2.5">
+            <HelpButton />
+            <Link
+              href="/"
+              aria-label="とじる"
+              className="flex size-[50px] items-center justify-center rounded-full border-3 border-ink bg-white shadow-pop-xs active:translate-y-[3px] active:shadow-none"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22223A" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </Link>
+          </div>
         </div>
 
         <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[32px] bg-photo">

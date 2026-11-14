@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { useApp } from "@/components/AuthProvider";
 import { GradePicker, RadioRow } from "@/components/Fields";
 import { Gate } from "@/components/Gate";
+import { PresenceNote } from "@/components/HelpButton";
 import { Icon, Medal } from "@/components/Icons";
 import { Page } from "@/components/Page";
 import { Button, Say } from "@/components/ui";
@@ -145,6 +146,7 @@ function SettingsContent() {
         </span>
         <Icon name="next" size={20} strokeWidth={3} className="ml-auto" />
       </Link>
+      {memberships && memberships.length > 0 && <PresenceNote className="-mt-2 px-1" />}
 
       {/* あそびかたの説明を、1枚目から もういちど出す（docs/design/first/screens/10） */}
       <Link

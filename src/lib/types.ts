@@ -23,8 +23,16 @@ export type Profile = {
    * この値がない前からのプロフィールと /demo は、見おわったとして扱う（docs/03-technical.md 6章）
    */
   guideSeenAt?: number | null;
+  /**
+   * ナビに着せている きせかえの ID（src/lib/navi.ts。「ribbon」など。場所ごとに1つ）。
+   * ない（前のプロフィール）・空は、何も着ていない。知らない ID は読みとばす
+   */
+  outfit?: string[];
   createdAt: number;
 };
+
+/** 子どもの「この はてな、どうだった？」への答え（おもしろい！・ふつう・むずかしい） */
+export type Feeling = "fun" | "ok" | "hard";
 
 /** 図鑑（アーカイブ）に保存する、1回ぶんの問い */
 export type ArchiveRecord = {
@@ -34,6 +42,11 @@ export type ArchiveRecord = {
   question: Question;
   guess: Guess;
   rating: Rating;
+  /**
+   * 保存するときに子どもが えらんだ「どうだった？」。えらばなかった記録と、この項目より前の記録には ない。
+   * 次の問いを作るときの手がかりにだけ使う（src/lib/progress.ts）。グループには見せない・先生の画面には出さない
+   */
+  feeling?: Feeling;
   /**
    * 記録のもと。ないときや "own" は、自分で囲んで作った問い。"played" は、ほかの人の問いで遊んだもの
    * （学習の進み具合の点数には数えない。src/lib/progress.ts）。ほかの人の問いで遊ぶ機能は、まだない
@@ -84,6 +97,31 @@ export type GroupMission = {
 export type JoinCode = {
   code: string;
   open: boolean;
+};
+
+/**
+ * 子どもが書く「いま つかっている」ようす（#192）。写真・問いの中身・位置・ニックネームは入れない。
+ * username は ログイン ID（メンバーの画面と同じ）。error は さいごに出た エラーの文（子ども向けの文から ふりがなを外したもの）
+ */
+export type GroupPresence = {
+  uid: string;
+  username: string | null;
+  /** いまの画面の名前（src/lib/presence.ts の PRESENCE_SCREENS） */
+  screen: string;
+  /** さいごに動いた時刻（ミリ秒） */
+  at: number;
+  error: string | null;
+  errorAt: number | null;
+  help: boolean;
+  helpAt: number | null;
+};
+
+/** presence への1回の書きこみ。error・help は、変わったときだけ入れる（入れないものは、前の値のまま） */
+export type PresenceWrite = {
+  username: string;
+  screen: string;
+  error?: string | null;
+  help?: boolean;
 };
 
 export type GroupSettings = {
