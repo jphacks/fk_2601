@@ -36,6 +36,8 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 ├── firestore.rules       # Firestore のセキュリティルール（本人だけが読み書きできる。グループの投稿とリアクションはメンバーだけが読め、持ち主は owners に分けて本人の記録だけ読める）
 ├── public/navi/          # ナビの7つの表情とスタンプ（stamp-*）の画像（docs/design/assets/navi/ と同じもの）
 ├── public/icon-*.png     # ホーム画面に追加（PWA）のアイコン 192・512（src/app/icon.png を縮小したもの。manifest.ts が読む）
+├── scripts/              # 手で動かす開発用の処理。eval-questions.mts は 問いの評価（`npm run eval:questions`。本物の AI を呼ぶ。`docs/03-technical.md` 5.3.2）。alias-*.mjs は それを Node で動かすための設定
+├── eval/                 # 問いの評価用。images/ は評価に使う写真（コミットする）、out/ は報告（git 管理しない）
 ├── vercel.json           # Vercel の設定（関数を東京で動かす）
 └── src/
     ├── app/              # 画面（Next.js の App Router）と API（app/api/questions：問いを作る1回目・custom＝自分で書いた問い・detail＝選んだ問いの解説を作る2回目）
@@ -54,6 +56,7 @@ AIコーディングエージェント（Claude Code / Codex / Gemini CLI など
 | lint | `npm run lint` |
 | 型チェック | `npm run typecheck` |
 | 本番ビルド | `npm run build` |
+| 問いの評価（AI を呼ぶ。手で動かすときだけ） | `npm run eval:questions`（1回 約3セント・1回の実行は 40回まで） |
 | テスト | なし（MVP では書かない） |
 
 - 環境変数は `.env.example` にキー名だけを載せ、実際の値は `.env.local`（git 管理外）に置く
