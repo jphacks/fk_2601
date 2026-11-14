@@ -6,10 +6,12 @@
 
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
+import { calculate } from "@/lib/calc";
 import { isLearned } from "@/lib/kanji";
 import { TIMES_GRADE } from "@/lib/format";
 import { stripRuby } from "@/lib/ruby";
 import { callStructured, LlmError } from "@/server/llm/client";
+import { FACTS } from "@/server/llm/facts";
 import { questionsUserText, SYSTEM_PROMPT } from "@/server/llm/prompts";
 import { QuestionsRequestSchema } from "@/server/llm/request";
 import { QuestionsOutputSchema, type DraftQuestion, type QuestionsOutput } from "@/server/llm/schema";
@@ -236,8 +238,38 @@ function timestamp(): string {
   return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
 }
 
+// ひきだし（facts.ts。#162）の すべての式が、calc.ts の calculate で計算できるかを確かめる（AI は呼ばない）。
+// 変数の はしからはし（min・max の 組み合わせ）でも、答えが 0 より大きい数になること。問題があれば、止める
+function checkFacts() {
+  const problems: string[] = [];
+  const ids = new Set<string>();
+  for (const f of FACTS) {
+    const at = (msg: string) => problems.push(`${f.id}: ${msg}`);
+    if (ids.has(f.id)) at("id が かさなっています");
+    ids.add(f.id);
+    if (f.targets.length === 0 || !f.source.trim() || !f.secret.trim() || !f.answerUnit.trim()) at("targets・secret・source・answerUnit が 空です");
+    if (!Number.isInteger(f.minGrade) || f.minGrade < 1 || f.minGrade > 6) at("minGrade は 1〜6 です");
+    if (f.variables.length === 0 || f.variables.length > 3) at("変数は 1〜3 こです");
+    for (const v of f.variables) {
+      if (!/^[a-z][A-Za-z0-9_]*$/.test(v.name) || !(v.min < v.max) || !(v.step > 0) || v.value < v.min || v.value > v.max) at(`変数が正しくありません: ${v.name}`);
+    }
+    const scopes = [Object.fromEntries(f.variables.map((v) => [v.name, v.value]))];
+    for (let mask = 0; mask < 1 << f.variables.length; mask++) {
+      scopes.push(Object.fromEntries(f.variables.map((v, i) => [v.name, mask & (1 << i) ? v.max : v.min])));
+    }
+    for (const scope of scopes) {
+      const r = calculate(f.formula, scope);
+      if (!r.ok) at(`${r.reason}（${JSON.stringify(scope)}）`);
+      else if (!(r.value > 0)) at(`答えが 0 以下です（${JSON.stringify(scope)}）`);
+    }
+  }
+  if (problems.length > 0) fail(`ひきだし（facts.ts）に 問題があります\n  ${problems.join("\n  ")}`);
+  console.log(`ひきだし ${FACTS.length} こ：すべての式が 計算できました`);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  checkFacts();
   const images = listImages(args.only);
   const total = images.length * args.grades.length;
   if (total > MAX_CALLS) fail(`呼ぶ回数が ${total} 回になります。1回の実行は ${MAX_CALLS} 回までです（--only か --grades で しぼってください）`);
