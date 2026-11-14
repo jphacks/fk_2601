@@ -77,6 +77,8 @@ const QUESTIONS: Question[] = [
     guessRange: { min: 200, max: 20000 },
     compare: null,
     choices: null,
+    certainty: "textbook",
+    basis: "しずく1てきの大きさは、スポイトなどの器具で変わるが、1mLが約20てき（1てき約0.05mL）という目安がよく使われる。500mL ÷ 0.05mL ＝ 約10000てき（ここでは目安の値で計算している）",
     explanation: {
       short: "{小|ちい}さな しずくも、あつまると 1{万|まん}てき！",
       steps: [
@@ -112,6 +114,8 @@ const QUESTIONS: Question[] = [
       { text: "{氷|こおり}に なると ふくらんで、ペットボトルが ぱんぱんに なる", correct: true },
       { text: "{氷|こおり}に なっても、ぜんぜん かわらない", correct: false },
     ],
+    certainty: "textbook",
+    basis: "水は凍ると体積が約9％（約1.09倍）ふえる。氷の密度は水より小さい（理科の教科書の「水の状態変化」）",
     explanation: {
       short: "{水|みず}は こおると、すこし ふえるんだ！",
       steps: [
@@ -147,6 +151,8 @@ const QUESTIONS: Question[] = [
       { text: "ほかの {数字|すうじ}から {計算|けいさん}で きまり、よみまちがいを {見|み}つける", correct: true },
       { text: "ねだんの いちばん {下|した}の けたを あらわす", correct: false },
     ],
+    certainty: "textbook",
+    basis: "JANコードの最後の1けたはチェックデジットで、前の12けたから決まった計算で求める（日本の流通で使われる規格）",
     explanation: {
       short: "さいごの 1つは、「よみまちがい チェック」の {数字|すうじ}なんだ！",
       steps: [
