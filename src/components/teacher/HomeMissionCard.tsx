@@ -1,4 +1,5 @@
 import { Icon } from "@/components/Icons";
+import { Jp } from "@/components/RubyText";
 
 // 子どものホームの「きょうの おだい」と同じ見た目（src/app/page.tsx）。先生が出す前に見え方を確かめるためのもので、ホームそのものは変えない
 export function HomeMissionCard({ text }: { text: string }) {
@@ -9,7 +10,8 @@ export function HomeMissionCard({ text }: { text: string }) {
       </span>
       <span className="flex min-w-0 grow flex-col">
         <span className="text-sm font-black">きょうの おだい</span>
-        <span className="font-pop text-[19px] leading-snug [overflow-wrap:anywhere]">{text}</span>
+        {/* アプリのお題は ふりがなの記法（{漢字|よみ}）で書いてあるので、子どものホームと同じく <Jp> で出す（#205） */}
+        <Jp className="font-pop text-[19px] leading-snug [overflow-wrap:anywhere]">{text}</Jp>
       </span>
     </div>
   );

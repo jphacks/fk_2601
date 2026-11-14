@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { todaysMission } from "@/lib/missions";
+import { stripRuby } from "@/lib/ruby";
 import { DEMO_CLASSES, DEMO_HOLIDAYS, DEMO_NOW, DEMO_TODAY, kanjiIn, MISSION_EXAMPLE as EXAMPLE, MISSION_MAX_LENGTH as MAX_LENGTH, type TeacherClass } from "@/lib/teacherDemo";
 import { HomeMissionCard } from "./HomeMissionCard";
 import { useTeacher } from "./TeacherProvider";
@@ -334,7 +335,7 @@ export function MissionsScreen() {
                           <span className="text-[11px] text-t-text-sub">{classes}</span>
                         </>
                       ) : (
-                        <span className="text-sm leading-normal text-t-text-sub">アプリのお題{isFuture(d) ? "が出ます" : ""}：{todaysMission(d)}</span>
+                        <span className="text-sm leading-normal text-t-text-sub">アプリのお題{isFuture(d) ? "が出ます" : ""}：{stripRuby(todaysMission(d))}</span>
                       )}
                     </span>
                     <span className="max-[640px]:col-span-full">
