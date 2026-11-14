@@ -15,6 +15,7 @@ import {
   type Question,
   type Recognition,
 } from "./schema";
+import { pickQuestions } from "./select";
 import { EMPTY_DETAIL, validateDetail, validateQuestion } from "./validate";
 
 export type QuestionsResponse = {
@@ -37,6 +38,8 @@ function keepValid(questions: (Question | DraftQuestion)[], options: { lenient?:
   for (const q of questions) {
     const result = validateQuestion(q, options);
     if (result.ok) valid.push(result.question);
+    // 落とした理由だけ残す（問いの中身は出さない）。3つ出ないとき、何で落ちたかを調べるため
+    else console.info("[llm] 問いを落とした:", result.reason);
   }
   return valid;
 }
@@ -64,7 +67,8 @@ export async function generateQuestions(input: QuestionsRequest): Promise<Questi
   // 見本の問い（モック）は、手で書いたものなので、問いの作りかたの検査はゆるくする。モックは 解説まで全部そろっている。
   // 本物の AI の問い（1回目）は、解説などが空（2回目で書かせる。#165）
   const valid = keepValid(output.questions, isMock() ? { lenient: true } : { partial: true });
-  const questions = fitToGrade(valid, input.grade);
+  // AI は4つ書くので、検査を通ったものから 3つに しぼる（select.ts）
+  const questions = pickQuestions(fitToGrade(valid, input.grade));
   // 1つも出せないときはエラー表示にする（自動で作り直さない）
   if (questions.length === 0) throw new NoValidQuestionError();
   return { recognition: output.recognition, questions, ...("demo" in output ? { demo: true } : {}) };
