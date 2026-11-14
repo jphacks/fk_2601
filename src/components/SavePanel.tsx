@@ -13,10 +13,13 @@ import type { Guess, Rating } from "@/lib/rating";
 import type { Question } from "@/server/llm/schema";
 import { useArchive } from "./ArchiveProvider";
 import { useApp } from "./AuthProvider";
-import { Bunting, Confetti, Hanko, Rays, SideConfetti, Sparkle, Spotlight } from "./Decor";
-import { Medal } from "./Icons";
+import { Burst, Confetti, Hanko, Rays, Sparkle, Spotlight } from "./Decor";
+import { HelpButton } from "./HelpButton";
+import { Icon, Medal } from "./Icons";
 import { MyNavigator, useNaviLook } from "./MyNavigator";
 import { Navigator, type Mood } from "./Navigator";
+import { BackButton } from "./Page";
+import { usePresence } from "./PresenceProvider";
 import { SUBJECT_STYLE, TYPE_LABEL } from "./QuestionCard";
 import { useQuiz } from "./QuizProvider";
 import { Stamp } from "./StampCards";
@@ -25,15 +28,41 @@ import { needsDetail } from "@/lib/questionDetail";
 import { stripRuby } from "@/lib/ruby";
 import type { Feeling } from "@/lib/types";
 
-/** ずかんのカード（見本 19）：つかまえた写真・はてな・きみのよそう→こたえ・はんこ */
-export function CollectCard({ question, image, summary, rating }: { question: Question; image: string; summary: string; rating: Rating }) {
+// カードの写真の たかさ（ひくい画面では ちぢめる）。はんこは、写真の下のふちに かさねる
+const PHOTO_HEIGHT = "clamp(84px, 11dvh, 124px)";
+
+/**
+ * ずかんのカード（見本 19）：つかまえた写真・はてな・きみのよそう→こたえ・はんこ。
+ * number を渡すと、ずかんの 何こめかを 左上の 丸い札で出す。shine のときは、光が ななめに走る（ずかんに のこそう）
+ */
+export function CollectCard({
+  question,
+  image,
+  summary,
+  rating,
+  number,
+  shine = false,
+}: {
+  question: Question;
+  image: string;
+  summary: string;
+  rating: Rating;
+  number?: number;
+  shine?: boolean;
+}) {
   const s = SUBJECT_STYLE[question.subject];
   // 「なぜ？」型は、ピタリ・はずれ ではなく、せいかい・ざんねん
   const label = question.type === "why" ? (rating === "pita" ? "せいかい" : "ざんねん") : undefined;
   return (
-    <div className={`w-[300px] max-w-full -rotate-3 self-center rounded-[28px] p-2 ${s.solid}`}>
+    <div className={`relative w-[300px] max-w-full rounded-[28px] p-2 ${s.solid}`} style={{ "--photo": PHOTO_HEIGHT } as React.CSSProperties}>
+      {number !== undefined && (
+        <span className="absolute -left-3.5 -top-3.5 z-10 flex size-[60px] -rotate-12 flex-col items-center justify-center rounded-full border-3 border-ink bg-yellow font-pop leading-none">
+          <span className="text-[21px]">{number}</span>
+          <span className="mt-0.5 text-[12px]">こめ</span>
+        </span>
+      )}
       <div className="relative overflow-hidden rounded-[20px] bg-white">
-        <div className="flex h-28 items-center justify-center bg-photo">
+        <div className="flex h-[var(--photo)] items-center justify-center bg-photo">
           {/* eslint-disable-next-line @next/next/no-img-element -- 囲んだ部分の切り抜き（data URL） */}
           <img src={image} alt={stripRuby(question.target)} className="size-full object-contain" />
         </div>
@@ -42,12 +71,13 @@ export function CollectCard({ question, image, summary, rating }: { question: Qu
             <Jp>{`${SUBJECT_JP[question.subject]} ・ ${question.topic || TYPE_LABEL[question.type]}`}</Jp>
           </span>
           {/* 小さい文字なので、ふりがなを付けず、学年に合わせて出す */}
-          <RubyText kana className="text-[18px] font-black leading-[1.45]" text={question.text} />
+          <RubyText kana className="line-clamp-3 text-[18px] font-black leading-[1.45]" text={question.text} />
           <Jp className="font-pop text-[15px]">{summary}</Jp>
         </div>
-        <div className="absolute right-1.5 top-[70px]">
+        <div className="absolute right-1.5 top-[calc(var(--photo)-42px)]">
           <Hanko rating={rating} label={label} size={74} />
         </div>
+        {shine && <span aria-hidden className="animate-shine pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/55 to-transparent" />}
       </div>
     </div>
   );
@@ -67,6 +97,7 @@ export function SavePanel({
   rating,
   image,
   summary,
+  onBack,
 }: {
   question: Question;
   guess: Guess;
@@ -74,14 +105,18 @@ export function SavePanel({
   image: string;
   /** 「きみ 100 → こたえ 720」のような、カードに入れる一行 */
   summary: string;
+  /** のこす前の「もどる」（なぞとき・もしも へ）。のこした あとは出さない */
+  onBack: () => void;
 }) {
   const router = useRouter();
   // 保存したかは、問いの状態に持つ（画面をもどっても、同じ問いを2回保存しない）
   const { saved, markSaved } = useQuiz();
   // 解説が まだ 来ていない問い（2回目の待ち・失敗）は、保存しない。解説が空の記録が ずかんに のこらないように（#165）
   const noDetail = needsDetail(question);
-  const { archives, add } = useArchive();
+  const { status, archives, add } = useArchive();
   const { memberships } = useApp();
+  // 「たすけて」ボタン（グループに入っている子だけ：#192）が出るときは、上の段の ナビの ふきだしを はぶく（はばが たりないため）
+  const canHelp = usePresence()?.canHelp ?? false;
   // 見せるグループ（はじめは どこにも見せない）
   const [picked, setPicked] = useState<GroupId[]>([]);
   const [busy, setBusy] = useState(false);
@@ -89,6 +124,8 @@ export function SavePanel({
   const [shareFailed, setShareFailed] = useState(false);
   // どうだった？（えらばなくても 保存できる。もう一度 押すと、えらびなおせる）
   const [feeling, setFeeling] = useState<Feeling | null>(null);
+  // いま のこした ところか（紙ふぶきは、のこした しゅんかんだけ。あとで もどってきたときは出さない）
+  const [celebrate, setCelebrate] = useState(false);
 
   function toggle(id: GroupId, on: boolean) {
     setPicked((prev) => (on ? [...prev.filter((g) => g !== id), id] : prev.filter((g) => g !== id)));
@@ -103,6 +140,7 @@ export function SavePanel({
       const groups = picked.filter((g) => memberships?.some((m) => m.groupId === g));
       const result = await add({ question, guess, rating, image, groups, ...(feeling ? { feeling } : {}) });
       setShareFailed(result.shareFailed);
+      setCelebrate(true);
       markSaved();
     } catch (e) {
       setError(messageOf(e));
@@ -126,55 +164,41 @@ export function SavePanel({
   // ナビが そだったか（この1つで、段階が上がったときだけ。#193）
   const { stage: naviNow } = useNaviLook();
   const grewTo = saved && archives.length > 0 && naviStage(progressPoints(archives.slice(1))) < naviNow ? naviStageInfo(naviNow) : null;
+  // ずかんの 何こめか。ずかんを 読みこめていないときは、まちがった数に なるので出さない
+  const number = status === "ready" ? archives.length + (saved ? 0 : 1) : undefined;
 
   if (!saved) {
     return (
       <div className="relative flex flex-1 flex-col gap-4">
         <Rays />
-        <SideConfetti />
-        <Bunting />
-        <div className="flex items-center justify-center gap-2">
-          <Sparkle color="#FF6F9C" size={22} />
-          {/* 1行に おさまるよう、画面の はばに合わせて 文字を小さくする */}
-          <h2 className="whitespace-nowrap font-pop text-[clamp(20px,7vw,28px)] font-normal leading-tight text-yellow [-webkit-text-stroke:2px_var(--color-ink)]">
-            <Jp big>{"ずかんに {残|のこ}そう！"}</Jp>
-          </h2>
-          <Sparkle color="#24C3A0" size={22} delay={0.6} />
+        {/* 上の段：もどる・ナビの ひとこと・たすけて（Page のヘッダーと同じ ならび。カードを 大きく見せたいので、1行に まとめる） */}
+        <div className="flex min-h-[52px] items-center gap-2.5">
+          <BackButton onBack={onBack} />
+          {canHelp ? (
+            <Navigator mood="happy" size={52} react />
+          ) : (
+            <div className="grow">
+              <Say mood="happy" size={52} react small>
+                いい はてなだね！
+              </Say>
+            </div>
+          )}
+          <HelpButton className="ml-auto" />
         </div>
+
+        {/* 見出し：画面の はばに合わせて、1行に おさまる いちばん大きな文字にする */}
+        <h2 className="title-pop whitespace-nowrap text-yellow text-center font-pop text-[clamp(28px,9vw,40px)] font-normal leading-[1.5]">
+          <Jp big>{"ずかんに {残|のこ}そう！"}</Jp>
+        </h2>
+
         <Spotlight>
-          <CollectCard question={question} image={image} summary={summary} rating={rating} />
+          <CollectCard question={question} image={image} summary={summary} rating={rating} number={number} shine />
         </Spotlight>
 
-        {memberships && memberships.length > 0 && (
-          <fieldset className="flex flex-col gap-2 rounded-card border-3 border-ink bg-pink-light px-4 py-3 shadow-pop-sm">
-            <legend className="sr-only">グループの なかまにも みせる</legend>
-            <span aria-hidden="true" className="text-[19px] font-black leading-[1.6]">
-              <Jp>{"なかまにも {見|み}せる"}</Jp>
-              <span className="block text-sm font-bold text-pink-dark">
-                <Jp>{"{名前|なまえ}は {出|で}ないよ。{囲|かこ}んだ {写真|しゃしん}と はてなだけ、{選|えら}んだ グループの なかまに {見|み}えるよ。"}</Jp>
-              </span>
-            </span>
-            {memberships.map((m) => (
-              <label
-                key={m.groupId}
-                className="flex cursor-pointer items-center gap-3 rounded-[16px] border-3 border-ink bg-white px-3 py-2 active:translate-y-0.5"
-              >
-                <input
-                  type="checkbox"
-                  checked={picked.includes(m.groupId)}
-                  onChange={(e) => toggle(m.groupId, e.target.checked)}
-                  className="size-6 shrink-0 accent-[var(--color-pink)]"
-                />
-                {/* 小さい文字なので、ひらがなで出す */}
-                <span className="text-[19px] font-black">{groupOf(m.groupId).kana}</span>
-              </label>
-            ))}
-          </fieldset>
-        )}
-
-        <fieldset className="flex flex-col gap-2">
-          <legend className="mb-2 text-[19px] font-black">この はてな、どうだった？</legend>
-          <div className="grid grid-cols-3 gap-2.5">
+        {/* どうだった？（#164）：顔は ナビの表情。えらぶと 色がついて 押しこまれる。もう一度 押すと とりけせる */}
+        <fieldset className="mt-auto flex flex-col">
+          <legend className="mb-1.5 font-pop text-[17px] leading-snug">この はてな、どうだった？</legend>
+          <div className="grid grid-cols-3 gap-2.5 pb-1">
             {FEELINGS.map((f) => {
               const on = feeling === f.id;
               return (
@@ -183,11 +207,11 @@ export function SavePanel({
                   type="button"
                   aria-pressed={on}
                   onClick={() => setFeeling(on ? null : f.id)}
-                  className={`flex flex-col items-center justify-center gap-0.5 rounded-[20px] border-3 border-ink px-1 py-2 text-[clamp(13px,3.7vw,16px)] font-black ${
+                  className={`flex flex-col items-center justify-center rounded-[18px] border-3 border-ink px-1 py-1 text-[clamp(12px,3.5vw,14px)] font-black leading-tight ${
                     on ? `${f.on} ${CHOICE_DOWN}` : `${f.off} ${CHOICE_UP}`
                   }`}
                 >
-                  <Navigator mood={f.mood} size={44} />
+                  <Navigator mood={f.mood} size={38} />
                   <span className="whitespace-nowrap">{f.label}</span>
                 </button>
               );
@@ -195,12 +219,39 @@ export function SavePanel({
           </div>
         </fieldset>
 
-        {/* ナビも いっしょに よろこぶ（のこった空白を うめる） */}
-        <div className="mt-auto">
-          <Say mood="happy" size={64} react>
-            <Jp className="whitespace-nowrap text-[clamp(15px,4.6vw,19px)]">{"いい はてなを {見|み}つけたね！"}</Jp>
-          </Say>
-        </div>
+        {memberships && memberships.length > 0 && (
+          // わくは 押せないので 地の色だけ。中の グループの ボタンだけが 押せる（えらぶと 色がついて 押しこまれる）。
+          // 見出しと ボタンは、はばが たりれば 1行に ならべる（入っている グループが 多いときは 折り返す）
+          <fieldset className="flex flex-col gap-1.5 rounded-card bg-pink-light px-4 py-2">
+            <legend className="sr-only">グループの なかまにも みせる</legend>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-1">
+              <span aria-hidden="true" className="font-pop text-[17px] leading-snug">
+                <Jp>{"なかまにも {見|み}せる？"}</Jp>
+              </span>
+              {memberships.map((m) => {
+                const on = picked.includes(m.groupId);
+                return (
+                  <label
+                    key={m.groupId}
+                    className={`flex h-11 cursor-pointer items-center gap-2 rounded-[18px] border-3 border-ink pl-2.5 pr-3.5 text-[17px] font-black has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-navi ${
+                      on ? `bg-pink ${CHOICE_DOWN}` : `bg-white ${CHOICE_UP}`
+                    }`}
+                  >
+                    <input type="checkbox" checked={on} onChange={(e) => toggle(m.groupId, e.target.checked)} className="sr-only" />
+                    <span aria-hidden className={`flex size-6 shrink-0 items-center justify-center rounded-lg border-[2.5px] border-ink ${on ? "bg-white" : "bg-cloud"}`}>
+                      {on && <Icon name="check" size={16} strokeWidth={4} />}
+                    </span>
+                    {/* 小さい文字なので、ひらがなで出す */}
+                    {groupOf(m.groupId).kana}
+                  </label>
+                );
+              })}
+            </div>
+            <span className="text-sm font-bold leading-[1.6] text-pink-dark">
+              <Jp>{"{名前|なまえ}は {出|で}ないよ。{囲|かこ}んだ {写真|しゃしん}と はてなだけ、{選|えら}んだ グループの なかまに {見|み}えるよ。"}</Jp>
+            </span>
+          </fieldset>
+        )}
 
         {error && (
           <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
@@ -212,10 +263,14 @@ export function SavePanel({
             <Jp>{"かいせつが まだ できていないよ。「なぞとき」に もどって、まってね"}</Jp>
           </p>
         )}
-        <div className="mt-auto">
-          <Button onClick={save} disabled={busy || noDetail}>
-            <Jp big>{busy ? "{残|のこ}しているよ…" : "ずかんに {残|のこ}す！"}</Jp>
-          </Button>
+        {/* ひくい画面では、スクロールしなくても ボタンが見えるよう、下に とめる */}
+        <div className="mt-auto [@media(max-height:830px)]:sticky [@media(max-height:830px)]:bottom-0 [@media(max-height:830px)]:z-10 [@media(max-height:830px)]:-mx-6 [@media(max-height:830px)]:-mb-[30px] [@media(max-height:830px)]:bg-gradient-to-t [@media(max-height:830px)]:from-white [@media(max-height:830px)]:from-70% [@media(max-height:830px)]:to-transparent [@media(max-height:830px)]:px-6 [@media(max-height:830px)]:pb-[30px] [@media(max-height:830px)]:pt-5">
+          <div className={busy || noDetail ? "" : "animate-nudge"}>
+            <Button onClick={save} disabled={busy || noDetail}>
+              <Icon name="book" size={30} strokeWidth={2.6} />
+              <Jp big>{busy ? "{残|のこ}しているよ…" : "ずかんに {残|のこ}す！"}</Jp>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -224,11 +279,16 @@ export function SavePanel({
   return (
     <div className="relative flex flex-1 flex-col gap-4">
       <Confetti />
-      <div className="flex items-center justify-center gap-1.5">
+      {celebrate && <Burst tone="party" y={32} rain />}
+      <div className="flex items-center justify-center gap-2">
         <MyNavigator mood="happy" size={70} react />
-        <h2 className="font-pop text-[34px] font-normal leading-tight text-yellow [-webkit-text-stroke:2px_var(--color-ink)]">はてなゲット！</h2>
+        <h2 className="title-pop whitespace-nowrap text-yellow font-pop text-[clamp(28px,8.6vw,36px)] font-normal leading-[1.5]">はてなゲット！</h2>
       </div>
-      <CollectCard question={question} image={image} summary={summary} rating={rating} />
+      <div className={`mt-auto self-center pt-2 ${celebrate ? "animate-card-pop" : ""}`}>
+        <div className="-rotate-3">
+          <CollectCard question={question} image={image} summary={summary} rating={rating} number={number} />
+        </div>
+      </div>
 
       {shareFailed && (
         <p role="alert" className="rounded-[20px] bg-pink-light px-4 py-3 text-base font-black text-pink-dark">
@@ -247,7 +307,9 @@ export function SavePanel({
             const isNew = count <= STAMP_GOAL && i === shownStamps - 1;
             if (isNew) {
               return (
-                <span key={i} className="-my-[5px] flex size-[60px] items-center justify-center rounded-full border-3 border-ink bg-yellow">
+                <span key={i} className="relative -my-[5px] flex size-[60px] items-center justify-center rounded-full border-3 border-ink bg-yellow">
+                  {/* スタンプを 押した しゅんかんに、輪が 広がる */}
+                  {celebrate && <span aria-hidden className="animate-ring absolute -inset-1 rounded-full border-[5px] border-yellow [animation-delay:0.5s]" />}
                   <Stamp subject={question.subject} size={46} react />
                 </span>
               );
@@ -262,18 +324,27 @@ export function SavePanel({
         )}
       </section>
 
-      {gotTitles.map((id) => (
-        <div key={id} className="flex items-center gap-3 rounded-card bg-purple px-4 py-3 text-white">
+      {gotTitles.map((id, i) => (
+        <div
+          key={id}
+          className={`relative flex items-center gap-3 rounded-card bg-purple px-4 py-3 text-white ${celebrate ? "animate-pop-in" : ""}`}
+          style={celebrate ? { animationDelay: `${0.7 + i * 0.2}s` } : undefined}
+        >
           <Medal size={40} tier={titleTier(id) ?? "gold"} />
           <div className="flex flex-col">
             <span className="text-[15px] font-black">しょうごう ゲット！</span>
-            <span className="font-pop text-[22px]">{titleLabel(id)}</span>
+            {/* 長い名前（「あさの たんけんか（どう）」など）も、なるべく 1行に おさめる。折り返すときは、行の長さを そろえる */}
+            <span className="text-balance font-pop text-[clamp(17px,5.1vw,20px)] leading-snug">{titleLabel(id)}</span>
           </div>
+          {/* 星は、名前の はばを とらないよう、カードの かどに かさねる */}
+          <span className="absolute -right-1.5 -top-2.5">
+            <Sparkle color="#FFC83D" size={28} delay={i * 0.3} />
+          </span>
         </div>
       ))}
 
       {grewTo && (
-        <div className="flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-2.5">
+        <div className={`flex items-center gap-3 rounded-card bg-yellow-soft px-4 py-2.5 ${celebrate ? "animate-pop-in" : ""}`} style={celebrate ? { animationDelay: `${0.9 + gotTitles.length * 0.2}s` } : undefined}>
           <MyNavigator mood="surprise" size={72} react />
           <div className="flex flex-col">
             <span className="font-pop text-[20px] leading-tight">ナビが そだったよ！</span>

@@ -9,27 +9,29 @@ import { photoFromFile } from "@/lib/image";
 
 /**
  * アルバムから写真を選ぶ（ホームと撮影画面で使う）。選んだら、そのまま「つかまえる」画面へ進む。
- * 子の要素が見た目になる（label の中に、見えない input を置く）
+ * 子の要素が見た目になる（label の中に、見えない input を置く）。
+ * onError を渡すと、写真が開けなかったときの文を 親に わたす（ボタンを ならべた わくの中に、文が わりこまないように）
  */
-export function AlbumPicker({ className = "", children }: { className?: string; children: ReactNode }) {
+export function AlbumPicker({ className = "", children, onError }: { className?: string; children: ReactNode; onError?: (message: string | null) => void }) {
   const router = useRouter();
   // 囲む画面の「もどる」で、選んだ画面（ホームか撮影）へ戻すため
   const pathname = usePathname();
   const { setPhoto } = useQuiz();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const report = onError ?? setError;
 
   async function pick(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
     setBusy(true);
-    setError(null);
+    report(null);
     try {
       setPhoto(await photoFromFile(file), pathname);
       router.push("/lasso");
     } catch (e) {
-      setError(messageOf(e));
+      report(messageOf(e));
       setBusy(false);
     }
   }

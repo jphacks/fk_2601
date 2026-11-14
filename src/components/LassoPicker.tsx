@@ -109,9 +109,18 @@ export function LassoPicker({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[32px] bg-photo select-none">
+    // 写真は、下のボタンまで スクロールなしで 見える たかさに おさめる（たて横の比は そのまま。わくは 写真の大きさに ぴったり合わせて、まんなかに置く）
+    <div className="relative mx-auto w-fit max-w-full overflow-hidden rounded-[32px] bg-photo select-none">
       {/* eslint-disable-next-line @next/next/no-img-element -- 撮ったばかりの写真（data URL）を表示する */}
-      <img ref={imgRef} src={photo.dataUrl} alt="とった しゃしん" className="block w-full" draggable={false} />
+      <img
+        ref={imgRef}
+        src={photo.dataUrl}
+        alt="とった しゃしん"
+        width={photo.width}
+        height={photo.height}
+        className="block h-auto max-h-[max(260px,calc(100dvh-404px))] w-auto max-w-full"
+        draggable={false}
+      />
       <canvas
         ref={canvasRef}
         style={{ width: size.w, height: size.h, touchAction: "none" }}

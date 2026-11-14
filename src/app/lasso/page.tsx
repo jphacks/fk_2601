@@ -44,18 +44,19 @@ function LassoContent() {
     // 履歴で1つ前にもどると、はてなの画面から「かこみなおす」で来たときに そちらへもどってしまうので、行き先を決めておく
     <Page title="ぐるっと {囲|かこ}もう！" back={photoFrom}>
       <LassoPicker photo={photo} points={points} onChange={setPoints} />
-      <Say mood={points ? "happy" : "think"} size={84}>
+      {/* 写真を大きく見せたいので、ナビは 小さな ふきだしで ひとことだけ言う */}
+      <Say mood={points ? "happy" : "think"} size={56} small>
         {points ? (
           <>
             これで いいかな？
             <br />
-            <Jp big>{"ちがうときは もう{一度|いちど}！"}</Jp>
+            <Jp>{"「OK！」を {押|お}してね"}</Jp>
           </>
         ) : (
           <>
-            <Jp big>{"{気|き}になる ところを"}</Jp>
+            <Jp>{"{気|き}になる ところを"}</Jp>
             <br />
-            <Jp big>{"{指|ゆび}で ぐるっと！"}</Jp>
+            <Jp>{"{指|ゆび}で ぐるっと {囲|かこ}もう！"}</Jp>
           </>
         )}
       </Say>
@@ -65,11 +66,11 @@ function LassoContent() {
         </p>
       )}
       <div className="flex gap-2.5">
-        <Button variant="sub" className="flex-1 !h-14 !text-lg" onClick={() => setPoints(null)} disabled={!points || busy}>
+        <Button variant="sub" className="flex-1 !h-14 whitespace-nowrap !px-2 !text-lg" onClick={() => setPoints(null)} disabled={!points || busy}>
           <Icon name="undo" size={22} strokeWidth={2.6} />
           もどす
         </Button>
-        <LinkButton href="/capture" variant="sub" className="flex-1 !h-14 !text-lg">
+        <LinkButton href="/capture" variant="sub" className="flex-1 !h-14 whitespace-nowrap !px-2 !text-lg">
           <Icon name="camera" size={22} />
           とりなおす
         </LinkButton>

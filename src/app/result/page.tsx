@@ -32,6 +32,8 @@ function ResultContent() {
   // 保存したあとに もどってきたときは、保存した画面（はてなゲット！）から見せる
   const [step, setStep] = useState<Step>(() => (saved ? "get" : "shoutai"));
   const [values, setValues] = useState<Record<string, number> | null>(null);
+  // こたえあわせを もう見たか（なぞときから もどったときは、「どきどき」や演出を やり直さない）
+  const [answerSeen, setAnswerSeen] = useState(false);
   usePresenceScreen(STEP_SCREEN[step]);
 
   useEffect(() => {
@@ -80,13 +82,24 @@ function ResultContent() {
   if (step === "shoutai") {
     return (
       <Page>
-        <ResultSummary question={selected} guess={guess} evaluation={evaluation} grade={profile?.grade} />
-        <div className="mt-auto">
-          <Button onClick={() => setStep("nazo")}>
-            <Icon name="search" size={28} strokeWidth={2.8} />
-            なぞときへ！
-          </Button>
-        </div>
+        <ResultSummary
+          question={selected}
+          guess={guess}
+          evaluation={evaluation}
+          grade={profile?.grade}
+          animate={!answerSeen}
+          action={
+            <Button
+              onClick={() => {
+                setAnswerSeen(true);
+                setStep("nazo");
+              }}
+            >
+              <Icon name="search" size={28} strokeWidth={2.8} />
+              なぞときへ！
+            </Button>
+          }
+        />
       </Page>
     );
   }
@@ -130,15 +143,15 @@ function ResultContent() {
         <TryIt question={selected} />
         <Related question={selected} />
         <Sources question={selected} />
-        <div className="mt-auto flex gap-2.5">
-          <button
-            type="button"
-            onClick={() => setStep("get")}
-            className="flex h-[68px] flex-1 items-center justify-center rounded-3xl border-3 border-ink bg-white text-lg font-black shadow-pop-md active:translate-y-[4px] active:shadow-none"
-          >
-            <Jp>{"ずかんに {残|のこ}す"}</Jp>
-          </button>
-          {canChange && (
+        {canChange ? (
+          <div className="mt-auto flex gap-2.5">
+            <button
+              type="button"
+              onClick={() => setStep("get")}
+              className="flex h-[68px] flex-1 items-center justify-center rounded-3xl border-3 border-ink bg-white text-lg font-black shadow-pop-md active:translate-y-[4px] active:shadow-none"
+            >
+              <Jp>{"ずかんに {残|のこ}す"}</Jp>
+            </button>
             <button
               type="button"
               onClick={() => setStep("moshimo")}
@@ -146,8 +159,15 @@ function ResultContent() {
             >
               もっと！
             </button>
-          )}
-        </div>
+          </div>
+        ) : (
+          // 「もっと！」が ないとき（「なぜ？」型）は、つぎに することが 1つなので、メインのボタンで出す
+          <div className="mt-auto">
+            <Button onClick={() => setStep("get")}>
+              <Jp big>{"ずかんに {残|のこ}す！"}</Jp>
+            </Button>
+          </div>
+        )}
       </Page>
     );
   }
@@ -171,9 +191,17 @@ function ResultContent() {
   }
 
   return (
-    <Page onBack={saved ? undefined : () => setStep(canChange ? "moshimo" : "nazo")}>
+    // 写真が あるときは、「もどる」を SavePanel の中に出す（ナビの ひとことと 同じ段に ならべるため）
+    <Page onBack={crop || saved ? undefined : () => setStep(canChange ? "moshimo" : "nazo")}>
       {crop ? (
-        <SavePanel question={selected} guess={guess} rating={evaluation.rating} image={crop.dataUrl} summary={summary} />
+        <SavePanel
+          question={selected}
+          guess={guess}
+          rating={evaluation.rating}
+          image={crop.dataUrl}
+          summary={summary}
+          onBack={() => setStep(canChange ? "moshimo" : "nazo")}
+        />
       ) : (
         <ErrorNotice>
           <Jp big>{"{写真|しゃしん}が {見|み}つからなかったよ。もう{一度|いちど} とってみてね。"}</Jp>

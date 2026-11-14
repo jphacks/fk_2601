@@ -64,6 +64,8 @@ export function NumberLine({
   const close = Math.abs(gx - ax) < (guessRange ? 45 : 18);
   const guessLabel = guessRange ? `きみ ${formatNumber(guessRange.min, grade)}〜${formatNumber(guessRange.max, grade)}` : `きみ ${formatNumber(guess, grade)}`;
   const guessSpoken = guessRange ? `${formatNumber(guessRange.min, grade)}〜${formatNumber(guessRange.max, grade)}` : formatNumber(guess, grade);
+  // 旗が 答えに つくまで、答えの数は 出さない（上の 大きな数が ふえている とちゅうで、先に 見えてしまわないように）
+  const answerStyle = intro ? { opacity: arrived ? 1 : 0, transition: reduced ? "none" : "opacity .3s 1.4s" } : undefined;
 
   return (
     <div
@@ -96,14 +98,18 @@ export function NumberLine({
       </span>
       {close ? (
         <div className="absolute inset-x-0 top-[82px] text-center font-pop text-base">
-          {guessLabel} ・ <span className="text-navi-dark"><Jp>{"{答|こた}え"}</Jp> {formatNumber(actual, grade)}</span>
+          {guessLabel}
+          <span style={answerStyle}>
+            {" ・ "}
+            <span className="text-navi-dark"><Jp>{"{答|こた}え"}</Jp> {formatNumber(actual, grade)}</span>
+          </span>
         </div>
       ) : (
         <>
           <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base" style={{ left: `clamp(75px, ${gx}%, calc(100% - 75px))` }}>
             {guessLabel}
           </div>
-          <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base text-navi-dark" style={{ left: `clamp(75px, ${ax}%, calc(100% - 75px))` }}>
+          <div className="absolute top-[82px] w-[150px] -translate-x-1/2 text-center font-pop text-base text-navi-dark" style={{ left: `clamp(75px, ${ax}%, calc(100% - 75px))`, ...answerStyle }}>
             <Jp>{"{答|こた}え"}</Jp> {formatNumber(actual, grade)}
           </div>
         </>

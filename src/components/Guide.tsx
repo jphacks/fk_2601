@@ -8,7 +8,8 @@ import { Button } from "./ui";
 
 /**
  * あそびかたの説明（3枚）。ホームを暗くして、その上に出す（docs/design/first/README.md「あそびかたの決まり」・見本 07〜09）。
- * いま説明しているもの（2枚目は下のナビ、3枚目は「はてなを さがす！」）は、ホームの側で暗い幕の上に持ち上げる
+ * いま説明しているものは 暗くしない：2枚目の 下のナビは、ホームの側で暗い幕の上に持ち上げる。
+ * 3枚目の「はてなを さがす！」は、幕のほうに 穴を あける（ボタンは 画面の枠 Page の 登場の動きの中にあり、重なりの順を 外へ 出せないため、持ち上げられない）
  */
 export const GUIDE_STEPS = 3;
 export type GuideStep = 0 | 1 | 2;
@@ -124,9 +125,14 @@ const SKIP_STYLE =
 const PAIR_STYLE =
   "flex h-14 items-center justify-center whitespace-nowrap rounded-[22px] border-3 border-ink px-1 text-ink shadow-pop-sm active:translate-y-1 active:shadow-none";
 
-/** 3枚目のカードを「はてなを さがす！」の上に置く（上に すきまがないときは下に置く） */
+// 3枚目で あける 穴：ボタンの まわりに 12px、下は ボタンの影（7px）の ぶん 広く 19px
+const HOLE = { side: 12, top: 12, bottom: 19 };
+
+type Place = { side: "above" | "below"; offset: number; hole: { top: number; left: number; width: number; height: number } };
+
+/** 3枚目のカードを「はてなを さがす！」の上に置く（上に すきまがないときは下に置く）。ボタンの ばしょ（幕に あける 穴）も はかる */
 function useAnchor(target: RefObject<HTMLElement | null>, active: boolean) {
-  const [place, setPlace] = useState<{ side: "above" | "below"; offset: number } | null>(null);
+  const [place, setPlace] = useState<Place | null>(null);
   useLayoutEffect(() => {
     if (!active) return;
     const el = target.current;
@@ -137,8 +143,9 @@ function useAnchor(target: RefObject<HTMLElement | null>, active: boolean) {
       const rect = el.getBoundingClientRect();
       // カードの高さは 200px ほど。上の「とじる」（24 + 44px）と重ならないだけの すきまがあれば上に置く
       const above = rect.top > 300;
+      const hole = { top: rect.top - HOLE.top, left: rect.left - HOLE.side, width: rect.width + HOLE.side * 2, height: rect.height + HOLE.top + HOLE.bottom };
       // しっぽ（11px）と、黄色の点線（上 12px・下 19px）の ぶん はなす
-      setPlace(above ? { side: "above", offset: window.innerHeight - rect.top + 24 } : { side: "below", offset: rect.bottom + 31 });
+      setPlace(above ? { side: "above", offset: window.innerHeight - rect.top + 24, hole } : { side: "below", offset: rect.bottom + 31, hole });
     }
     measure();
     window.addEventListener("resize", measure);
@@ -183,7 +190,20 @@ export function Guide({
 
   return (
     <>
-      <div aria-hidden className="fixed inset-0 z-40 bg-ink/74" />
+      {step === 2 && place ? (
+        <>
+          {/* 見えない幕：説明のあいだ、うしろの ホームを 押せないようにする */}
+          <div aria-hidden className="fixed inset-0 z-40" />
+          {/* 穴：黄色の点線の わく。その外がわを、大きな影で 暗くする（わくの中の「はてなを さがす！」だけ 明るく見える） */}
+          <div
+            aria-hidden
+            className="pointer-events-none fixed z-40 rounded-[40px] border-4 border-dashed border-yellow shadow-[0_0_0_200vmax_color-mix(in_srgb,var(--color-ink)_74%,transparent)]"
+            style={place.hole}
+          />
+        </>
+      ) : (
+        <div aria-hidden className="fixed inset-0 z-40 bg-ink/74" />
+      )}
       <div
         ref={dialog}
         role="dialog"
@@ -299,9 +319,4 @@ export function Guide({
       </div>
     </>
   );
-}
-
-/** 3枚目で「はてなを さがす！」を囲む 黄色の点線。ボタンの下の影（7px）の ぶん、下を広くする */
-export function GuideRing() {
-  return <span aria-hidden className="pointer-events-none absolute -inset-x-3 -bottom-[19px] -top-3 rounded-[40px] border-4 border-dashed border-yellow" />;
 }

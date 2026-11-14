@@ -220,7 +220,7 @@ export function Loading({
       <div className="mt-11 flex items-center justify-center gap-3.5" role="status" aria-live="polite">
         <CropCircle src={image} alt="つかまえた ところ" size={128} />
         <div className="flex flex-col gap-2">
-          <span className="font-pop text-[32px] leading-tight text-pink [-webkit-text-stroke:1.5px_var(--color-ink)]">
+          <span className="title-pop font-pop text-[32px] leading-[1.5] text-pink [--d:3px] [--o:2px]">
             <Jp big>{"{見|み}つけた！"}</Jp>
           </span>
           <span className="self-start rounded-[14px] bg-yellow-light px-3 py-1 text-[15px] font-black"><Jp>{done ? "はてなが できたよ" : (message ?? "いま {調|しら}べてるよ")}</Jp></span>
