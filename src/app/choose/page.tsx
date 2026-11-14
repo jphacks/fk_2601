@@ -6,6 +6,7 @@ import { useArchive } from "@/components/ArchiveProvider";
 import { useApp } from "@/components/AuthProvider";
 import { CropCircle } from "@/components/CropCircle";
 import { Gate } from "@/components/Gate";
+import { HelpButton } from "@/components/HelpButton";
 import { Icon } from "@/components/Icons";
 import { Loading } from "@/components/Loading";
 import { Page } from "@/components/Page";
@@ -92,7 +93,8 @@ function ChooseContent() {
           <Icon name="back" size={24} strokeWidth={3} />
         </button>
         <CropCircle src={crop.dataUrl} alt="つかまえた ところ" size={54} />
-        <h1 className="min-w-0 truncate font-pop text-xl font-normal">{label ? <RubyText kana text={label} /> : "はてな"} の はてな</h1>
+        <h1 className="line-clamp-2 min-w-0 font-pop text-xl font-normal leading-tight">{label ? <RubyText kana text={label} /> : "はてな"} の はてな</h1>
+        <HelpButton className="ml-auto" />
       </header>
 
       <div role="tablist" className="grid grid-cols-2 gap-1.5 rounded-[26px] border-3 border-ink bg-white p-[5px]">

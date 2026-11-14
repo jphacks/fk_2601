@@ -12,6 +12,7 @@ import { Page } from "@/components/Page";
 import { useQuiz } from "@/components/QuizProvider";
 import { ResultSummary } from "@/components/ResultSummary";
 import { Jp, RubyText } from "@/components/RubyText";
+import { usePresenceScreen } from "@/components/PresenceProvider";
 import { SavePanel } from "@/components/SavePanel";
 import { Button, ErrorNotice, LinkButton, Say } from "@/components/ui";
 import { defaultScope } from "@/lib/calc";
@@ -21,6 +22,8 @@ import { unitKana } from "@/lib/ruby";
 
 // こたえあわせ → なぞとき → もしも → ずかんにのこす（見本 14〜19）
 type Step = "shoutai" | "nazo" | "moshimo" | "get";
+// 先生の画面に知らせる画面の名前（src/lib/presence.ts の PRESENCE_SCREENS。#192）
+const STEP_SCREEN: Record<Step, string> = { shoutai: "result", nazo: "nazo", moshimo: "moshimo", get: "save" };
 
 function ResultContent() {
   const router = useRouter();
@@ -29,6 +32,7 @@ function ResultContent() {
   // 保存したあとに もどってきたときは、保存した画面（はてなゲット！）から見せる
   const [step, setStep] = useState<Step>(() => (saved ? "get" : "shoutai"));
   const [values, setValues] = useState<Record<string, number> | null>(null);
+  usePresenceScreen(STEP_SCREEN[step]);
 
   useEffect(() => {
     if (!selected) router.replace(crop ? "/choose" : "/capture");

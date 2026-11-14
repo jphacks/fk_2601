@@ -94,6 +94,31 @@ export type JoinCode = {
   open: boolean;
 };
 
+/**
+ * 子どもが書く「いま つかっている」ようす（#192）。写真・問いの中身・位置・ニックネームは入れない。
+ * username は ログイン ID（メンバーの画面と同じ）。error は さいごに出た エラーの文（子ども向けの文から ふりがなを外したもの）
+ */
+export type GroupPresence = {
+  uid: string;
+  username: string | null;
+  /** いまの画面の名前（src/lib/presence.ts の PRESENCE_SCREENS） */
+  screen: string;
+  /** さいごに動いた時刻（ミリ秒） */
+  at: number;
+  error: string | null;
+  errorAt: number | null;
+  help: boolean;
+  helpAt: number | null;
+};
+
+/** presence への1回の書きこみ。error・help は、変わったときだけ入れる（入れないものは、前の値のまま） */
+export type PresenceWrite = {
+  username: string;
+  screen: string;
+  error?: string | null;
+  help?: boolean;
+};
+
 export type GroupSettings = {
   autoJoinUntil: number | null;
   open: boolean;
