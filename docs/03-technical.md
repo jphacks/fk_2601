@@ -215,7 +215,7 @@ src/
 Firestore:
   users/{uid}
     └ profiles/{profileId}          id, nickname, grade, title（使っている称号の分類 or null）,
-         │                          firstMode（"choices" | "custom"）, guideSeenAt, createdAt
+         │                          firstMode（"choices" | "custom"）, guideSeenAt, outfit（きせかえの ID の配列。省略可）, createdAt
          └ archives/{archiveId}     id, createdAt, grade, question（5.2 の問い 1 つ分）,
                                     guess（予想）, rating（"pita" | "oshii" | "ohazure"）,
                                     feeling（"fun" | "ok" | "hard"。えらんだときだけ。#164）,
