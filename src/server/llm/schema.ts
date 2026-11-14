@@ -79,9 +79,14 @@ export const RecognitionSchema = z.object({
   canAsk: z.boolean().describe("この写真から問いが作れるか"),
 });
 
-// AI に問いを作らせるときの形。出力の形が大きすぎると API に断られる（compiled grammar is too large）ので、項目を足すときは、ほかを減らす。
+// 2回目（子どもが問いを選んだあと）に、その1問だけ書かせる項目（#165）。1回目には書かせない
+const DETAIL_KEYS = { explanation: true, whatIf: true, tryIt: true, related: true, keyword: true, sources: true } as const;
+export const DetailSchema = QuestionSchema.pick(DETAIL_KEYS);
+
+// 1回目で、AI に問いを作らせるときの形。予想とこたえあわせに必要な分だけで、解説・やってみよう・出典などは 2回目（DetailSchema）。
+// 出力の形が大きすぎると API に断られる（compiled grammar is too large）ので、項目を足すときは、ほかを減らす。
 // いまは swappable を書かせず（入れかえテストは プロンプトで させる）、そのぶん naiveGuess を足している（2026-11-13 にためした）
-export const DraftQuestionSchema = QuestionSchema.omit({ swappable: true }).extend({
+export const DraftQuestionSchema = QuestionSchema.omit({ swappable: true, ...DETAIL_KEYS }).extend({
   naiveGuess: z
     .number()
     .describe("estimate・compare のとき、この学年の子どもが 計算せずに 直感で言いそうな数（答えと同じ単位）。答えと2倍以上はなれていない問いは使われない。why は 0"),
@@ -107,6 +112,7 @@ export type Subject = z.infer<typeof SubjectSchema>;
 export type Variable = z.infer<typeof VariableSchema>;
 export type Source = z.infer<typeof SourceSchema>;
 export type Question = z.infer<typeof QuestionSchema>;
+export type Detail = z.infer<typeof DetailSchema>;
 export type DraftQuestion = z.infer<typeof DraftQuestionSchema>;
 export type Recognition = z.infer<typeof RecognitionSchema>;
 export type QuestionsOutput = z.infer<typeof QuestionsOutputSchema>;

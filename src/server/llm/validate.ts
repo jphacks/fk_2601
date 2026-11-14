@@ -1,7 +1,7 @@
 import "server-only";
 import { calculate, defaultScope } from "@/lib/calc";
 import { stripRuby } from "@/lib/ruby";
-import type { DraftQuestion, Question } from "./schema";
+import type { Detail, Question } from "./schema";
 
 // LLM の答え（llmAnswer）と、式で計算した値のずれの許容範囲（docs/03-technical.md 5.2）
 const ANSWER_TOLERANCE = 0.05;
@@ -18,6 +18,16 @@ const MIN_SURPRISE_RATIO = 1.5;
 const NAME_PATTERN = /^[a-z][A-Za-z0-9_]*$/;
 
 export type Validated = { ok: true; question: Question } | { ok: false; reason: string };
+
+/** 解説などは、2回目で書かせる（#165）。1回目の問いには、空の値を入れておく（explanation.short が空かどうかで、2回目が要るかが分かる） */
+export const EMPTY_DETAIL: Detail = {
+  explanation: { short: "", steps: [] },
+  whatIf: "",
+  tryIt: "",
+  related: [],
+  keyword: "",
+  sources: [],
+};
 
 function sanitizeUrl(url: string | null): string | null {
   if (!url) return null;
@@ -68,16 +78,36 @@ function sanitizeRef(ref: Question["ref"]): Question["ref"] {
   return { type: ref.type, label, value: ref.value, unit: clip(ref.unit, 10) };
 }
 
+/** 2回目で書かせた 解説などを確かめ、使える形にそろえる（1回目の問いと同じ決まり）。解説の一言が空なら null */
+export function validateDetail(detail: Detail): Detail | null {
+  const short = clip(detail.explanation.short, 200);
+  if (short.length === 0) return null;
+  return {
+    explanation: { short, steps: detail.explanation.steps.map((s) => clip(s, 200)).filter(Boolean).slice(0, 6) },
+    whatIf: clip(detail.whatIf ?? "", 80),
+    tryIt: sanitizeTryIt(detail.tryIt),
+    related: (detail.related ?? []).map((r) => clip(r, 100)).filter(Boolean).slice(0, 2),
+    keyword: clip(detail.keyword ?? "", 40),
+    sources: (detail.sources ?? []).slice(0, 5).map((s) => ({ ...s, url: sanitizeUrl(s.url) })),
+  };
+}
+
+// 検査する問い。1回目の問い（解説などがない）・見本の問い・自分で書いた問い（全部ある）のどれでも受けとる
+type Draft = Omit<Question, keyof Detail | "swappable"> & Partial<Detail> & { swappable?: boolean; naiveGuess?: number };
+
 /**
  * LLM が出した問いを確かめ、使える形にそろえる。式の答えは LLM の値ではなく、math.js で計算した値を信じる。
- * lenient は、子どもが自分で書いた問いと、見本の問い（写真のものを入れかえられるか・長さ・数の個数では はじかない）
+ * lenient は、子どもが自分で書いた問いと、見本の問い（写真のものを入れかえられるか・長さ・数の個数では はじかない）。
+ * partial は、1回目の問い（解説などは 2回目に書くので、空のまま通す）
  */
-export function validateQuestion(draft: Question | DraftQuestion, options: { lenient?: boolean } = {}): Validated {
+export function validateQuestion(draft: Draft, options: { lenient?: boolean; partial?: boolean } = {}): Validated {
   const fail = (reason: string): Validated => ({ ok: false, reason });
   // naiveGuess は検査に使うだけで、保存しない。AI が作る問い（DraftQuestion）には swappable がない
-  const { naiveGuess, swappable, ...input }: Omit<Question, "swappable"> & { swappable?: boolean; naiveGuess?: number } = draft;
+  const { naiveGuess, swappable, ...input } = draft;
   const q: Question = {
     ...input,
+    explanation: input.explanation ?? EMPTY_DETAIL.explanation,
+    sources: (input.sources ?? []).map((s) => ({ ...s, url: sanitizeUrl(s.url) })),
     // 内部で使うだけの項目は、保存しない
     secret: "",
     swappable: false,
@@ -91,7 +121,6 @@ export function validateQuestion(draft: Question | DraftQuestion, options: { len
     tryIt: sanitizeTryIt(input.tryIt),
     related: (input.related ?? []).map((r) => clip(r, 100)).filter(Boolean).slice(0, 2),
     keyword: clip(input.keyword ?? "", 40),
-    sources: input.sources.map((s) => ({ ...s, url: sanitizeUrl(s.url) })),
     ref: sanitizeRef(input.ref),
   };
 
@@ -111,7 +140,7 @@ export function validateQuestion(draft: Question | DraftQuestion, options: { len
       if (numbers.length + inHint.length > MAX_NUMBERS_WITH_HINT) return fail("問題文とヒントに、計算に使う数がならんでいます");
     }
   }
-  if (q.explanation.short.trim().length === 0) return fail("解説がありません");
+  if (!options.partial && q.explanation.short.trim().length === 0) return fail("解説がありません");
   if (q.topic.length === 0 || q.target.length === 0) return fail("単元か対象がありません");
 
   const names = new Set<string>();
