@@ -2,7 +2,7 @@
 // 手で動かすときだけ、本物の AI を呼ぶ（テスト・CI・ビルドからは呼ばれない）。使いかたは docs/03-technical.md 5.3.2
 //   npm run eval:questions -- [--only <ファイル名>] [--grades 1,3,6] [--level 1] [--dry-run]
 // 本物と同じ道（SYSTEM_PROMPT・questionsUserText・QuestionsOutputSchema・callStructured・validateQuestion）を通す。
-// 1回目（問い3つ）だけを評価する。解説・やってみよう・出典は 2回目（#165）で書かせるので、ここには出ない
+// 1回目（問い4つ→検査を通ったものから3つに しぼる）だけを評価する。解説・やってみよう・出典は 2回目（#165）で書かせるので、ここには出ない
 
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
@@ -15,6 +15,7 @@ import { FACTS } from "@/server/llm/facts";
 import { questionsUserText, SYSTEM_PROMPT } from "@/server/llm/prompts";
 import { QuestionsRequestSchema } from "@/server/llm/request";
 import { QuestionsOutputSchema, type DraftQuestion, type QuestionsOutput } from "@/server/llm/schema";
+import { pickQuestions, SHOWN_COUNT } from "@/server/llm/select";
 import { validateQuestion } from "@/server/llm/validate";
 
 // 1回の実行で呼べる回数の上限（課金のため。これをこえるときは、呼ばずにエラーで止める）
@@ -66,7 +67,8 @@ type Call = {
   questions: Judged[];
 };
 
-type Judged = { draft: DraftQuestion; ok: boolean; reason: string | null };
+// ok＝検査を通った／chosen＝そのうち、子どもに出す 3つに選ばれた（select.ts）
+type Judged = { draft: DraftQuestion; ok: boolean; reason: string | null; chosen: boolean };
 
 /** callStructured が出す [llm] のログ（時間とトークンの数だけ）を取りこむ。画面には出さない */
 type LlmLog = { ms: number; inputTokens: number; outputTokens: number; cacheRead: number; cacheWrite: number; model: string; effort: string };
@@ -88,7 +90,7 @@ function captureLlmLog<T>(run: () => Promise<T>): Promise<{ result: T | Error; l
 function judge(output: QuestionsOutput, grade: number): Judged[] {
   const judged: Judged[] = output.questions.map((draft) => {
     const result = validateQuestion(draft, { partial: true });
-    return result.ok ? { draft, ok: true, reason: null } : { draft, ok: false, reason: result.reason };
+    return result.ok ? { draft, ok: true, reason: null, chosen: false } : { draft, ok: false, reason: result.reason, chosen: false };
   });
   // 1年生は「倍」を まだ習っていないので、ほかの問いがあるときは compare を出さない（generate.ts の fitToGrade）
   if (grade < TIMES_GRADE && judged.some((j) => j.ok && j.draft.type !== "compare")) {
@@ -99,6 +101,9 @@ function judge(output: QuestionsOutput, grade: number): Judged[] {
       }
     }
   }
+  // 本物と同じ選びかた（generate.ts）。AI は 4つ書き、検査を通ったものから 3つに しぼる
+  const picked = new Set(pickQuestions(judged.filter((j) => j.ok).map((j) => ({ type: j.draft.type, judged: j }))).map((p) => p.judged));
+  for (const j of judged) j.chosen = picked.has(j);
   return judged;
 }
 
@@ -142,26 +147,29 @@ function unlearnedKanji(q: DraftQuestion, grade: number): string[] {
 function summarize(calls: Call[]): string {
   const done = calls.filter((c) => !c.error);
   const all = done.flatMap((c) => c.questions.map((j) => ({ ...j, grade: c.grade })));
-  const shown = all.filter((j) => j.ok);
+  const passed = all.filter((j) => j.ok);
+  const shown = all.filter((j) => j.chosen);
   const rows: [string, string][] = [];
 
   rows.push(["呼んだ回数（うち失敗）", `${calls.length}（${calls.length - done.length}）`]);
   const recognized = done.filter((c) => c.recognition?.canAsk !== false);
   rows.push(["問いを作れないと答えた写真の割合（canAsk=false）", pct(done.length - recognized.length, done.length)]);
-  rows.push(["検査で落ちた問いの割合", pct(all.length - shown.length, all.length)]);
+  rows.push(["検査で落ちた問いの割合", pct(all.length - passed.length, all.length)]);
+  const full = recognized.filter((c) => c.questions.filter((j) => j.chosen).length >= SHOWN_COUNT);
+  rows.push([`子どもに ${SHOWN_COUNT}つ 出せた割合（選んだあと）`, pct(full.length, recognized.length)]);
 
   const count = (list: typeof all, type: string) => list.filter((j) => j.draft.type === type).length;
   rows.push(["type の内わけ・作った問い（why / estimate / compare）", `${count(all, "why")} / ${count(all, "estimate")} / ${count(all, "compare")}`]);
-  rows.push(["type の内わけ・出る問い（検査を通ったもの）", `${count(shown, "why")} / ${count(shown, "estimate")} / ${count(shown, "compare")}`]);
+  rows.push(["type の内わけ・出る問い（検査を通って、3つに選ばれたもの）", `${count(shown, "why")} / ${count(shown, "estimate")} / ${count(shown, "compare")}`]);
   // 子どもに出る問い（検査を通ったもの）に、数で答える問いが1つもない、写真×学年の割合
-  const noNumeric = recognized.filter((c) => !c.questions.some((j) => j.ok && isNumeric(j.draft)));
+  const noNumeric = recognized.filter((c) => !c.questions.some((j) => j.chosen && isNumeric(j.draft)));
   rows.push(["数で答える問いが1つもない写真×学年の割合（出る問いの中で）", pct(noNumeric.length, recognized.length)]);
   const noNumericMade = recognized.filter((c) => !c.questions.some((j) => isNumeric(j.draft)));
   rows.push(["数で答える問いが1つもない写真×学年の割合（作った問いの中で）", pct(noNumericMade.length, recognized.length)]);
 
   const threeCalls = recognized.filter((c) => c.questions.length >= 3);
-  const sameSubject = threeCalls.filter((c) => new Set(c.questions.map((j) => j.draft.subject)).size === 1);
-  rows.push(["3問とも同じ subject の割合（作った問い3つの回）", pct(sameSubject.length, threeCalls.length)]);
+  const sameSubject = threeCalls.filter((c) => new Set(c.questions.filter((j) => j.chosen).map((j) => j.draft.subject)).size === 1);
+  rows.push(["3問とも同じ subject の割合（選んだ3つ）", pct(sameSubject.length, threeCalls.length)]);
 
   rows.push(["問題文の長さの平均（ふりがなをのぞく・作った問い）", `${mean(all.map((j) => plainOf(j.draft).length)).toFixed(1)} 字`]);
   rows.push(["問題文の数の個数の平均（1をのぞく・作った問い）", `${mean(all.map((j) => numbersIn(plainOf(j.draft)).length)).toFixed(2)} こ`]);
@@ -202,7 +210,7 @@ function summarize(calls: Call[]): string {
 function describeQuestion(j: Judged, index: number, grade: number): string {
   const q = j.draft;
   const lines: string[] = [];
-  lines.push(`#### 問い${index + 1}　${j.ok ? "✅ 通った" : `❌ 落ちた：${j.reason}`}`);
+  lines.push(`#### 問い${index + 1}　${j.ok ? (j.chosen ? "✅ 通った（選ばれた）" : "☑ 通った（3つの外）") : `❌ 落ちた：${j.reason}`}`);
   lines.push("");
   lines.push(`- type: ${q.type} ／ subject: ${q.subject} ／ 単元: ${q.topic} ／ 対象: ${q.target}`);
   lines.push(`- 問題文: ${q.text}`);
@@ -311,7 +319,8 @@ async function main() {
       }
       calls.push(call);
       const okCount = call.questions.filter((j) => j.ok).length;
-      console.log(`[${n}/${total}] ${image} ${grade}年 → ${call.error ? `失敗（${call.error}）` : `問い ${call.questions.length}（通った ${okCount}）`}`);
+      const chosenCount = call.questions.filter((j) => j.chosen).length;
+      console.log(`[${n}/${total}] ${image} ${grade}年 → ${call.error ? `失敗（${call.error}）` : `問い ${call.questions.length}（通った ${okCount}・出す ${chosenCount}）`}`);
     }
   }
 
@@ -324,7 +333,7 @@ async function main() {
     `- 写真: ${images.join("、")}`,
     `- 学年: ${args.grades.join("・")} ／ 学習の進み具合: レベル${args.level} ／ 出題済み: なし`,
     `- モデル: ${first?.model ?? "?"} ／ effort: ${first?.effort ?? "?"}`,
-    "- 評価するのは 1回目（問い3つ）だけ。解説・やってみよう・出典は 2回目（#165）で書かせるので、ここには出ない",
+    "- 評価するのは 1回目（問い4つ→3つに しぼる）だけ。解説・やってみよう・出典は 2回目（#165）で書かせるので、ここには出ない",
     "",
     summary,
     "## 1問ごとの結果",
