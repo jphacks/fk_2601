@@ -10,6 +10,7 @@ import { stripRuby } from "@/lib/ruby";
 import type { GroupMission, GroupPost, GroupSettings, JoinCode } from "@/lib/types";
 import type { Subject } from "@/server/llm/schema";
 import { BTN_BASE, GroupAdminPage, groupLabel, SUB } from "./GroupAdmin";
+import { GroupPresencePanel } from "./GroupPresencePanel";
 
 // グループの きょう（/teacher/groups/{グループ}。#140）。グループを選んで はじめに開く画面。本番のデータを扱う。
 // その日のようす（投稿・通報・メンバー・ミッション・参加コード）を1画面に まとめる。
@@ -102,6 +103,8 @@ function Today({ groupId }: { groupId: GroupId }) {
           読み込み直す
         </button>
       </div>
+
+      <GroupPresencePanel groupId={groupId} reloadKey={attempt} />
 
       <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
         <Tile label="きょうの投稿" href={`${base}/hatena`} linkLabel="はてなを見る">
@@ -204,7 +207,7 @@ export function GroupTodayScreen({ groupId }: { groupId: string }) {
     <GroupAdminPage
       groupId={groupId}
       title={(id) => `きょうの ${groupLabel(id)}`}
-      description="きょう（日本時間）のグループのようすです。子どもどうしを比べる数（人ごとの件数など）は出しません。この画面は見本ではなく、本番のデータを扱います。"
+      description="きょう（日本時間）のグループのようすです。「いま使っている人」は、いまの画面と「たすけて」を出した人です。子どもどうしを比べる数（人ごとの件数など）は出しません。この画面は見本ではなく、本番のデータを扱います。"
     >
       {(id) => <Today key={id} groupId={id} />}
     </GroupAdminPage>

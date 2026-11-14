@@ -208,6 +208,30 @@ service cloud.firestore {
           && (resource == null || reactionId == request.auth.uid + '__' + resource.data.postId || isAdmin(groupId));
       }
 
+      // 「いま つかっている」（#192）：presence/{uid}。子どもの画面が、いまの画面の名前・時刻・さいごのエラーの文・たすけて を書く。
+      // 写真・問いの中身・位置・ニックネームは入れない。書けるのは本人（メンバー）だけ。読めるのは管理者と本人。消せるのは本人と管理者。
+      // 書きこみは merge で来るので、request.resource.data は書いたあとの文書ぜんたい。at は書くたびにサーバーの時刻にする。
+      // username（ログイン ID）は、入れるなら ID トークンの名前と同じでなければならない（ほかの人の名前を名乗れない）。
+      // errorAt・helpAt は、前の値のままのこともあるので、サーバーの時刻より先でないことだけを確かめる
+      function validPresence() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['username', 'screen', 'at', 'error', 'errorAt', 'help', 'helpAt'])
+          && d.keys().hasAll(['screen', 'at'])
+          && d.screen is string && d.screen.size() > 0 && d.screen.size() <= 24
+          && d.at == request.time
+          && (!('username' in d) || (d.username is string && d.username == request.auth.token.name))
+          && (d.get('error', null) == null || (d.error is string && d.error.size() <= 120))
+          && (d.get('errorAt', null) == null || (d.errorAt is timestamp && d.errorAt <= request.time))
+          && (d.get('help', false) is bool)
+          && (d.get('helpAt', null) == null || (d.helpAt is timestamp && d.helpAt <= request.time));
+      }
+
+      match /presence/{uid} {
+        allow read: if request.auth != null && (request.auth.uid == uid || isAdmin(groupId));
+        allow create, update: if request.auth != null && request.auth.uid == uid && isMember(groupId) && validPresence();
+        allow delete: if request.auth != null && (request.auth.uid == uid || isAdmin(groupId));
+      }
+
       // 投稿の持ち主（本人が消せるようにするためだけの記録）。本人の記録だけ読める（退会で全投稿を消すため。管理者も他人の記録は読めない）。
       // 作れるのは、まだない投稿を同じバッチで作るときだけ（ほかの人の投稿の持ち主になれない）。
       // 消すのは投稿と同じバッチ（投稿が残ったまま、持ち主の記録だけを消せない）
