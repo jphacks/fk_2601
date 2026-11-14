@@ -13,13 +13,14 @@ import { useArchive } from "./ArchiveProvider";
 import { useApp } from "./AuthProvider";
 import { Bunting, Confetti, Hanko, Rays, SideConfetti, Sparkle, Spotlight } from "./Decor";
 import { Medal } from "./Icons";
-import { Navigator } from "./Navigator";
+import { Navigator, type Mood } from "./Navigator";
 import { SUBJECT_STYLE, TYPE_LABEL } from "./QuestionCard";
 import { useQuiz } from "./QuizProvider";
 import { Stamp } from "./StampCards";
-import { Button, Say } from "./ui";
+import { Button, CHOICE_DOWN, CHOICE_UP, Say } from "./ui";
 import { needsDetail } from "@/lib/questionDetail";
 import { stripRuby } from "@/lib/ruby";
+import type { Feeling } from "@/lib/types";
 
 /** ずかんのカード（見本 19）：つかまえた写真・はてな・きみのよそう→こたえ・はんこ */
 export function CollectCard({ question, image, summary, rating }: { question: Question; image: string; summary: string; rating: Rating }) {
@@ -49,6 +50,13 @@ export function CollectCard({ question, image, summary, rating }: { question: Qu
   );
 }
 
+/** 「この はてな、どうだった？」の3つ（顔は ナビの表情。小さい文字なので ひらがなで書く）。次の問いを作る手がかりになる（#164） */
+const FEELINGS: { id: Feeling; label: string; mood: Mood; off: string; on: string }[] = [
+  { id: "fun", label: "おもしろい！", mood: "happy", off: "bg-pink-light", on: "bg-pink" },
+  { id: "ok", label: "ふつう", mood: "sorry", off: "bg-mint-light", on: "bg-mint" },
+  { id: "hard", label: "むずかしい", mood: "effort", off: "bg-orange-light", on: "bg-orange" },
+];
+
 /** 答え合わせのあと、ずかんに保存する（見本 19「はてなゲット！」）。入っているグループの なかまに、名前を出さずに見せるかも選べる */
 export function SavePanel({
   question,
@@ -76,6 +84,8 @@ export function SavePanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shareFailed, setShareFailed] = useState(false);
+  // どうだった？（えらばなくても 保存できる。もう一度 押すと、えらびなおせる）
+  const [feeling, setFeeling] = useState<Feeling | null>(null);
 
   function toggle(id: GroupId, on: boolean) {
     setPicked((prev) => (on ? [...prev.filter((g) => g !== id), id] : prev.filter((g) => g !== id)));
@@ -88,7 +98,7 @@ export function SavePanel({
     try {
       // 入っているグループだけに見せる（ルールでも、メンバーでないグループには書けない）
       const groups = picked.filter((g) => memberships?.some((m) => m.groupId === g));
-      const result = await add({ question, guess, rating, image, groups });
+      const result = await add({ question, guess, rating, image, groups, ...(feeling ? { feeling } : {}) });
       setShareFailed(result.shareFailed);
       markSaved();
     } catch (e) {
@@ -155,6 +165,29 @@ export function SavePanel({
             ))}
           </fieldset>
         )}
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 text-[19px] font-black">この はてな、どうだった？</legend>
+          <div className="grid grid-cols-3 gap-2.5">
+            {FEELINGS.map((f) => {
+              const on = feeling === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => setFeeling(on ? null : f.id)}
+                  className={`flex flex-col items-center justify-center gap-0.5 rounded-[20px] border-3 border-ink px-1 py-2 text-[clamp(13px,3.7vw,16px)] font-black ${
+                    on ? `${f.on} ${CHOICE_DOWN}` : `${f.off} ${CHOICE_UP}`
+                  }`}
+                >
+                  <Navigator mood={f.mood} size={44} />
+                  <span className="whitespace-nowrap">{f.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
 
         {/* ナビも いっしょに よろこぶ（のこった空白を うめる） */}
         <div className="mt-auto">

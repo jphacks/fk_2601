@@ -26,6 +26,9 @@ export type Profile = {
   createdAt: number;
 };
 
+/** 子どもの「この はてな、どうだった？」への答え（おもしろい！・ふつう・むずかしい） */
+export type Feeling = "fun" | "ok" | "hard";
+
 /** 図鑑（アーカイブ）に保存する、1回ぶんの問い */
 export type ArchiveRecord = {
   id: string;
@@ -34,6 +37,11 @@ export type ArchiveRecord = {
   question: Question;
   guess: Guess;
   rating: Rating;
+  /**
+   * 保存するときに子どもが えらんだ「どうだった？」。えらばなかった記録と、この項目より前の記録には ない。
+   * 次の問いを作るときの手がかりにだけ使う（src/lib/progress.ts）。グループには見せない・先生の画面には出さない
+   */
+  feeling?: Feeling;
   /**
    * 記録のもと。ないときや "own" は、自分で囲んで作った問い。"played" は、ほかの人の問いで遊んだもの
    * （学習の進み具合の点数には数えない。src/lib/progress.ts）。ほかの人の問いで遊ぶ機能は、まだない

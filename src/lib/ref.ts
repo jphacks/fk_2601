@@ -2,6 +2,12 @@ import type { Question } from "@/server/llm/schema";
 
 export type RefParts = { label: string; value: number; unit: string; suffix: string };
 
+/** 身近なものへの言いかえは「だいたい」でよいので、細かい数にしない（2.777 → 2.8、166.7 → 167）。1万より大きい数は formatNumber が まるめる */
+export function roughRef(value: number): number {
+  if (value >= 10) return Math.round(value);
+  return Math.round(value * 10) / 10;
+}
+
 type LegacyFamiliar = { name: string; amount: number };
 
 /**

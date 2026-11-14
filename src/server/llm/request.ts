@@ -21,6 +21,10 @@ export const QuestionsRequestSchema = z.object({
   archiveCount: z.number().int().min(0).max(100_000),
   /** 出題済みの対象×単元 */
   asked: z.array(Asked).max(200),
+  /** さいきん「おもしろい！」と言った問いの単元（新しい順）。前の版のアプリは送らないので、なくてもよい */
+  liked: z.array(z.string().max(60)).max(10).optional(),
+  /** さいきん10問のうち、「むずかしい」と言った数。前の版のアプリは送らないので、なくてもよい */
+  hardCount: z.number().int().min(0).max(10).optional(),
   /** 見本の絵を使っているとき、その名前（開発用のモックや、AI が使えないときの見本の問いに使う） */
   scene: z.enum(SCENES).optional(),
   /** true のとき、AI を呼ばずに見本の問いを返す（見本の絵のときだけ） */

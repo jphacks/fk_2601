@@ -6,7 +6,7 @@ import { makeThumb } from "@/lib/image";
 import { UserFacingError } from "@/lib/errors";
 import type { Guess, Rating } from "@/lib/rating";
 import { GROUPS, type GroupId } from "@/lib/constants";
-import type { ArchiveRecord, GroupPost, Profile } from "@/lib/types";
+import type { ArchiveRecord, Feeling, GroupPost, Profile } from "@/lib/types";
 import type { Question } from "@/server/llm/schema";
 import { legacyTitle } from "@/lib/titles";
 import { useApp } from "./AuthProvider";
@@ -21,7 +21,7 @@ type ArchiveContext = {
    * 図鑑に保存する。groups に入れたグループにも見せる（名前は出さない）。
    * 図鑑に保存できなかったときだけ例外にする（見せるのに失敗したときは shareFailed。もう一度押して、二重に保存しないように）
    */
-  add: (input: { question: Question; guess: Guess; rating: Rating; image: string; groups: GroupId[] }) => Promise<{ record: ArchiveRecord; shareFailed: boolean }>;
+  add: (input: { question: Question; guess: Guess; rating: Rating; image: string; groups: GroupId[]; feeling?: Feeling }) => Promise<{ record: ArchiveRecord; shareFailed: boolean }>;
   remove: (id: string) => Promise<void>;
   removeAll: () => Promise<void>;
   /** グループに見せるのをやめる（図鑑には残す） */
@@ -118,7 +118,7 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
   }, [backend, user, profile, clearGoneShares]);
 
   const add = useCallback<ArchiveContext["add"]>(
-    async ({ question, guess, rating, image, groups }) => {
+    async ({ question, guess, rating, image, groups, feeling }) => {
       if (!user || !profile) throw new UserFacingError("ログインしなおしてね");
       // ずかんの記録には小さな画像だけを入れ、大きな切り抜きは別の文書に分ける（#88）。
       // 小さな画像が作れないときは、前のように大きな切り抜きを記録に入れる（保存は止めない）
@@ -130,6 +130,7 @@ function ArchiveState({ children }: { children: React.ReactNode }) {
         question,
         guess,
         rating,
+        ...(feeling ? { feeling } : {}),
         ...(thumb ? { thumb } : { image }),
         sharedGroups: [],
       };
