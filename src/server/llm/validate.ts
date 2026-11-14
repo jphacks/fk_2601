@@ -16,6 +16,10 @@ const MAX_NUMBERS_WITH_HINT = 2;
 // 2倍にすると、ガチャを ぜんぶ そろえる平均（直感 8回・答え 約15回）のような よい問いまで落ちた（2026-11-13）
 const MIN_SURPRISE_RATIO = 1.5;
 const NAME_PATTERN = /^[a-z][A-Za-z0-9_]*$/;
+// 正解が あやふやな「なぜ？」型は出さない。空白をのぞいて探す。「あたらしい」などの「らしい」は、のぞいてから探す
+const HEDGE_PATTERN = /かもしれ|おもう|おもいま|おもわれ|思う|思いま|思われ|らしい|たぶん|多分/;
+const NOT_HEDGE_PATTERN = /あたらしい|めずらしい|すばらしい|わざとらしい|いやらしい|かわいらしい|ばからしい|新しい|珍しい|素晴らしい/g;
+const hasHedge = (text: string) => HEDGE_PATTERN.test(stripRuby(text).replace(/\s+/g, "").replace(NOT_HEDGE_PATTERN, ""));
 
 export type Validated = { ok: true; question: Question } | { ok: false; reason: string };
 
@@ -111,6 +115,8 @@ export function validateQuestion(draft: Draft, options: { lenient?: boolean; par
     // 内部で使うだけの項目は、保存しない
     secret: "",
     swappable: false,
+    // 大人が あとで たしかめられるよう、basis は のこす（ふりがな記法は残さない）。前の記録には ない
+    ...(input.basis === undefined ? {} : { basis: clip(stripRuby(input.basis), 200) }),
     // 見出しや分類に使う文字には、ふりがな記法を残さない
     topic: stripRuby(input.topic).trim(),
     target: stripRuby(input.target).trim(),
@@ -125,6 +131,8 @@ export function validateQuestion(draft: Draft, options: { lenient?: boolean; par
   };
 
   if (q.text.trim().length === 0 || q.text.length > 400) return fail("問題文の長さが正しくありません");
+  // AI が「写真からの すいそく」と申告した問いは、まちがったことを おぼえさせるおそれがあるので出さない（見本の問いは通す）
+  if (!options.lenient && q.certainty === "guess") return fail("正解の たしかさが すいそくの問いです");
   if (!options.lenient) {
     // 写っているものでなければ成り立たない、短くて、条件をならべすぎない問いだけを使う
     if (swappable) return fail("写っているもの以外でも成り立つ問いです");
@@ -155,6 +163,8 @@ export function validateQuestion(draft: Draft, options: { lenient?: boolean; par
   if (q.type === "why") {
     const choices = q.choices ?? [];
     if (choices.length < 2 || choices.filter((c) => c.correct).length !== 1) return fail("選択肢が正しくありません");
+    // 正解の選択肢や一言に「かもしれない」などが入っている問いは、正解があやふやなので出さない
+    if (choices.some((c) => c.correct && hasHedge(c.text)) || hasHedge(q.explanation.short)) return fail("正解が あやふやな ことばで 書かれています");
     return { ok: true, question: { ...q, choices: shuffled(choices), formula: null, variables: [], guessRange: null, compare: null, llmAnswer: null, ref: null } };
   }
 

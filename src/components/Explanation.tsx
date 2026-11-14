@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Question } from "@/server/llm/schema";
 import { Icon } from "./Icons";
 import { Navigator } from "./Navigator";
+import { stripRuby } from "@/lib/ruby";
 import { Jp, RubyText, useJp } from "./RubyText";
 
 const KIND_LABEL = { data: "データ", book: "{本|ほん}", site: "サイト" } as const;
@@ -114,7 +115,7 @@ export function Related({ question }: { question: Question }) {
 /** 出典と前提条件。リンクは、おとなの人といっしょに見るよう伝える */
 export function Sources({ question }: { question: Question }) {
   const jp = useJp();
-  if (question.sources.length === 0 && !question.keyword) return null;
+  if (question.sources.length === 0 && !question.keyword && !question.basis) return null;
   return (
     // 見出しを押すと開くので、見出しは ほかのボタンと同じく影つきにする
     <details className="rounded-card bg-cloud px-4 py-3 [&>summary]:-mx-2 [&>summary]:rounded-[18px] [&>summary]:border-3 [&>summary]:border-ink [&>summary]:bg-white [&>summary]:px-3 [&>summary]:py-2 [&>summary]:shadow-pop-sm [&>summary]:active:translate-y-1 [&>summary]:active:shadow-none">
@@ -146,6 +147,13 @@ export function Sources({ question }: { question: Question }) {
         <p className="mt-3 text-base font-bold">
           <Jp>{"もっと {調|しら}べるときの ことば："}</Jp>
           <b className="font-black">{jp(question.keyword)}</b>
+        </p>
+      )}
+      {/* AI が書いた「わけ」を、大人があとで たしかめるための1文。子どもには小さく出す（ふりがな記法は、保存のときに のぞいてある） */}
+      {question.basis && (
+        <p className="mt-3 text-sm font-bold text-ink-muted">
+          <Jp>{"{大人|おとな}の {人|ひと}へ："}</Jp>
+          {stripRuby(question.basis)}
         </p>
       )}
       <p className="mt-3 text-sm font-bold text-ink-muted">
