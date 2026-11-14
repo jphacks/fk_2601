@@ -9,7 +9,7 @@
 | デモ動画 | https://d.kuku.lu/hsyczcn3z | 上の画像をクリックしても開けます |
 | アプリ（本番） | https://fk2601.vercel.app | 「はじめて」でログイン ID とパスワードを決めると使えます。AI が囲んだ部分から問いを作ります |
 | 見本の絵の一覧 | https://fk2601.vercel.app/samples | カメラが使えないときの入口です。ログインしたあと（デモ版の中でも）開けます。ホームの「見本の絵で試す」からも行けます |
-| 発表スライド（PDF） | [docs/slides.pdf](docs/slides.pdf) | JPHACKS 2026 Award Day の発表資料（18枚）です |
+| 発表スライド（PDF） | [docs/slides.pdf](docs/slides.pdf) | JPHACKS 2026 Award Day の発表資料です（本編19枚＋質疑用の付録4枚） |
 | 先生の管理画面（見本） | https://fk2601.vercel.app/teacher | ログイン不要。架空のクラスと子どものデータで動く見本です。パソコンかタブレットの画面向けです（「学校の授業での使いかた」に、できていることと見本のことを分けて書きました） |
 
 > [!TIP]
