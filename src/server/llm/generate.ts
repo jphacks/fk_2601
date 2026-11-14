@@ -37,6 +37,8 @@ function keepValid(questions: (Question | DraftQuestion)[], options: { lenient?:
   for (const q of questions) {
     const result = validateQuestion(q, options);
     if (result.ok) valid.push(result.question);
+    // 落とした理由だけ残す（問いの中身は出さない）。3つ出ないとき、何で落ちたかを調べるため
+    else console.info("[llm] 問いを落とした:", result.reason);
   }
   return valid;
 }
