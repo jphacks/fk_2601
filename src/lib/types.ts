@@ -23,6 +23,11 @@ export type Profile = {
    * この値がない前からのプロフィールと /demo は、見おわったとして扱う（docs/03-technical.md 6章）
    */
   guideSeenAt?: number | null;
+  /**
+   * ナビに着せている きせかえの ID（src/lib/navi.ts。「ribbon」など。場所ごとに1つ）。
+   * ない（前のプロフィール）・空は、何も着ていない。知らない ID は読みとばす
+   */
+  outfit?: string[];
   createdAt: number;
 };
 
