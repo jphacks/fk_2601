@@ -102,7 +102,7 @@ function judge(output: QuestionsOutput, grade: number): Judged[] {
     }
   }
   // 本物と同じ選びかた（generate.ts）。AI は 4つ書き、検査を通ったものから 3つに しぼる
-  const picked = new Set(pickQuestions(judged.filter((j) => j.ok).map((j) => ({ type: j.draft.type, judged: j }))).map((p) => p.judged));
+  const picked = new Set(pickQuestions(judged.filter((j) => j.ok).map((j) => ({ type: j.draft.type, subject: j.draft.subject, judged: j }))).map((p) => p.judged));
   for (const j of judged) j.chosen = picked.has(j);
   return judged;
 }
